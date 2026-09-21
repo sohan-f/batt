@@ -570,10 +570,10 @@ class MainActivity : AppCompatActivity() {
 
     private var restartIconFade: ValueAnimator? = null
 
-    // Expressive loading button: gentle press, then the restart glyph fades
-    // out while an indeterminate spinner fades in over the button and the
-    // label reads "Restarting…". Restore reverses the fades plus a small
-    // settle pop so completion reads intuitively.
+    // Expressive loading button: gentle press, then the glyph and label
+    // fade out while an indeterminate spinner fades in centered over the
+    // button. Restore reverses the fades plus a small settle pop so
+    // completion reads intuitively.
     private fun playRestartAnimation(v: View) {
         val btn = binding.btnRestartSystemUI
         val spin = binding.restartSpinner
@@ -585,7 +585,7 @@ class MainActivity : AppCompatActivity() {
         v.animate().scaleX(0.97f).scaleY(0.97f).setDuration(120).setInterpolator(emphasizedAccelerate)
             .withEndAction {
                 v.animate().scaleX(1f).scaleY(1f).setDuration(450).setInterpolator(emphasized).start()
-                btn.text = "$origText…"
+                btn.text = ""
                 fadeRestartIcon(btn, visible = false) {
                     btn.icon = null
                     spin.alpha = 0f

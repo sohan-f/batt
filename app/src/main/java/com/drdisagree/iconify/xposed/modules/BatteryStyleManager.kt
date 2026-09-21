@@ -251,6 +251,8 @@ class BatteryStyleManager(context: Context) : ModPack(context) {
             if (styleChanged) {
                 val mCharging = view.isBatteryCharging()
                 val mLevel = view.getFieldSilently("mLevel") as? Int ?: continue
+                val mPowerSave =
+                    batteryController?.getFieldSilently("mPowerSave") as? Boolean == true
 
                 if (customBatteryEnabled) {
                     val mBatteryDrawable = getNewBatteryDrawable(mContext)
@@ -265,6 +267,7 @@ class BatteryStyleManager(context: Context) : ModPack(context) {
 
                         mBatteryDrawable.setBatteryLevel(mLevel)
                         mBatteryDrawable.setChargingEnabled(mCharging)
+                        mBatteryDrawable.setPowerSavingEnabled(mPowerSave)
 
                         updateCustomizeBatteryDrawable(mBatteryDrawable)
                     }

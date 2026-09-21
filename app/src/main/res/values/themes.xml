@@ -1,6 +1,6 @@
 <resources>
     <!-- Base application theme: Material 3 Expressive, DayNight + dynamic color. -->
-    <style name="Theme.Iconify" parent="Theme.Material3.Expressive.DayNight.NoActionBar">
+    <style name="Theme.Iconify" parent="Theme.Material3Expressive.DayNight.NoActionBar">
         <!-- Background color. -->
         <item name="android:windowBackground">?attr/colorSurface</item>
         <item name="android:colorBackground">?attr/colorSurface</item>

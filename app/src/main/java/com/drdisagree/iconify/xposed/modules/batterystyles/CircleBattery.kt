@@ -62,7 +62,7 @@ open class CircleBattery(private val mContext: Context, frameColor: Int) : Batte
     }
 
     override fun setBatteryLevel(mLevel: Int) {
-        batteryLevel = mLevel
+        batteryLevel = mLevel.coerceIn(0, 100)
         invalidateSelf()
     }
 
@@ -154,7 +154,7 @@ open class CircleBattery(private val mContext: Context, frameColor: Int) : Batte
 
         @ColorInt val fillColor = customFillColor
         mShadeLevels!![mShadeLevels!!.size - 2] =
-            (batteryLevels!![batteryLevels!!.size - 1] + (100 - batteryLevels!![batteryLevels!!.size - 1] * 0.3f)) / 100
+            (batteryLevels!![batteryLevels!!.size - 1] + (100 - batteryLevels!![batteryLevels!!.size - 1]) * 0.3f) / 100
         mShadeColors!![mShadeColors!!.size - 2] =
             if (customBlendColor) if (fillColor != Color.BLACK) fillColor else Color.GREEN else mFGColor
         mShadeLevels!![mShadeLevels!!.size - 1] = 1f
@@ -168,7 +168,7 @@ open class CircleBattery(private val mContext: Context, frameColor: Int) : Batte
         refreshShadeColors()
         setLevelBasedColors(mBatteryPaint, mFrame.centerX(), mFrame.centerY())
 
-        if (charging && batteryLevel < 100) {
+        if (charging && batteryLevel < 100 && mBoltPath != null) {
             if (!mBoltAlphaAnimator.isStarted) {
                 mBoltAlphaAnimator.start()
             }
@@ -251,6 +251,7 @@ open class CircleBattery(private val mContext: Context, frameColor: Int) : Batte
     private fun updateSize() {
         val res = mContext.resources
         mDiameter = getBounds().bottom - getBounds().top
+        if (mDiameter <= 0) return
         mWarningTextPaint.textSize = mDiameter * 0.75f
         val strokeWidth = mDiameter / 6.5f
         mFramePaint.strokeWidth = strokeWidth
@@ -258,35 +259,40 @@ open class CircleBattery(private val mContext: Context, frameColor: Int) : Batte
         mTextPaint.textSize = mDiameter * 0.52f
         mFrame[strokeWidth / 2.0f, strokeWidth / 2.0f, mDiameter - strokeWidth / 2.0f] =
             mDiameter - strokeWidth / 2.0f
-        @SuppressLint("DiscouragedApi") val unscaledBoltPath = Path()
-        unscaledBoltPath.set(
-            PathParser.createPathFromPathData(
-                res.getString(
-                    res.getIdentifier(
-                        "android:string/config_batterymeterBoltPath",
-                        "string",
-                        "android"
-                    )
-                )
+        // Bolt path comes from the *android* framework, not the module/SystemUI package.
+        // The resource may not exist on all ROMs, so never let this crash layout.
+        try {
+            val boltPathId = res.getIdentifier(
+                "config_batterymeterBoltPath",
+                "string",
+                "android"
             )
-        )
+            if (boltPathId == 0) return
+            @SuppressLint("DiscouragedApi") val unscaledBoltPath = Path()
+            unscaledBoltPath.set(
+                PathParser.createPathFromPathData(res.getString(boltPathId))
+            )
 
-        //Bolt icon
-        val scaleMatrix = Matrix()
-        val pathBounds = RectF()
-        unscaledBoltPath.computeBounds(pathBounds, true)
-        val scaleF =
-            (getBounds().height() - strokeWidth * 2) * .8f / pathBounds.height() //scale comparing to 80% of icon's inner space
-        scaleMatrix.setScale(scaleF, scaleF)
-        mBoltPath = Path()
-        unscaledBoltPath.transform(scaleMatrix, mBoltPath)
-        mBoltPath!!.computeBounds(pathBounds, true)
+            //Bolt icon
+            val scaleMatrix = Matrix()
+            val pathBounds = RectF()
+            unscaledBoltPath.computeBounds(pathBounds, true)
+            if (pathBounds.height() <= 0f) return
+            val scaleF =
+                (getBounds().height() - strokeWidth * 2) * .8f / pathBounds.height() //scale comparing to 80% of icon's inner space
+            scaleMatrix.setScale(scaleF, scaleF)
+            mBoltPath = Path()
+            unscaledBoltPath.transform(scaleMatrix, mBoltPath)
+            mBoltPath!!.computeBounds(pathBounds, true)
 
-        //moving it to center
-        mBoltPath!!.offset(
-            getBounds().centerX() - pathBounds.centerX(),
-            getBounds().centerY() - pathBounds.centerY()
-        )
+            //moving it to center
+            mBoltPath!!.offset(
+                getBounds().centerX() - pathBounds.centerX(),
+                getBounds().centerY() - pathBounds.centerY()
+            )
+        } catch (_: Throwable) {
+            mBoltPath = null
+        }
     }
 
     override fun setColorFilter(colorFilter: ColorFilter?) {

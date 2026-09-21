@@ -107,11 +107,15 @@ class HookCheck(context: Context) : ModPack(context) {
             var done = false
             val mainHandler = android.os.Handler(android.os.Looper.getMainLooper())
             lateinit var receiver: BroadcastReceiver
+            lateinit var timeoutRunnable: Runnable
 
             val complete = { active: Boolean ->
                 if (!done) {
                     done = true
-                    mainHandler.removeCallbacksAndMessages(null)
+                    try {
+                        mainHandler.removeCallbacks(timeoutRunnable)
+                    } catch (_: Throwable) {
+                    }
                     try {
                         appContext.unregisterReceiver(receiver)
                     } catch (_: Throwable) {
@@ -160,7 +164,7 @@ class HookCheck(context: Context) : ModPack(context) {
 
             mainHandler.postDelayed({
                 complete(false)
-            }, timeoutMs)
+            }.also { timeoutRunnable = it }, timeoutMs)
         }
     }
 }

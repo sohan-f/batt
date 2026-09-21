@@ -15,11 +15,12 @@ class Iconify : Application() {
         val appContext: Context
             get() {
                 if (contextReference == null || contextReference?.get() == null) {
-                    contextReference = WeakReference(
-                        instance?.applicationContext ?: getInstance().applicationContext
-                    )
+                    val app = instance?.applicationContext
+                        ?: throw IllegalStateException("Iconify application is not created yet")
+                    contextReference = WeakReference(app)
                 }
-                return contextReference!!.get()!!
+                return contextReference!!.get()
+                    ?: throw IllegalStateException("Iconify application context was garbage collected")
             }
 
         val appContextLocale: Context
@@ -28,10 +29,8 @@ class Iconify : Application() {
             }
 
         private fun getInstance(): Iconify {
-            if (instance == null) {
-                instance = Iconify()
-            }
-            return instance!!
+            return instance
+                ?: throw IllegalStateException("Iconify application is not created yet")
         }
     }
 

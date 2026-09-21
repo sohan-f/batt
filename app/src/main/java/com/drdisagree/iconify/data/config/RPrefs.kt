@@ -15,33 +15,33 @@ object RPrefs : SharedPreferences {
         )
     }
 
-    private val editor: SharedPreferences.Editor by lazy { prefs.edit() }
-
     val instance: RPrefs
         get() = this
 
     val getPrefs: SharedPreferences
         get() = prefs
 
+    // NOTE: SharedPreferences.Editor instances are single-use and not safe to
+    // share across threads. Always use a fresh editor per write.
     // Basic put methods
     fun putBoolean(key: String?, value: Boolean) {
-        editor.putBoolean(key, value).apply()
+        prefs.edit().putBoolean(key, value).apply()
     }
 
     fun putInt(key: String?, value: Int) {
-        editor.putInt(key, value).apply()
+        prefs.edit().putInt(key, value).apply()
     }
 
     fun putFloat(key: String?, value: Float) {
-        editor.putFloat(key, value).apply()
+        prefs.edit().putFloat(key, value).apply()
     }
 
     fun putLong(key: String?, value: Long) {
-        editor.putLong(key, value).apply()
+        prefs.edit().putLong(key, value).apply()
     }
 
     fun putString(key: String?, value: String?) {
-        editor.putString(key, value).apply()
+        prefs.edit().putString(key, value).apply()
     }
 
     // Basic get methods
@@ -96,17 +96,20 @@ object RPrefs : SharedPreferences {
 
     // Clear methods
     fun clearPref(key: String?) {
-        editor.remove(key).apply()
+        prefs.edit().remove(key).apply()
     }
 
     fun clearPrefs(vararg keys: String?) {
-        keys.forEach { key ->
-            editor.remove(key).apply()
+        prefs.edit().apply {
+            keys.forEach { key ->
+                remove(key)
+            }
+            apply()
         }
     }
 
     fun clearAllPrefs() {
-        editor.clear().apply()
+        prefs.edit().clear().apply()
     }
 
     // Implementing SharedPreferences interface
@@ -143,7 +146,7 @@ object RPrefs : SharedPreferences {
     }
 
     override fun edit(): SharedPreferences.Editor {
-        return editor
+        return prefs.edit()
     }
 
     override fun registerOnSharedPreferenceChangeListener(listener: OnSharedPreferenceChangeListener) {

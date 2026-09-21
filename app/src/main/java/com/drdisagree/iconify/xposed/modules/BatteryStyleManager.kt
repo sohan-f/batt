@@ -181,7 +181,9 @@ class BatteryStyleManager(context: Context) : ModPack(context) {
         var batteryStyle: Int
 
         Xprefs.apply {
-            batteryStyle = getString(CUSTOM_BATTERY_STYLE, "$BATTERY_STYLE_CIRCLE")!!.toInt()
+            batteryStyle =
+                getString(CUSTOM_BATTERY_STYLE, "$BATTERY_STYLE_CIRCLE")?.toIntOrNull()
+                    ?: BATTERY_STYLE_CIRCLE
 
             val hidePercentage = getBoolean(CUSTOM_BATTERY_HIDE_PERCENTAGE, false)
             val defaultInsidePercentage = batteryStyle in listOf(
@@ -226,7 +228,8 @@ class BatteryStyleManager(context: Context) : ModPack(context) {
             mCustomPowerSaveFillColor = getInt(CUSTOM_BATTERY_POWERSAVE_FILL_COLOR, Color.BLACK)
             mSwapPercentage = getBoolean(CUSTOM_BATTERY_SWAP_PERCENTAGE, true)
             mChargingIconSwitch = getBoolean(CUSTOM_BATTERY_CHARGING_ICON_SWITCH, false)
-            mChargingIconStyle = getString(CUSTOM_BATTERY_CHARGING_ICON_STYLE, "0")!!.toInt()
+            mChargingIconStyle =
+                getString(CUSTOM_BATTERY_CHARGING_ICON_STYLE, "0")?.toIntOrNull() ?: 0
             mChargingIconML = getSliderInt(CUSTOM_BATTERY_CHARGING_ICON_MARGIN_LEFT, 1)
             mChargingIconMR = getSliderInt(CUSTOM_BATTERY_CHARGING_ICON_MARGIN_RIGHT, 0)
             mChargingIconWH = getSliderInt(CUSTOM_BATTERY_CHARGING_ICON_WIDTH_HEIGHT, 14)
@@ -239,7 +242,7 @@ class BatteryStyleManager(context: Context) : ModPack(context) {
         val styleChanged = mBatteryStyle != batteryStyle
         mBatteryStyle = batteryStyle
 
-        for (view in batteryViews) {
+        for (view in batteryViews.toList()) {
             val mBatteryIconView = view.getFieldSilently("mBatteryIconView") as? ImageView
             mBatteryIconView?.let {
                 updateBatteryRotation(it)
@@ -251,7 +254,7 @@ class BatteryStyleManager(context: Context) : ModPack(context) {
 
             if (styleChanged) {
                 val mCharging = view.isBatteryCharging()
-                val mLevel = view.getField("mLevel") as Int
+                val mLevel = view.getFieldSilently("mLevel") as? Int ?: continue
 
                 if (customBatteryEnabled) {
                     val mBatteryDrawable = getNewBatteryDrawable(mContext)
@@ -279,15 +282,19 @@ class BatteryStyleManager(context: Context) : ModPack(context) {
             in setOf(
                 CUSTOM_BATTERY_WIDTH,
                 CUSTOM_BATTERY_HEIGHT
-            ) -> setDefaultBatteryDimens()
+            ) -> {
+                setDefaultBatteryDimens()
+                // Dimension changes also affect the live views, not just resources.
+                batteryMeterViewParam?.let {
+                    updateSettings(it)
+                }
+            }
 
             in setOf(
                 CUSTOM_BATTERY_STYLE,
                 CUSTOM_BATTERY_HIDE_PERCENTAGE,
                 CUSTOM_BATTERY_LAYOUT_REVERSE,
                 CUSTOM_BATTERY_DIMENSION,
-                CUSTOM_BATTERY_WIDTH,
-                CUSTOM_BATTERY_HEIGHT,
                 CUSTOM_BATTERY_PERIMETER_ALPHA,
                 CUSTOM_BATTERY_FILL_ALPHA,
                 CUSTOM_BATTERY_RAINBOW_FILL_COLOR,
@@ -335,12 +342,14 @@ class BatteryStyleManager(context: Context) : ModPack(context) {
             .runAfter {
                 if (!customBatteryEnabled) return@runAfter
 
-                for (view in batteryViews) {
-                    val mBatteryDrawable = view.getExtraField(
+                for (view in batteryViews.toList()) {
+                    val mBatteryDrawable = view.getExtraFieldSilently(
                         "mBatteryDrawable"
-                    ) as BatteryDrawable
+                    ) as? BatteryDrawable ?: continue
 
-                    view.callMethod("setImageDrawable", mBatteryDrawable)
+                    val mBatteryIconView =
+                        view.getFieldSilently("mBatteryIconView") as? ImageView
+                    mBatteryIconView?.setImageDrawable(mBatteryDrawable)
                 }
             }
 
@@ -414,28 +423,36 @@ class BatteryStyleManager(context: Context) : ModPack(context) {
                         mContext.packageName
                     )
                 )
-                val attrs = mContext.obtainStyledAttributes(
-                    param.args[1] as AttributeSet,
-                    styleableBatteryMeterView,
-                    param.args[2] as Int,
-                    0
-                )
+                try {
+                    val attrs = mContext.obtainStyledAttributes(
+                        param.args[1] as AttributeSet,
+                        styleableBatteryMeterView,
+                        param.args[2] as Int,
+                        0
+                    )
 
-                frameColor = attrs.getColor(
-                    mContext.resources.getIdentifier(
-                        "BatteryMeterView_frameColor",
-                        "styleable",
-                        mContext.packageName
-                    ),
-                    mContext.getColor(
-                        mContext.resources.getIdentifier(
+                    // NOTE: obtainStyledAttributes is indexed positionally (0, 1),
+                    // not by resource id. The previous code passed a styleable
+                    // resource id as the index, which throws on most ROMs.
+                    val fallbackColor = try {
+                        val bgId = mContext.resources.getIdentifier(
                             "meter_background_color",
                             "color",
                             mContext.packageName
                         )
-                    )
-                )
-                attrs.recycle()
+                        if (bgId != 0) mContext.getColor(bgId) else Color.WHITE
+                    } catch (_: Throwable) {
+                        Color.WHITE
+                    }
+                    frameColor = try {
+                        attrs.getColor(0, fallbackColor)
+                    } catch (_: Throwable) {
+                        fallbackColor
+                    }
+                    attrs.recycle()
+                } catch (throwable: Throwable) {
+                    log(this@BatteryStyleManager, throwable)
+                }
 
                 (param.thisObject as View).addOnAttachStateChangeListener(listener)
 
@@ -574,7 +591,7 @@ class BatteryStyleManager(context: Context) : ModPack(context) {
     }
 
     private fun refreshBatteryData(mLevel: Int, mCharging: Boolean, mPowerSave: Boolean) {
-        for (view in batteryViews) {
+        for (view in batteryViews.toList()) {
             try {
                 view.post {
                     val mBatteryDrawable = view.getExtraFieldSilently(
@@ -653,7 +670,7 @@ class BatteryStyleManager(context: Context) : ModPack(context) {
     }
 
     private fun refreshBatteryIcons() {
-        for (view in batteryViews) {
+        for (view in batteryViews.toList()) {
             val mBatteryIconView = view.getFieldSilently("mBatteryIconView") as? ImageView
 
             if (mBatteryIconView != null) {
@@ -927,13 +944,22 @@ class BatteryStyleManager(context: Context) : ModPack(context) {
         thisObject: Any,
         mCharging: Boolean = thisObject.isBatteryCharging()
     ) {
+        val parent = thisObject as? ViewGroup ?: return
         var mChargingIconView =
-            (thisObject as ViewGroup).findViewWithTag<ImageView>(ICONIFY_CHARGING_ICON_TAG)
+            parent.findViewWithTag<ImageView>(ICONIFY_CHARGING_ICON_TAG)
+
+        // The custom charging icon drawable was never assigned (always null),
+        // so an enabled switch only injected an empty ImageView that shifted
+        // the layout. Don't add anything unless the feature is enabled.
+        if (!mChargingIconSwitch) {
+            mChargingIconView?.visibility = View.GONE
+            return
+        }
 
         if (mChargingIconView == null) {
             mChargingIconView = ImageView(mContext)
             mChargingIconView.tag = ICONIFY_CHARGING_ICON_TAG
-            thisObject.addView(mChargingIconView, 1)
+            parent.addView(mChargingIconView, 1)
         }
 
         val drawable: Drawable? = null
@@ -1009,7 +1035,8 @@ class BatteryStyleManager(context: Context) : ModPack(context) {
     private fun updateCustomizeBatteryDrawable(thisObject: Any) {
         if (!customBatteryEnabled) return
 
-        val mBatteryDrawable = thisObject.getExtraField("mBatteryDrawable") as BatteryDrawable
+        val mBatteryDrawable = thisObject.getExtraFieldSilently("mBatteryDrawable") as? BatteryDrawable
+            ?: return
 
         updateCustomizeBatteryDrawable(mBatteryDrawable)
     }
@@ -1069,10 +1096,11 @@ class BatteryStyleManager(context: Context) : ModPack(context) {
                 mBatteryIconView.context.resources.displayMetrics
             ).toInt()
 
-            val scaledLayoutParams = try {
-                mBatteryIconView.layoutParams as LinearLayout.LayoutParams
-            } catch (throwable: Throwable) {
-                mBatteryIconView.layoutParams as FrameLayout.LayoutParams
+            val scaledLayoutParams = when (val lp = mBatteryIconView.layoutParams) {
+                is LinearLayout.LayoutParams -> lp
+                is FrameLayout.LayoutParams -> lp
+                is MarginLayoutParams -> lp
+                else -> return
             }
             scaledLayoutParams.width = (batteryWidth * iconScaleFactor).toInt()
             scaledLayoutParams.height = (batteryHeight * iconScaleFactor).toInt()
@@ -1107,7 +1135,7 @@ class BatteryStyleManager(context: Context) : ModPack(context) {
     }
 
     companion object {
-        private val batteryViews = ArrayList<View>()
+        private val batteryViews = java.util.concurrent.CopyOnWriteArrayList<View>()
         private var mBatteryStyle = BATTERY_STYLE_CIRCLE
         private var mShowPercentInside = false
         private var mHidePercentage = false

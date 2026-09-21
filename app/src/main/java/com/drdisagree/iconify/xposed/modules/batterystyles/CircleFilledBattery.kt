@@ -26,6 +26,8 @@ open class CircleFilledBattery(private val mContext: Context, frameColor: Int) :
     private var mChargingAnimationEnabled = true
     private var mDimension = INTRINSIC_DIMENSION
     private val mPadding = Rect()
+    private val mBasePaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val mLevelPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private var mFGColor = Color.WHITE
     private var mBGColor = Color.WHITE
     private var mAlpha = 255
@@ -57,24 +59,26 @@ open class CircleFilledBattery(private val mContext: Context, frameColor: Int) :
     }
 
     override fun draw(canvas: Canvas) {
+        if (batteryLevel < 0 || mDimension <= 0) return
         refreshShadeColors()
 
-        val basePaint = Paint(Paint.ANTI_ALIAS_FLAG)
+        val basePaint = mBasePaint
         basePaint.color = mBGColor
         basePaint.alpha = Math.round(80f * (mAlpha / 255f))
 
-        val levelPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+        val levelPaint = mLevelPaint
 
         val centerX = mDimension / 2f + mPadding.left
         val centerY = mDimension / 2f + mPadding.top
 
         val baseRadius = mDimension / 2f
 
-        val levelRadius: Float = baseRadius * batteryLevel / 100f
+        val levelRadius: Float = (baseRadius * batteryLevel.coerceIn(0, 100) / 100f).coerceAtLeast(0f)
 
         try {
             setLevelBasedColor(levelPaint, centerX, centerY, baseRadius)
         } catch (t: Throwable) {
+            levelPaint.shader = null
             levelPaint.color = Color.BLACK
         }
 
@@ -99,7 +103,7 @@ open class CircleFilledBattery(private val mContext: Context, frameColor: Int) :
         }
 
         canvas.drawCircle(centerX, centerY, baseRadius, basePaint)
-        canvas.drawCircle(centerY, centerY, levelRadius, levelPaint)
+        canvas.drawCircle(centerX, centerY, levelRadius, levelPaint)
     }
 
     private fun setLevelBasedColor(paint: Paint, cx: Float, cy: Float, baseRadius: Float) {
@@ -115,19 +119,28 @@ open class CircleFilledBattery(private val mContext: Context, frameColor: Int) :
         }
 
         if (mShadeColors == null) {
-            for (i in batteryLevels!!.indices) {
-                if (batteryLevel <= batteryLevels!![i]) {
+            if (batteryLevels == null || batteryColors == null) {
+                initColors()
+            }
+            val levels = batteryLevels
+            val colors = batteryColors
+            if (levels == null || colors == null) {
+                paint.color = singleColor
+                return
+            }
+            for (i in levels.indices) {
+                if (batteryLevel <= levels[i]) {
                     if (i > 0) {
-                        val range: Float = (batteryLevels!![i] - batteryLevels!![i - 1]).toFloat()
-                        val currentPos: Float = (batteryLevel - batteryLevels!![i - 1]).toFloat()
-                        val ratio = currentPos / range
+                        val range: Float = (levels[i] - levels[i - 1]).toFloat()
+                        val currentPos: Float = (batteryLevel - levels[i - 1]).toFloat()
+                        val ratio = if (range != 0f) (currentPos / range).coerceIn(0f, 1f) else 0f
                         singleColor = ColorUtils.blendARGB(
-                            batteryColors!![i - 1],
-                            batteryColors!![i],
+                            colors[i - 1],
+                            colors[i],
                             ratio
                         )
                     } else {
-                        singleColor = batteryColors!![i]
+                        singleColor = colors[i]
                     }
                     break
                 }
@@ -151,14 +164,18 @@ open class CircleFilledBattery(private val mContext: Context, frameColor: Int) :
     override fun setColorFilter(colorFilter: ColorFilter?) {
     }
 
-    override fun setBounds(bounds: Rect) {
-        super.setBounds(bounds)
+    override fun setBounds(left: Int, top: Int, right: Int, bottom: Int) {
+        super.setBounds(left, top, right, bottom)
         mDimension = max(
-            (bounds.height() - mPadding.height()).toDouble(),
-            (bounds.width() - mPadding.width()).toDouble()
+            (bottom - top - mPadding.height()).toDouble(),
+            (right - left - mPadding.width()).toDouble()
         )
             .toInt()
         invalidateSelf()
+    }
+
+    override fun setBounds(bounds: Rect) {
+        setBounds(bounds.left, bounds.top, bounds.right, bounds.bottom)
     }
 
 
@@ -175,7 +192,7 @@ open class CircleFilledBattery(private val mContext: Context, frameColor: Int) :
     fun setMeterStyle(batteryStyle: Int) {}
 
     override fun setBatteryLevel(mLevel: Int) {
-        batteryLevel = mLevel
+        batteryLevel = mLevel.coerceIn(0, 100)
         invalidateSelf()
     }
 
@@ -250,7 +267,7 @@ open class CircleFilledBattery(private val mContext: Context, frameColor: Int) :
 
         @ColorInt val fillColor = customFillColor
         mShadeLevels!![mShadeLevels!!.size - 2] =
-            (batteryLevels!![batteryLevels!!.size - 1] + (100 - batteryLevels!![batteryLevels!!.size - 1] * 0.3f)) / 100
+            (batteryLevels!![batteryLevels!!.size - 1] + (100 - batteryLevels!![batteryLevels!!.size - 1]) * 0.3f) / 100
         mShadeColors!![mShadeColors!!.size - 2] =
             if (customBlendColor) if (fillColor != Color.BLACK) fillColor else Color.GREEN else mFGColor
         mShadeLevels!![mShadeLevels!!.size - 1] = 1f

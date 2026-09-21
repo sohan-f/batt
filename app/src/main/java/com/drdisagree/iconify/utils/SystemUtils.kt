@@ -59,7 +59,10 @@ object SystemUtils {
 
         RPrefs.putLong(loadTimeKey, currentTime)
         RPrefs.putInt(strikeKey, 0)
-        Shell.cmd("killall $SYSTEMUI_PACKAGE").submit()
+        val result = Shell.cmd("killall $SYSTEMUI_PACKAGE").exec()
+        if (!result.isSuccess) {
+            throw IllegalStateException("SystemUI restart failed (no root?): ${result.err}")
+        }
     }
 
     private fun forceReloadUI() {

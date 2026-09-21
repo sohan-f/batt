@@ -100,7 +100,7 @@ class MainActivity : AppCompatActivity() {
                 if (isFinishing || isDestroyed) return@runOnUiThread
                 if (active) {
                     binding.textStatusTitle.setText(R.string.status_module_active)
-                    binding.textStatusDesc.text = getString(R.string.status_module_active)
+                    binding.textStatusDesc.setText(R.string.status_module_desc)
                     binding.imageStatusIcon.setImageResource(android.R.drawable.checkbox_on_background)
                 } else {
                     binding.textStatusTitle.setText(R.string.status_module_inactive)
@@ -163,6 +163,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         val sizeDp = RPrefs.getSliderInt(CUSTOM_BATTERY_WIDTH, DEFAULT_BATTERY_SIZE_DP)
+            .coerceIn(12, 32)
         binding.sliderBatterySize.value = sizeDp.toFloat()
         updatePreviewIconSize(sizeDp)
 

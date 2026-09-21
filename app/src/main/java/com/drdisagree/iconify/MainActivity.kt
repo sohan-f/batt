@@ -235,17 +235,23 @@ class MainActivity : AppCompatActivity() {
         val isSwapped = RPrefs.getBoolean(CUSTOM_BATTERY_SWAP_PERCENTAGE, true)
         updatePreviewLayoutDirection(isSwapped)
 
-        // Battery Scrub Slider
+        // Battery Scrub Slider: update live while dragging, bounce once on release
         binding.sliderBatteryLevel.addOnChangeListener { _, value, _ ->
             val level = value.toInt()
             updateBatteryLevel(level)
         }
+        binding.sliderBatteryLevel.addOnSliderTouchListener(object : com.google.android.material.slider.Slider.OnSliderTouchListener {
+            override fun onStartTrackingTouch(slider: com.google.android.material.slider.Slider) = Unit
+            override fun onStopTrackingTouch(slider: com.google.android.material.slider.Slider) {
+                bounceHeroDial()
+            }
+        })
 
         // Quick Jump Chips
-        binding.chipLevel20.setOnClickListener { binding.sliderBatteryLevel.value = 20f }
-        binding.chipLevel50.setOnClickListener { binding.sliderBatteryLevel.value = 50f }
-        binding.chipLevel80.setOnClickListener { binding.sliderBatteryLevel.value = 80f }
-        binding.chipLevel100.setOnClickListener { binding.sliderBatteryLevel.value = 100f }
+        binding.chipLevel20.setOnClickListener { jumpToLevel(20f) }
+        binding.chipLevel50.setOnClickListener { jumpToLevel(50f) }
+        binding.chipLevel80.setOnClickListener { jumpToLevel(80f) }
+        binding.chipLevel100.setOnClickListener { jumpToLevel(100f) }
 
         // Simulate Charging Button
         binding.btnToggleCharging.setOnClickListener {
@@ -310,7 +316,14 @@ class MainActivity : AppCompatActivity() {
         binding.textStatusBarPercent.text = "$level%"
         binding.textHeroPercent.text = "$level%"
         binding.textScrubLevelBadge.text = "$level%"
+    }
 
+    private fun jumpToLevel(value: Float) {
+        binding.sliderBatteryLevel.value = value
+        bounceHeroDial()
+    }
+
+    private fun bounceHeroDial() {
         // Overshoot spring tactile animation on hero dial
         binding.imageHeroBattery.animate()
             .scaleX(1.08f)
@@ -332,7 +345,7 @@ class MainActivity : AppCompatActivity() {
         heroBatteryDrawable?.setChargingEnabled(charging)
 
         if (charging) {
-            binding.btnToggleCharging.setBackgroundColor(Color.parseColor("#33FFB300"))
+            binding.btnToggleCharging.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#33FFB300"))
             binding.btnToggleCharging.setTextColor(Color.parseColor("#FFD54F"))
             binding.btnToggleCharging.iconTint = ColorStateList.valueOf(Color.parseColor("#FFD54F"))
             binding.btnToggleCharging.setText(R.string.charging_active)
@@ -341,7 +354,7 @@ class MainActivity : AppCompatActivity() {
             startGlowPulseAnimation()
         } else {
             val (fg, _) = getPreviewColors()
-            binding.btnToggleCharging.setBackgroundColor(Color.TRANSPARENT)
+            binding.btnToggleCharging.backgroundTintList = null
             binding.btnToggleCharging.setTextColor(fg)
             binding.btnToggleCharging.iconTint = ColorStateList.valueOf(fg)
             binding.btnToggleCharging.setText(R.string.preview_simulate_charging)
@@ -600,6 +613,13 @@ class MainActivity : AppCompatActivity() {
             height = px
         }
 
+        // Keep the status-bar percent legible and proportioned to the icon:
+        // 20dp icon -> 14sp text, clamped so extremes stay readable.
+        binding.textStatusBarPercent.setTextSize(
+            android.util.TypedValue.COMPLEX_UNIT_SP,
+            (sizeDp * 0.7f).coerceIn(9f, 22f)
+        )
+
         updatePresetButtonStyles(sizeDp)
     }
 
@@ -618,11 +638,11 @@ class MainActivity : AppCompatActivity() {
 
         for ((btn, size) in presetButtons) {
             if (size == activeSizeDp) {
-                btn.setBackgroundColor(primaryContainer)
+                btn.backgroundTintList = ColorStateList.valueOf(primaryContainer)
                 btn.setTextColor(onPrimaryContainer)
                 btn.strokeColor = ColorStateList.valueOf(Color.TRANSPARENT)
             } else {
-                btn.setBackgroundColor(Color.TRANSPARENT)
+                btn.backgroundTintList = null
                 btn.setTextColor(onSurface)
                 btn.strokeColor = ColorStateList.valueOf(outlineVariant)
             }

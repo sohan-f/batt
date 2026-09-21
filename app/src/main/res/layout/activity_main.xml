@@ -121,13 +121,12 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <!-- Realistic Status Bar Cutout -->
-                    <LinearLayout
+                    <!-- Realistic Status Bar Cutout: time pinned start, icons pinned
+                         end, camera punch-hole truly centered in the row -->
+                    <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/layoutStatusBarSimulation"
                         android:layout_width="match_parent"
                         android:layout_height="44dp"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
                         android:paddingHorizontal="8dp">
 
                         <TextView
@@ -137,71 +136,79 @@
                             android:text="09:41"
                             android:textColor="#FFFFFF"
                             android:textSize="14sp"
-                            android:textStyle="bold" />
-
-                        <View
-                            android:layout_width="0dp"
-                            android:layout_height="1dp"
-                            android:layout_weight="1" />
+                            android:textStyle="bold"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
 
                         <!-- Center Camera Punchhole -->
                         <View
                             android:id="@+id/viewCameraPunch"
-                            android:layout_width="12dp"
-                            android:layout_height="12dp"
-                            android:background="@drawable/bg_camera_punch" />
-
-                        <View
-                            android:layout_width="0dp"
-                            android:layout_height="1dp"
-                            android:layout_weight="1" />
+                            android:layout_width="10dp"
+                            android:layout_height="10dp"
+                            android:background="@drawable/bg_camera_punch"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
 
                         <!-- Right Icons: Wi-Fi, Cell, Live Circle Battery -->
-                        <ImageView
-                            android:id="@+id/imagePreviewWifi"
-                            android:layout_width="15dp"
-                            android:layout_height="15dp"
-                            android:layout_marginEnd="6dp"
-                            android:contentDescription="@null"
-                            android:src="@drawable/ic_wifi_statusbar"
-                            app:tint="#FFFFFF" />
-
-                        <ImageView
-                            android:id="@+id/imagePreviewCell"
-                            android:layout_width="15dp"
-                            android:layout_height="15dp"
-                            android:layout_marginEnd="8dp"
-                            android:contentDescription="@null"
-                            android:src="@drawable/ic_cell_statusbar"
-                            app:tint="#FFFFFF" />
-
-                        <!-- Live Status Bar Battery + Percentage -->
                         <LinearLayout
-                            android:id="@+id/layoutStatusBarBattery"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:gravity="center_vertical"
-                            android:orientation="horizontal">
-
-                            <TextView
-                                android:id="@+id/textStatusBarPercent"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginHorizontal="5dp"
-                                android:text="85%"
-                                android:textColor="#FFFFFF"
-                                android:textSize="14sp"
-                                android:textStyle="bold" />
+                            android:orientation="horizontal"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent">
 
                             <ImageView
-                                android:id="@+id/imageStatusBarBattery"
-                                android:layout_width="20dp"
-                                android:layout_height="20dp"
-                                android:contentDescription="@null" />
+                                android:id="@+id/imagePreviewWifi"
+                                android:layout_width="15dp"
+                                android:layout_height="15dp"
+                                android:layout_marginEnd="6dp"
+                                android:contentDescription="@null"
+                                android:src="@drawable/ic_wifi_statusbar"
+                                app:tint="#FFFFFF" />
+
+                            <ImageView
+                                android:id="@+id/imagePreviewCell"
+                                android:layout_width="15dp"
+                                android:layout_height="15dp"
+                                android:layout_marginEnd="8dp"
+                                android:contentDescription="@null"
+                                android:src="@drawable/ic_cell_statusbar"
+                                app:tint="#FFFFFF" />
+
+                            <!-- Live Status Bar Battery + Percentage -->
+                            <LinearLayout
+                                android:id="@+id/layoutStatusBarBattery"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:id="@+id/textStatusBarPercent"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginHorizontal="5dp"
+                                    android:text="85%"
+                                    android:textColor="#FFFFFF"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold" />
+
+                                <ImageView
+                                    android:id="@+id/imageStatusBarBattery"
+                                    android:layout_width="20dp"
+                                    android:layout_height="20dp"
+                                    android:contentDescription="@null" />
+
+                            </LinearLayout>
 
                         </LinearLayout>
 
-                    </LinearLayout>
+                    </androidx.constraintlayout.widget.ConstraintLayout>
 
                     <!-- Centerpiece Enlarged Hero Battery Studio -->
                     <LinearLayout

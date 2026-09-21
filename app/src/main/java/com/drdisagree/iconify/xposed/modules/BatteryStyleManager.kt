@@ -269,6 +269,14 @@ class BatteryStyleManager(context: Context) : ModPack(context) {
                         mBatteryDrawable.setChargingEnabled(mCharging)
                         mBatteryDrawable.setPowerSavingEnabled(mPowerSave)
 
+                        // A fresh drawable defaults to WHITE (the constructor's
+                        // frameColor is unused), so replay this view's last
+                        // SystemUI colors — otherwise the icon keeps the wrong
+                        // color until the next theme-driven updateColors.
+                        (view.getExtraFieldSilently("mLastBatteryColors") as? IntArray)
+                            ?.takeIf { it.size == 3 }
+                            ?.let { mBatteryDrawable.setColors(it[0], it[1], it[2]) }
+
                         updateCustomizeBatteryDrawable(mBatteryDrawable)
                     }
                 }
@@ -498,6 +506,22 @@ class BatteryStyleManager(context: Context) : ModPack(context) {
             .runAfter { param ->
                 if (batteryMeterViewParam == null) {
                     batteryMeterViewParam = param
+                }
+
+                // Remember the last colors pushed by SystemUI for this view so a
+                // later style swap can replay them onto the fresh drawable.
+                // Stored unconditionally (even when disabled) so switching from
+                // stock to a custom style also picks up the current theme.
+                try {
+                    param.thisObject.setExtraField(
+                        "mLastBatteryColors",
+                        intArrayOf(
+                            param.args[0] as Int,
+                            param.args[1] as Int,
+                            param.args[2] as Int
+                        )
+                    )
+                } catch (_: Throwable) {
                 }
 
                 if (!customBatteryEnabled) return@runAfter

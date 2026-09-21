@@ -1,0 +1,55 @@
+<resources>
+    <style name="Shape.CircleBattery.Small" parent="ShapeAppearance.Material3.SmallComponent">
+        <item name="cornerSize">12dp</item>
+    </style>
+    <style name="Shape.CircleBattery.Medium" parent="ShapeAppearance.Material3.MediumComponent">
+        <item name="cornerSize">20dp</item>
+    </style>
+    <style name="Shape.CircleBattery.Large" parent="ShapeAppearance.Material3.LargeComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">28dp</item>
+    </style>
+    <style name="Widget.CircleBattery.Button.Primary" parent="Widget.Material3Expressive.Button">
+        <item name="cornerRadius">28dp</item>
+        <item name="android:minHeight">56dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+    </style>
+    <style name="Widget.CircleBattery.Button.Tonal" parent="Widget.Material3Expressive.Button.TonalButton">
+        <item name="cornerRadius">22dp</item>
+        <item name="android:minHeight">44dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+    </style>
+    <style name="Widget.CircleBattery.Button.StageOutlined" parent="Widget.Material3Expressive.Button.OutlinedButton">
+        <item name="cornerRadius">19dp</item>
+        <item name="android:minHeight">38dp</item>
+    </style>
+    <style name="Widget.CircleBattery.DockButton" parent="Widget.Material3Expressive.ExtendedFloatingActionButton.Medium">
+        <item name="cornerRadius">28dp</item>
+    </style>
+    <style name="Widget.CircleBattery.Card" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardCornerRadius">28dp</item>
+        <item name="cardElevation">1dp</item>
+    </style>
+    <style name="Widget.CircleBattery.Slider" parent="Widget.Material3Expressive.Slider.Large">
+        <item name="trackThickness">16dp</item>
+        <item name="thumbRadius">8dp</item>
+        <item name="thumbColor">?attr/colorPrimary</item>
+        <item name="thumbTrackGapSize">6dp</item>
+        <item name="trackInsideCornerSize">2dp</item>
+        <item name="tickVisible">false</item>
+        <item name="trackStopIndicatorSize">0dp</item>
+        <item name="labelBehavior">withinBounds</item>
+    </style>
+    <style name="Widget.CircleBattery.Slider.Small" parent="Widget.Material3Expressive.Slider.Medium">
+        <item name="tickVisible">false</item>
+        <item name="trackStopIndicatorSize">0dp</item>
+        <item name="thumbColor">?attr/colorPrimary</item>
+        <item name="thumbTrackGapSize">6dp</item>
+        <item name="trackInsideCornerSize">2dp</item>
+    </style>
+    <style name="Text.CircleBattery.SectionTitle" parent="TextAppearance.Material3.TitleMedium">
+        <item name="android:textStyle">bold</item>
+    </style>
+</resources>

@@ -9,11 +9,11 @@ plugins {
 }
 
 android {
-    namespace = "com.drdisagree.iconify"
+    namespace = "com.sysui.batt"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.drdisagree.iconify"
+        applicationId = "com.sysui.batt"
         minSdk = 31
         targetSdk = 35
         versionCode = 25

@@ -4,7 +4,7 @@ LSPosed / Xposed module to replace the SystemUI battery icon with a circle style
 
 - App name: `Circle Battery` (`app/src/main/res/values/strings.xml:2`)
 - Motto: `Replace battery icon with circle style and swap percentage`
-- Package: `com.drdisagree.iconify`, version `7.3.0` (`versionCode 25`) (`app/build.gradle.kts:19-25`)
+- Package: `com.sysui.batt`, version `7.3.0` (`versionCode 25`) (`app/build.gradle.kts:19-25`)
 - `minSdk 31` (Android 12+), `targetSdk / compileSdk 35`
 
 Fork / stripped-down build of Iconify focused on a single tweak: `BATTERY_STYLE_CIRCLE = 35`.
@@ -43,7 +43,7 @@ Fork / stripped-down build of Iconify focused on a single tweak: `BATTERY_STYLE_
 
 ## How it works
 
-- Entry: `app/src/main/assets/xposed_init` → `com.drdisagree.iconify.xposed.InitHook`
+- Entry: `app/src/main/resources/META-INF/xposed/java_init.list` → `com.sysui.batt.xposed.ModernInitHook`
 - `InitHook.kt` delegates to `HookRes` (resources) + `HookEntry` (package hooks).
 - `EntryList.kt:10-25` loads:
   - own package → `HookCheck` (reports `isModuleActive() = true` when hooked)
@@ -60,9 +60,10 @@ Fork / stripped-down build of Iconify focused on a single tweak: `BATTERY_STYLE_
 app/src/main/
   AndroidManifest.xml          # xposedmodule=true, scope=@array/module_scope, RemotePrefProvider
   assets/xposed_init           # InitHook entry
-  java/com/drdisagree/iconify/
+  java/com/sysui/batt/
     MainActivity.kt            # status, preview, swap toggle, size slider, restart
-    xposed/InitHook.kt EntryList.kt HookEntry.kt HookRes.kt ModPack.kt
+    BattApp.kt                 # Application subclass
+    xposed/ModernInitHook.kt EntryList.kt HookEntry.kt HookRes.kt ModPack.kt
     xposed/modules/BatteryStyleManager.kt
     xposed/modules/batterystyles/CircleBattery.kt CircleFilledBattery.kt BatteryDrawable.kt
     xposed/utils/HookCheck.kt XPrefs.kt

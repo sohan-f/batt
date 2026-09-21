@@ -22,20 +22,20 @@
 }
 
 # Activity and Fragment names
--keep class com.drdisagree.iconify.ui.activities.**
--keep class com.drdisagree.iconify.ui.fragments.**
+-keep class com.sysui.batt.ui.activities.**
+-keep class com.sysui.batt.ui.fragments.**
 
 # LSPosed API 102 entry (loaded via META-INF/xposed/java_init.list)
--keep class com.drdisagree.iconify.xposed.ModernInitHook
--keepnames class com.drdisagree.iconify.xposed.**
--keepnames class com.drdisagree.iconify.xposed.utils.XPrefs
--keep class com.drdisagree.iconify.xposed.** {
+-keep class com.sysui.batt.xposed.ModernInitHook
+-keepnames class com.sysui.batt.xposed.**
+-keepnames class com.sysui.batt.xposed.utils.XPrefs
+-keep class com.sysui.batt.xposed.** {
     <init>(android.content.Context);
 }
 
 # Weather
--keepnames class com.drdisagree.iconify.utils.weather.**
--keep class com.drdisagree.iconify.utils.weather.** { *; }
+-keepnames class com.sysui.batt.utils.weather.**
+-keep class com.sysui.batt.utils.weather.** { *; }
 
 # EventBus
 -keepattributes *Annotation*
@@ -69,8 +69,8 @@
 -allowaccessmodification
 
 # Root Service
--keep class com.drdisagree.iconify.services.RootProviderProxy { *; }
--keep class com.drdisagree.iconify.IRootProviderProxy { *; }
+-keep class com.sysui.batt.services.RootProviderProxy { *; }
+-keep class com.sysui.batt.IRootProviderProxy { *; }
 
 # AIDL Classes
 -keep interface **.I* { *; }
@@ -79,7 +79,7 @@
 
 # Circle Battery: LSPosed loads ModernInitHook by name from META-INF/xposed/java_init.list,
 # invisible to R8. Keep the whole xposed package plus app entry points.
--keep class com.drdisagree.iconify.xposed.** { *; }
--keep class com.drdisagree.iconify.Iconify { *; }
--keep class com.drdisagree.iconify.MainActivity { *; }
--keep class com.drdisagree.iconify.data.provider.** { *; }
+-keep class com.sysui.batt.xposed.** { *; }
+-keep class com.sysui.batt.BattApp { *; }
+-keep class com.sysui.batt.MainActivity { *; }
+-keep class com.sysui.batt.data.provider.** { *; }

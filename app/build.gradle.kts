@@ -66,8 +66,11 @@ android {
             abi {
                 isEnable = true
                 reset()
-                include("arm64-v8a", "armeabi-v7a", "x86", "x86_64")
-                isUniversalApk = false
+                // Optional: -PtargetAbi=arm64-v8a to build a single ABI only.
+                val targetAbi = findProperty("targetAbi") as String?
+                if (targetAbi != null) include(targetAbi)
+                else include("arm64-v8a", "armeabi-v7a", "x86", "x86_64")
+                isUniversalApk = targetAbi == null
             }
         }
     }

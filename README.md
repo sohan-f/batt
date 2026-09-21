@@ -183,6 +183,38 @@ You can help translate Iconify [on Crowdin](https://crowdin.com/project/iconify)
 - [HideNavBar](https://github.com/Magisk-Modules-Repo/HideNavBar) for the navbar tweaks.
 - And everyone who [contributed](https://github.com/Mahmud0808/Iconify/blob/beta/docs/contributors.md) and [translated](https://github.com/Mahmud0808/Iconify/blob/beta/docs/translators.md)... :)
 
+# 🚀 CI / CD Release Support
+
+This project includes automated and manual CI release workflows using **GitHub Actions**.
+
+### 1. Automated Release (Git Tag)
+Pushing any version tag starting with `v` triggers an automated build, checksum generation, and GitHub Release creation:
+```bash
+git tag v7.3.0
+git push origin v7.3.0
+```
+
+### 2. Manual Release (GitHub Actions UI)
+You can trigger a release manually at any time without creating a Git tag:
+1. Navigate to the **Actions** tab on your GitHub repository.
+2. Under **Workflows**, select **Build and Release**.
+3. Click **Run workflow**.
+4. Configure optional parameters:
+   - **Release Tag**: Specify custom tag name (e.g., `v7.3.0`), or leave blank to auto-detect from `build.gradle.kts`.
+   - **Release Title**: Custom title (e.g., `Circle Battery v7.3.0`).
+   - **Build Type**: Choose `release`, `debug`, or `both`.
+   - **Pre-release / Draft**: Mark release as pre-release or draft if desired.
+5. Click **Run workflow**. The APK and its SHA-256 checksums will be built and attached to the GitHub Release and workflow artifacts.
+
+### 3. Optional Keystore Signing Secrets
+By default, builds sign with standard keys. To sign releases with your custom production keystore, add the following GitHub repository secrets:
+- `KEYSTORE_BASE64`: Base64-encoded `.jks` file (`base64 -w 0 your-keystore.jks`)
+- `KEY_ALIAS`: Keystore key alias
+- `KEY_PASSWORD`: Keystore key password
+- `STORE_PASSWORD`: Keystore store password
+
+---
+
 # 📝 Disclaimer
 
 > [!WARNING]

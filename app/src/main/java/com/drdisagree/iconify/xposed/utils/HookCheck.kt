@@ -162,9 +162,8 @@ class HookCheck(context: Context) : ModPack(context) {
                 return
             }
 
-            mainHandler.postDelayed({
-                complete(false)
-            }.also { timeoutRunnable = it }, timeoutMs)
+            timeoutRunnable = Runnable { complete(false) }
+            mainHandler.postDelayed(timeoutRunnable, timeoutMs)
         }
     }
 }

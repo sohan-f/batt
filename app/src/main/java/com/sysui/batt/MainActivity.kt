@@ -6,11 +6,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.graphics.drawable.AnimatedVectorDrawable
-import android.graphics.drawable.Drawable
 import android.os.BatteryManager
 import android.os.Bundle
-import android.os.SystemClock
 import android.text.method.LinkMovementMethod
 import android.view.HapticFeedbackConstants
 import android.view.View
@@ -417,13 +414,13 @@ class MainActivity : AppCompatActivity() {
         binding.sliderBatterySize.value = sizeDp.toFloat()
         updateSizeDisplay(sizeDp)
         syncPresetChecked(sizeDp)
+        binding.sliderBatterySize.setLabelFormatter { v -> "${v.toInt()} dp" }
         binding.sliderBatterySize.addOnChangeListener { _, value, fromUser ->
             val s = value.toInt()
             updateSizeDisplay(s)
             if (fromUser) applyBatterySize(s)
             syncPresetChecked(s)
         }
-        attachMorphThumb(binding.sliderBatterySize)
         binding.btnSizeMinus.setOnClickListener {
             val c = binding.sliderBatterySize.value.toInt()
             if (c > MIN_BATTERY_SIZE_DP) {
@@ -470,8 +467,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateSizeDisplay(sizeDp: Int) {
         binding.textSizeValueDisplay.text = "$sizeDp dp"
-        binding.imageSliderSize.visibility =
-            if (sizeDp > MIN_BATTERY_SIZE_DP) View.VISIBLE else View.GONE
     }
 
     private fun setupActions() {
@@ -519,50 +514,6 @@ class MainActivity : AppCompatActivity() {
     private fun itHaptic(v: View) {
         try {
             v.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-        } catch (_: Throwable) {
-        }
-    }
-
-    // Dynamic physics morphing thumb: press squeezes the round handle into a
-    // wide pill (160ms), release springs back to round with overshoot (420ms).
-    // The track gap reduction around the handle is handled by the framework
-    // via thumbTrackGapSize animating to zero on touch.
-    private fun attachMorphThumb(slider: com.google.android.material.slider.Slider) {
-        try {
-            (getDrawable(R.drawable.thumb_morph_vector)?.mutate())?.let {
-                slider.setCustomThumbDrawable(it)
-            }
-        } catch (_: Throwable) {
-        }
-        slider.addOnSliderTouchListener(object : com.google.android.material.slider.Slider.OnSliderTouchListener {
-            override fun onStartTrackingTouch(s: com.google.android.material.slider.Slider) {
-                morphThumb(s, R.drawable.avd_thumb_press)
-            }
-
-            override fun onStopTrackingTouch(s: com.google.android.material.slider.Slider) {
-                morphThumb(s, R.drawable.avd_thumb_release)
-            }
-        })
-    }
-
-    private fun morphThumb(slider: com.google.android.material.slider.Slider, avdRes: Int) {
-        try {
-            val avd = getDrawable(avdRes)?.mutate() as? AnimatedVectorDrawable ?: return
-            avd.callback = object : Drawable.Callback {
-                override fun invalidateDrawable(who: Drawable) {
-                    slider.invalidate()
-                }
-
-                override fun scheduleDrawable(who: Drawable, what: Runnable, `when`: Long) {
-                    slider.postDelayed(what, (`when` - SystemClock.uptimeMillis()).coerceAtLeast(0))
-                }
-
-                override fun unscheduleDrawable(who: Drawable, what: Runnable) {
-                    slider.removeCallbacks(what)
-                }
-            }
-            slider.setCustomThumbDrawable(avd)
-            avd.start()
         } catch (_: Throwable) {
         }
     }

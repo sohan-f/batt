@@ -24,6 +24,7 @@
     <string name="ring_style_filled">Filled</string>
     <string name="dimension_slider_title">Circle Footprint</string>
     <string name="footprint_label">Status bar footprint</string>
+    <string name="footprint_slider_desc">Circle footprint size</string>
     <string name="size_title">Size</string>
     <string name="btn_restart_sysui">Restart SystemUI</string>
     <string name="restart_sysui_success">SystemUI restarted</string>

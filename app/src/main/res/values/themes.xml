@@ -50,7 +50,7 @@
         <item name="materialButtonTonalStyle">@style/Widget.CircleBattery.Button.Tonal</item>
         <item name="materialButtonToggleGroupStyle">@style/Widget.Material3Expressive.MaterialButtonToggleGroup</item>
         <item name="materialButtonGroupStyle">@style/Widget.Material3Expressive.MaterialButtonGroup</item>
-        <item name="sliderStyle">@style/Widget.CircleBattery.Slider</item>
+        <item name="sliderStyle">@style/Widget.Material3Expressive.Slider.Medium</item>
         <item name="extendedFloatingActionButtonStyle">@style/Widget.CircleBattery.DockButton</item>
         <item name="floatingActionButtonStyle">@style/Widget.Material3Expressive.FloatingActionButton</item>
         <item name="materialCardViewStyle">@style/Widget.CircleBattery.Card</item>

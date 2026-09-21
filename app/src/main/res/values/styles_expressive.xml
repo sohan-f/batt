@@ -28,22 +28,11 @@
         <item name="cardCornerRadius">28dp</item>
         <item name="cardElevation">1dp</item>
     </style>
-    <style name="Widget.CircleBattery.Slider" parent="Widget.Material3Expressive.Slider.Large">
-        <item name="trackThickness">16dp</item>
-        <item name="thumbRadius">8dp</item>
-        <item name="thumbColor">?attr/colorPrimary</item>
-        <item name="thumbTrackGapSize">6dp</item>
-        <item name="trackInsideCornerSize">2dp</item>
-        <item name="tickVisible">false</item>
-        <item name="trackStopIndicatorSize">0dp</item>
-        <item name="labelBehavior">withinBounds</item>
-    </style>
     <style name="Widget.CircleBattery.Slider.Small" parent="Widget.Material3Expressive.Slider.Medium">
-        <item name="tickVisible">false</item>
-        <item name="trackStopIndicatorSize">0dp</item>
-        <item name="thumbColor">?attr/colorPrimary</item>
-        <item name="thumbTrackGapSize">6dp</item>
-        <item name="trackInsideCornerSize">2dp</item>
+        <item name="labelBehavior">withinBounds</item>
+        <item name="trackIconActiveStart">@drawable/ic_slider_size_track</item>
+        <item name="trackIconActiveColor">?attr/colorOnPrimary</item>
+        <item name="trackIconSize">16dp</item>
     </style>
     <style name="Text.CircleBattery.SectionTitle" parent="TextAppearance.Material3.TitleMedium">
         <item name="android:textStyle">bold</item>

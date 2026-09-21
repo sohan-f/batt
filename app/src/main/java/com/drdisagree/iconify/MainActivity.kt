@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.text.method.LinkMovementMethod
 import android.view.View
+import android.view.animation.OvershootInterpolator
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -17,6 +18,7 @@ import com.drdisagree.iconify.databinding.ActivityMainBinding
 import com.drdisagree.iconify.utils.SystemUtils
 import com.drdisagree.iconify.xposed.modules.batterystyles.CircleBattery
 import com.drdisagree.iconify.xposed.utils.HookCheck
+import com.google.android.material.color.DynamicColors
 import com.google.android.material.snackbar.Snackbar
 
 class MainActivity : AppCompatActivity() {
@@ -25,6 +27,7 @@ class MainActivity : AppCompatActivity() {
     private var previewBatteryDrawable: CircleBattery? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        DynamicColors.applyToActivityIfAvailable(this)
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -65,11 +68,12 @@ class MainActivity : AppCompatActivity() {
         val isHookActive = HookCheck.isModuleActive()
         if (isHookActive) {
             binding.textStatusTitle.setText(R.string.status_module_active)
-            binding.textStatusTitle.setTextColor(getColor(R.color.colorSuccess))
             binding.textStatusDesc.text = getString(R.string.status_module_active) + " - Circle Battery is active in SystemUI."
+            binding.imageStatusIcon.setImageResource(android.R.drawable.checkbox_on_background)
         } else {
             binding.textStatusTitle.setText(R.string.status_module_inactive)
             binding.textStatusDesc.setText(R.string.status_module_desc)
+            binding.imageStatusIcon.setImageResource(android.R.drawable.ic_dialog_info)
         }
     }
 
@@ -89,6 +93,20 @@ class MainActivity : AppCompatActivity() {
             previewBatteryDrawable?.setBatteryLevel(level)
             binding.textPreviewPercent.text = "$level%"
             binding.textLevelLabel.text = "Battery Level: $level%"
+            // Expressive motion: subtle spring on the preview icon
+            binding.imageBatteryPreview.animate()
+                .scaleX(1.08f)
+                .scaleY(1.08f)
+                .setDuration(120)
+                .setInterpolator(OvershootInterpolator())
+                .withEndAction {
+                    binding.imageBatteryPreview.animate()
+                        .scaleX(1f)
+                        .scaleY(1f)
+                        .setDuration(160)
+                        .start()
+                }
+                .start()
         }
 
         binding.switchSimulateCharging.setOnCheckedChangeListener { _, isChecked ->

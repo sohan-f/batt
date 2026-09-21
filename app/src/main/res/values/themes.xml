@@ -1,9 +1,9 @@
 <resources>
-    <!-- Base application theme. -->
-    <style name="Theme.Iconify" parent="Theme.Material3.Light.NoActionBar">
+    <!-- Base application theme: Material 3 Expressive, DayNight + dynamic color. -->
+    <style name="Theme.Iconify" parent="Theme.Material3.Expressive.DayNight.NoActionBar">
         <!-- Background color. -->
-        <item name="android:windowBackground">@color/colorBackground</item>
-        <item name="android:colorBackground">@color/colorBackground</item>
+        <item name="android:windowBackground">?attr/colorSurface</item>
+        <item name="android:colorBackground">?attr/colorSurface</item>
 
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/colorAccent</item>
@@ -16,16 +16,10 @@
         <item name="colorSecondaryVariant">@color/colorAccent</item>
         <item name="colorOnSecondary">@color/black</item>
 
-        <!-- Window layout. -->
+        <!-- Window layout: edge-to-edge on Android 16. -->
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-
-        <!-- Status bar color. -->
-        <item name="android:statusBarColor">@color/transparent</item>
-        <item name="android:windowLightStatusBar">true</item>
-
-        <!-- Navigation bar color. -->
-        <item name="android:navigationBarColor">@color/transparent</item>
-        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:enforceNavigationBarContrast">false</item>
 
         <!-- App theme -->

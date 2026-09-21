@@ -14,335 +14,75 @@
         app:elevation="0dp"
         app:liftOnScroll="true">
 
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:title="@string/app_name"
-            app:subtitle="@string/app_moto"
-            app:titleCentered="false"
-            app:titleTextAppearance="@style/TextAppearance.Material3.HeadlineSmall"
-            app:subtitleTextAppearance="@style/TextAppearance.Material3.BodyMedium" />
-
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <androidx.core.widget.NestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clipToPadding="false"
-        android:fillViewport="true"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="20dp"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp">
 
-            <!-- Module Status Card: expressive tonal filled card -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardStatus"
-                android:layout_width="match_parent"
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textAppTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/app_name"
+                    android:textAppearance="@style/TextAppearance.Material3.HeadlineMedium"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/textAppSubtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/app_moto"
+                    android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+                    android:textColor="?android:attr/textColorSecondary" />
+
+            </LinearLayout>
+
+            <!-- Compact Live Module Status Pill -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/pillModuleStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:clickable="true"
+                android:focusable="true"
                 app:cardBackgroundColor="?attr/colorPrimaryContainer"
-                app:cardCornerRadius="28dp"
+                app:cardCornerRadius="18dp"
                 app:cardElevation="0dp"
                 app:strokeWidth="0dp">
 
                 <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:padding="20dp">
+                    android:paddingHorizontal="12dp">
 
                     <ImageView
-                        android:id="@+id/imageStatusIcon"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:contentDescription="@string/status_module_active"
-                        android:src="@android:drawable/ic_dialog_info"
-                        app:tint="?attr/colorOnPrimaryContainer"
-                        tools:ignore="ContentDescription" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:paddingStart="16dp">
-
-                        <TextView
-                            android:id="@+id/textStatusTitle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/status_module_active"
-                            android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
-                            android:textColor="?attr/colorOnPrimaryContainer" />
-
-                        <TextView
-                            android:id="@+id/textStatusDesc"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:text="@string/status_module_desc"
-                            android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-                            android:textColor="?attr/colorOnPrimaryContainer" />
-
-                    </LinearLayout>
-
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Battery Preview Card: compact expressive elevated card -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                app:cardCornerRadius="28dp"
-                app:cardElevation="1dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/preview_title"
-                        android:textAppearance="@style/TextAppearance.Material3.TitleLarge" />
-
-                    <!-- Visual status bar mockup: contrasting inner shape -->
-                    <com.google.android.material.card.MaterialCardView
-                        android:layout_width="match_parent"
-                        android:layout_height="72dp"
-                        android:layout_marginTop="12dp"
-                        android:layout_marginBottom="12dp"
-                        app:cardBackgroundColor="@color/black"
-                        app:cardCornerRadius="16dp"
-                        app:cardElevation="0dp"
-                        app:strokeWidth="0dp">
-
-                        <LinearLayout
-                            android:id="@+id/layoutBatteryPreview"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
-
-                            <TextView
-                                android:id="@+id/textPreviewPercent"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginEnd="8dp"
-                                android:text="85%"
-                                android:textColor="@color/white"
-                                android:textSize="16sp"
-                                android:textStyle="bold" />
-
-                            <ImageView
-                                android:id="@+id/imageBatteryPreview"
-                                android:layout_width="20dp"
-                                android:layout_height="20dp"
-                                android:contentDescription="@string/battery_style_circle_title" />
-
-                        </LinearLayout>
-
-                    </com.google.android.material.card.MaterialCardView>
-
-                    <!-- Preview Controls -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="@string/preview_simulate_charging"
-                            android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
-
-                        <com.google.android.material.materialswitch.MaterialSwitch
-                            android:id="@+id/switchSimulateCharging"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
-
-                    </LinearLayout>
-
-                    <com.google.android.material.slider.Slider
-                        android:id="@+id/sliderBatteryLevel"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:stepSize="1.0"
-                        android:value="85.0"
-                        android:valueFrom="0.0"
-                        android:valueTo="100.0"
-                        app:labelBehavior="withinBounds" />
-
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Swap Card: one control per card, leading icon row -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="0dp"
-                app:strokeColor="?attr/colorOutlineVariant"
-                app:strokeWidth="1dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:padding="16dp">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
+                        android:id="@+id/imageModuleStatusDot"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
                         android:contentDescription="@null"
-                        android:src="@android:drawable/ic_menu_sort_by_size"
-                        app:tint="?attr/colorPrimary" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:paddingHorizontal="16dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/swap_percentage_title"
-                            android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:text="@string/swap_percentage_desc"
-                            android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-                            android:textColor="?android:attr/textColorSecondary" />
-
-                    </LinearLayout>
-
-                    <com.google.android.material.materialswitch.MaterialSwitch
-                        android:id="@+id/switchSwapPercentage"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:checked="true" />
-
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Size Card: expressive slider with built-in value label -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="0dp"
-                app:strokeColor="?attr/colorOutlineVariant"
-                app:strokeWidth="1dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:contentDescription="@null"
-                            android:src="@android:drawable/ic_menu_crop"
-                            app:tint="?attr/colorPrimary" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:paddingStart="16dp"
-                            android:text="@string/size_title"
-                            android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
-
-                    </LinearLayout>
-
-                    <com.google.android.material.slider.Slider
-                        android:id="@+id/sliderBatterySize"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:stepSize="1.0"
-                        android:value="20.0"
-                        android:valueFrom="12.0"
-                        android:valueTo="32.0"
-                        app:labelBehavior="withinBounds" />
-
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Primary action: expressive tonal button with icon -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnRestartSystemUI"
-                style="@style/Widget.Material3.Button.TonalButton"
-                android:layout_width="match_parent"
-                android:layout_height="64dp"
-                android:layout_marginBottom="16dp"
-                android:text="@string/btn_restart_sysui"
-                app:cornerRadius="20dp"
-                app:icon="@android:drawable/ic_menu_rotate"
-                app:iconGravity="textStart" />
-
-            <!-- About / Legal -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="28dp"
-                app:cardElevation="0dp"
-                app:strokeColor="?attr/colorOutlineVariant"
-                app:strokeWidth="1dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp">
+                        android:src="@drawable/ic_shield_check"
+                        app:tint="?attr/colorOnPrimaryContainer" />
 
                     <TextView
+                        android:id="@+id/textModuleStatusBadge"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/about_title"
-                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
-
-                    <TextView
-                        android:id="@+id/textAboutDesc"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:autoLink="web"
-                        android:text="@string/about_desc"
-                        android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-                        android:textColor="?android:attr/textColorSecondary" />
+                        android:layout_marginStart="6dp"
+                        android:text="@string/status_module_active"
+                        android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
+                        android:textColor="?attr/colorOnPrimaryContainer"
+                        android:textStyle="bold" />
 
                 </LinearLayout>
 
@@ -350,6 +90,845 @@
 
         </LinearLayout>
 
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/nestedScrollView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:fillViewport="true"
+        android:paddingBottom="100dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp">
+
+            <!-- 1. CREATIVE PHONE STAGE (OLED Studio Display) -->
+            <FrameLayout
+                android:id="@+id/layoutPhoneStage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/bg_phone_stage"
+                android:padding="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <!-- Realistic Status Bar Cutout -->
+                    <LinearLayout
+                        android:id="@+id/layoutStatusBarSimulation"
+                        android:layout_width="match_parent"
+                        android:layout_height="44dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="8dp">
+
+                        <TextView
+                            android:id="@+id/textPreviewTime"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="09:41"
+                            android:textColor="#FFFFFF"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="1dp"
+                            android:layout_weight="1" />
+
+                        <!-- Center Camera Punchhole -->
+                        <View
+                            android:id="@+id/viewCameraPunch"
+                            android:layout_width="12dp"
+                            android:layout_height="12dp"
+                            android:background="@drawable/bg_camera_punch" />
+
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="1dp"
+                            android:layout_weight="1" />
+
+                        <!-- Right Icons: Wi-Fi, Cell, Live Circle Battery -->
+                        <ImageView
+                            android:id="@+id/imagePreviewWifi"
+                            android:layout_width="15dp"
+                            android:layout_height="15dp"
+                            android:layout_marginEnd="6dp"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_wifi_statusbar"
+                            app:tint="#FFFFFF" />
+
+                        <ImageView
+                            android:id="@+id/imagePreviewCell"
+                            android:layout_width="15dp"
+                            android:layout_height="15dp"
+                            android:layout_marginEnd="8dp"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_cell_statusbar"
+                            app:tint="#FFFFFF" />
+
+                        <!-- Live Status Bar Battery + Percentage -->
+                        <LinearLayout
+                            android:id="@+id/layoutStatusBarBattery"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/textStatusBarPercent"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginHorizontal="5dp"
+                                android:text="85%"
+                                android:textColor="#FFFFFF"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
+
+                            <ImageView
+                                android:id="@+id/imageStatusBarBattery"
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:contentDescription="@null" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <!-- Centerpiece Enlarged Hero Battery Studio -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:paddingVertical="14dp">
+
+                        <FrameLayout
+                            android:layout_width="96dp"
+                            android:layout_height="96dp">
+
+                            <!-- Ambient glow aura -->
+                            <View
+                                android:id="@+id/viewHeroGlow"
+                                android:layout_width="96dp"
+                                android:layout_height="96dp"
+                                android:background="@drawable/bg_hero_glow" />
+
+                            <ImageView
+                                android:id="@+id/imageHeroBattery"
+                                android:layout_width="68dp"
+                                android:layout_height="68dp"
+                                android:layout_gravity="center"
+                                android:contentDescription="@string/battery_style_circle_title" />
+
+                        </FrameLayout>
+
+                        <TextView
+                            android:id="@+id/textHeroPercent"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:text="85%"
+                            android:textColor="#FFFFFF"
+                            android:textSize="24sp"
+                            android:textStyle="bold" />
+
+                        <!-- In-Stage Actions: Charging Pill & Dark/Light Toggle -->
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <!-- Simulate Charging Button -->
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnToggleCharging"
+                                style="@style/Widget.Material3.Button.OutlinedButton"
+                                android:layout_width="wrap_content"
+                                android:layout_height="38dp"
+                                android:layout_marginEnd="8dp"
+                                android:paddingHorizontal="14dp"
+                                android:text="@string/preview_simulate_charging"
+                                android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
+                                android:textColor="#FFFFFF"
+                                app:cornerRadius="19dp"
+                                app:icon="@drawable/ic_bolt"
+                                app:iconSize="18dp"
+                                app:iconTint="#FFFFFF"
+                                app:strokeColor="#40FFFFFF" />
+
+                            <!-- Status Bar Mode Toggle (Day/Night) -->
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnToggleThemeMode"
+                                style="@style/Widget.Material3.Button.OutlinedButton"
+                                android:layout_width="38dp"
+                                android:layout_height="38dp"
+                                android:insetLeft="0dp"
+                                android:insetTop="0dp"
+                                android:insetRight="0dp"
+                                android:insetBottom="0dp"
+                                android:padding="0dp"
+                                app:cornerRadius="19dp"
+                                app:icon="@drawable/ic_sun"
+                                app:iconGravity="textStart"
+                                app:iconPadding="0dp"
+                                app:iconSize="18dp"
+                                app:iconTint="#FFFFFF"
+                                app:strokeColor="#40FFFFFF" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <!-- Battery Level Scrub Slider -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="4dp">
+
+                        <TextView
+                            android:id="@+id/textSimulationLabel"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Battery Simulation"
+                            android:textColor="#A0A0A0"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/textScrubLevelBadge"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_pill_badge_active"
+                            android:paddingHorizontal="8dp"
+                            android:paddingVertical="2dp"
+                            android:text="85%"
+                            android:textColor="?attr/colorOnPrimaryContainer"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+                    <com.google.android.material.slider.Slider
+                        android:id="@+id/sliderBatteryLevel"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:stepSize="1.0"
+                        android:value="85.0"
+                        android:valueFrom="0.0"
+                        android:valueTo="100.0" />
+
+                    <!-- Quick Level Chips -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/chipLevel20"
+                            android:layout_width="0dp"
+                            android:layout_height="32dp"
+                            android:layout_marginHorizontal="3dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/bg_segment_inactive"
+                            android:gravity="center"
+                            android:text="20%"
+                            android:textColor="#FFFFFF"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/chipLevel50"
+                            android:layout_width="0dp"
+                            android:layout_height="32dp"
+                            android:layout_marginHorizontal="3dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/bg_segment_inactive"
+                            android:gravity="center"
+                            android:text="50%"
+                            android:textColor="#FFFFFF"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/chipLevel80"
+                            android:layout_width="0dp"
+                            android:layout_height="32dp"
+                            android:layout_marginHorizontal="3dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/bg_segment_inactive"
+                            android:gravity="center"
+                            android:text="80%"
+                            android:textColor="#FFFFFF"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/chipLevel100"
+                            android:layout_width="0dp"
+                            android:layout_height="32dp"
+                            android:layout_marginHorizontal="3dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/bg_segment_inactive"
+                            android:gravity="center"
+                            android:text="100%"
+                            android:textColor="#FFFFFF"
+                            android:textSize="12sp" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </FrameLayout>
+
+            <!-- 2. RING GEOMETRY ARCHITECTURE SELECTOR -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="8dp"
+                android:text="@string/ring_style_title"
+                android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <!-- Geometry Option 1: Continuous Ring -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardStyleRing"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"
+                    android:layout_weight="1"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:cardBackgroundColor="?attr/colorPrimaryContainer"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="?attr/colorPrimary"
+                    app:strokeWidth="2dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:paddingVertical="14dp"
+                        android:paddingHorizontal="8dp">
+
+                        <ImageView
+                            android:id="@+id/iconStyleRing"
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_style_ring"
+                            app:tint="?attr/colorPrimary" />
+
+                        <TextView
+                            android:id="@+id/textStyleRingTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="@string/ring_style_continuous"
+                            android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
+                            android:textColor="?attr/colorOnPrimaryContainer"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Geometry Option 2: Dotted Ring -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardStyleDotted"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="4dp"
+                    android:layout_weight="1"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="?attr/colorOutlineVariant"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:paddingVertical="14dp"
+                        android:paddingHorizontal="8dp">
+
+                        <ImageView
+                            android:id="@+id/iconStyleDotted"
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_style_dotted"
+                            app:tint="?android:attr/textColorSecondary" />
+
+                        <TextView
+                            android:id="@+id/textStyleDottedTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="@string/ring_style_dotted"
+                            android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
+                            android:textColor="?android:attr/textColorPrimary"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Geometry Option 3: Filled Circle -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardStyleFilled"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:layout_weight="1"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="?attr/colorOutlineVariant"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:paddingVertical="14dp"
+                        android:paddingHorizontal="8dp">
+
+                        <ImageView
+                            android:id="@+id/iconStyleFilled"
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_style_filled"
+                            app:tint="?android:attr/textColorSecondary" />
+
+                        <TextView
+                            android:id="@+id/textStyleFilledTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="@string/ring_style_filled"
+                            android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
+                            android:textColor="?android:attr/textColorPrimary"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+
+            <!-- 3. CREATIVE VISUAL ORDER SELECTOR (Segmented Pill Cards) -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="8dp"
+                android:text="@string/layout_order_title"
+                android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                android:textStyle="bold" />
+
+            <!-- Dual Interactive Segment Selector -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <!-- Segment A: Percent First -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardOrderPercentFirst"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:cardBackgroundColor="?attr/colorPrimaryContainer"
+                    app:cardCornerRadius="22dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="?attr/colorPrimary"
+                    app:strokeWidth="2dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <!-- Visual Representation -->
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="85%  ◎"
+                                android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                                android:textColor="?attr/colorOnPrimaryContainer"
+                                android:textStyle="bold" />
+
+                            <View
+                                android:layout_width="0dp"
+                                android:layout_height="1dp"
+                                android:layout_weight="1" />
+
+                            <ImageView
+                                android:id="@+id/checkPercentFirst"
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:contentDescription="@null"
+                                android:src="@drawable/ic_check"
+                                app:tint="?attr/colorPrimary" />
+
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/textPercentFirstTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:text="@string/order_percent_first"
+                            android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+                            android:textColor="?attr/colorOnPrimaryContainer"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/textPercentFirstDesc"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="% before circle icon"
+                            android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+                            android:textColor="?attr/colorOnPrimaryContainer" />
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Segment B: Icon First -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardOrderIconFirst"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:layout_weight="1"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
+                    app:cardCornerRadius="22dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="?attr/colorOutlineVariant"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <!-- Visual Representation -->
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="◎  85%"
+                                android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                                android:textColor="?android:attr/textColorPrimary"
+                                android:textStyle="bold" />
+
+                            <View
+                                android:layout_width="0dp"
+                                android:layout_height="1dp"
+                                android:layout_weight="1" />
+
+                            <ImageView
+                                android:id="@+id/checkIconFirst"
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:contentDescription="@null"
+                                android:src="@drawable/ic_check"
+                                android:visibility="invisible"
+                                app:tint="?attr/colorPrimary" />
+
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/textIconFirstTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:text="@string/order_icon_first"
+                            android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+                            android:textColor="?android:attr/textColorPrimary"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/textIconFirstDesc"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Standard SystemUI order"
+                            android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+                            android:textColor="?android:attr/textColorSecondary" />
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+
+            <!-- 4. CIRCLE FOOTPRINT STUDIO (Size Controller) -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="8dp"
+                android:text="@string/dimension_slider_title"
+                android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                android:textStyle="bold" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="0dp"
+                app:strokeColor="?attr/colorOutlineVariant"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnSizeMinus"
+                            style="@style/Widget.Material3.Button.TonalButton"
+                            android:layout_width="44dp"
+                            android:layout_height="44dp"
+                            android:insetLeft="0dp"
+                            android:insetTop="0dp"
+                            android:insetRight="0dp"
+                            android:insetBottom="0dp"
+                            android:padding="0dp"
+                            app:cornerRadius="22dp"
+                            app:icon="@drawable/ic_remove"
+                            app:iconGravity="textStart"
+                            app:iconPadding="0dp"
+                            app:iconSize="20dp" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/textSizeValueDisplay"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="20 dp"
+                                android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
+                                android:textColor="?attr/colorPrimary"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Status bar footprint"
+                                android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+                                android:textColor="?android:attr/textColorSecondary" />
+
+                        </LinearLayout>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnSizePlus"
+                            style="@style/Widget.Material3.Button.TonalButton"
+                            android:layout_width="44dp"
+                            android:layout_height="44dp"
+                            android:insetLeft="0dp"
+                            android:insetTop="0dp"
+                            android:insetRight="0dp"
+                            android:insetBottom="0dp"
+                            android:padding="0dp"
+                            app:cornerRadius="22dp"
+                            app:icon="@drawable/ic_add"
+                            app:iconGravity="textStart"
+                            app:iconPadding="0dp"
+                            app:iconSize="20dp" />
+
+                    </LinearLayout>
+
+                    <com.google.android.material.slider.Slider
+                        android:id="@+id/sliderBatterySize"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:stepSize="1.0"
+                        android:value="20.0"
+                        android:valueFrom="12.0"
+                        android:valueTo="32.0" />
+
+                    <!-- Presets Group with dynamic styling -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnPreset16"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_height="38dp"
+                            android:layout_marginEnd="4dp"
+                            android:layout_weight="1"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
+                            android:padding="0dp"
+                            android:text="16"
+                            android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
+                            app:cornerRadius="12dp" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnPreset20"
+                            style="@style/Widget.Material3.Button.TonalButton"
+                            android:layout_width="0dp"
+                            android:layout_height="38dp"
+                            android:layout_marginHorizontal="2dp"
+                            android:layout_weight="1"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
+                            android:padding="0dp"
+                            android:text="20"
+                            android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
+                            app:cornerRadius="12dp" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnPreset24"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_height="38dp"
+                            android:layout_marginHorizontal="2dp"
+                            android:layout_weight="1"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
+                            android:padding="0dp"
+                            android:text="24"
+                            android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
+                            app:cornerRadius="12dp" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnPreset28"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_height="38dp"
+                            android:layout_marginStart="4dp"
+                            android:layout_weight="1"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
+                            android:padding="0dp"
+                            android:text="28"
+                            android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
+                            app:cornerRadius="12dp" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 5. SUBTLE FOOTER INFO -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="16dp"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textAboutDesc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:autoLink="web"
+                    android:gravity="center"
+                    android:text="@string/about_desc"
+                    android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+                    android:textColor="?android:attr/textColorSecondary" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
     </androidx.core.widget.NestedScrollView>
+
+    <!-- 6. FLOATING SYSTEM ACTION DOCK (Bottom Bar) -->
+    <LinearLayout
+        android:id="@+id/layoutBottomDock"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="?attr/colorSurface"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="16dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnRestartSystemUI"
+            style="@style/Widget.Material3.Button"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="@string/btn_restart_sysui"
+            android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+            app:cornerRadius="28dp"
+            app:icon="@drawable/ic_restart"
+            app:iconGravity="textStart"
+            app:iconSize="22dp" />
+
+    </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

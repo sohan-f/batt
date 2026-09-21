@@ -13,6 +13,7 @@ import android.view.HapticFeedbackConstants
 import android.view.View
 import android.view.animation.PathInterpolator
 import android.widget.Toast
+import kotlin.math.abs
 import kotlin.math.roundToInt
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -568,8 +569,11 @@ class MainActivity : AppCompatActivity() {
             syncPresetChecked(targetDp)
             return
         }
+        // Distance-proportional timing: short hops snap, long jumps glide.
+        val distance = abs(target - slider.value)
+        val duration = (180 + distance * 30).toLong().coerceIn(180, 450)
         sizeAnimator = ValueAnimator.ofFloat(slider.value, target).apply {
-            duration = 350
+            this.duration = duration
             interpolator = emphasized
             addUpdateListener { a -> slider.value = a.animatedValue as Float }
             addListener(object : android.animation.AnimatorListenerAdapter() {

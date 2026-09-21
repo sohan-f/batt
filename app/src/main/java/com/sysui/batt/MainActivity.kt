@@ -1,5 +1,6 @@
 package com.sysui.batt
 
+import android.animation.TimeInterpolator
 import android.animation.ValueAnimator
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -19,6 +20,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.updatePadding
+import androidx.dynamicanimation.animation.SpringAnimation
 import com.sysui.batt.data.common.Preferences.BATTERY_STYLE_CIRCLE
 import com.sysui.batt.data.common.Preferences.BATTERY_STYLE_DOTTED_CIRCLE
 import com.sysui.batt.data.common.Preferences.BATTERY_STYLE_FILLED_CIRCLE
@@ -37,6 +39,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.motion.MotionUtils
 
 class MainActivity : AppCompatActivity() {
 
@@ -47,8 +50,23 @@ class MainActivity : AppCompatActivity() {
     private var orderIconSecondDrawable: BatteryDrawable? = null
     private var lastBatteryLevel = -1
     private var lastCharging = false
-    private val emphasized = PathInterpolator(0.05f, 0.7f, 0.1f, 1f)
-    private val emphasizedAccelerate = PathInterpolator(0.3f, 0f, 0.8f, 0.15f)
+    // Motion comes from the M3E theme tokens (emphasized easing, spatial
+    // springs), with the spec curves as fallback if a token is missing.
+    private val emphasized: TimeInterpolator by lazy {
+        MotionUtils.resolveThemeInterpolator(
+            this,
+            com.google.android.material.R.attr.motionEasingEmphasizedInterpolator,
+            PathInterpolator(0.05f, 0.7f, 0.1f, 1f),
+        )
+    }
+    private val emphasizedAccelerate: TimeInterpolator by lazy {
+        MotionUtils.resolveThemeInterpolator(
+            this,
+            com.google.android.material.R.attr.motionEasingEmphasizedAccelerateInterpolator,
+            PathInterpolator(0.3f, 0f, 0.8f, 0.15f),
+        )
+    }
+    private val settleSprings = mutableListOf<SpringAnimation>()
 
     companion object {
         private const val DEFAULT_BATTERY_SIZE_DP = 20
@@ -97,6 +115,8 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         sizeAnimator?.cancel()
         restartIconFade?.cancel()
+        settleSprings.forEach { it.cancel() }
+        settleSprings.clear()
         cardColorAnimators.values.forEach { it.cancel() }
         super.onDestroy()
     }
@@ -571,15 +591,16 @@ class MainActivity : AppCompatActivity() {
     private var restartIconFade: ValueAnimator? = null
 
     // Expressive loading button: gentle press, then the glyph and label
-    // fade out while an indeterminate spinner fades in centered over the
-    // button. Restore reverses the fades plus a small settle pop so
-    // completion reads intuitively.
+    // fade out while the expressive LoadingIndicator plays centered over
+    // the button. Restore reverses the fades plus a theme-spring settle pop
+    // so completion reads intuitively.
     private fun playRestartAnimation(v: View) {
         val btn = binding.btnRestartSystemUI
         val spin = binding.restartSpinner
         restartIconFade?.cancel()
-        spin.animate().cancel()
-        spin.visibility = View.GONE
+        settleSprings.forEach { it.cancel() }
+        settleSprings.clear()
+        spin.hide()
         btn.isEnabled = false
         val origText = btn.text.toString()
         v.animate().scaleX(0.97f).scaleY(0.97f).setDuration(120).setInterpolator(emphasizedAccelerate)
@@ -588,20 +609,14 @@ class MainActivity : AppCompatActivity() {
                 btn.text = ""
                 fadeRestartIcon(btn, visible = false) {
                     btn.icon = null
-                    spin.alpha = 0f
-                    spin.visibility = View.VISIBLE
-                    spin.animate().alpha(1f).setDuration(220).setInterpolator(emphasized).start()
+                    spin.show()
                 }
                 v.postDelayed({
                     if (isFinishing || isDestroyed) return@postDelayed
-                    spin.animate().alpha(0f).setDuration(150).setInterpolator(emphasizedAccelerate)
-                        .withEndAction { spin.visibility = View.GONE }.start()
+                    spin.hide()
                     btn.icon = getDrawable(R.drawable.ic_restart)
                     fadeRestartIcon(btn, visible = true)
-                    v.animate().scaleX(1.02f).scaleY(1.02f).setDuration(150).setInterpolator(emphasizedAccelerate)
-                        .withEndAction {
-                            v.animate().scaleX(1f).scaleY(1f).setDuration(350).setInterpolator(emphasized).start()
-                        }.start()
+                    springSettlePop(v)
                     v.postDelayed({
                         if (isFinishing || isDestroyed) return@postDelayed
                         btn.text = origText
@@ -609,6 +624,26 @@ class MainActivity : AppCompatActivity() {
                     }, 300)
                 }, 1400)
             }.start()
+    }
+
+    private fun springSettlePop(v: View) {
+        val spring = MotionUtils.resolveThemeSpringForce(
+            this,
+            com.google.android.material.R.attr.motionSpringDefaultSpatial,
+            0,
+        )
+        settleSprings.forEach { it.cancel() }
+        settleSprings.clear()
+        v.scaleX = 1.02f
+        v.scaleY = 1.02f
+        settleSprings += SpringAnimation(v, SpringAnimation.SCALE_X, 1f).apply {
+            setSpring(spring)
+            start()
+        }
+        settleSprings += SpringAnimation(v, SpringAnimation.SCALE_Y, 1f).apply {
+            setSpring(spring)
+            start()
+        }
     }
 
     private fun fadeRestartIcon(btn: MaterialButton, visible: Boolean, onDone: (() -> Unit)? = null) {

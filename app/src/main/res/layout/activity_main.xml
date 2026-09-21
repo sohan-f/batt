@@ -251,25 +251,6 @@
                             android:orientation="horizontal">
 
                             <com.google.android.material.button.MaterialButton
-                                android:id="@+id/btnToggleCharging"
-                                style="@style/Widget.CircleBattery.Button.StageOutlined"
-                                android:layout_width="wrap_content"
-                                android:layout_height="@dimen/stage_action_height"
-                                android:layout_marginEnd="8dp"
-                                android:ellipsize="end"
-                                android:gravity="center"
-                                android:maxLines="1"
-                                android:paddingHorizontal="16dp"
-                                android:text="@string/preview_simulate_charging"
-                                android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
-                                android:textColor="#FFFFFF"
-                                app:cornerRadius="@dimen/stage_action_radius"
-                                app:icon="@drawable/ic_bolt"
-                                app:iconSize="18dp"
-                                app:iconTint="#FFFFFF"
-                                app:strokeColor="#40FFFFFF" />
-
-                            <com.google.android.material.button.MaterialButton
                                 android:id="@+id/btnToggleThemeMode"
                                 style="@style/Widget.CircleBattery.Button.StageOutlined"
                                 android:layout_width="@dimen/stage_action_height"
@@ -291,112 +272,189 @@
 
                     </LinearLayout>
 
+                </LinearLayout>
+
+            </FrameLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="12dp"
+                android:text="@string/device_battery_title"
+                android:textAppearance="@style/Text.CircleBattery.SectionTitle" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardDeviceBattery"
+                style="@style/Widget.CircleBattery.Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="18dp">
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:paddingHorizontal="4dp">
+                        android:orientation="horizontal">
 
-                        <TextView
-                            android:id="@+id/textSimulationLabel"
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="@string/simulation_label"
-                            android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
-                            android:textColor="#A0A0A0" />
+                            android:orientation="vertical">
 
-                        <TextView
-                            android:id="@+id/textScrubLevelBadge"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/bg_pill_badge_active"
-                            android:paddingHorizontal="12dp"
-                            android:paddingVertical="4dp"
-                            android:text="85%"
-                            android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
-                            android:textColor="?attr/colorOnPrimaryContainer"
-                            android:textStyle="bold" />
+                            <TextView
+                                android:id="@+id/textDeviceLevel"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="--%"
+                                android:textAppearance="@style/TextAppearance.Material3.DisplaySmall"
+                                android:textColor="?attr/colorPrimary"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/textDeviceStatus"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="@string/device_status_unknown"
+                                android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+                                android:textColor="?android:attr/textColorSecondary" />
+
+                        </LinearLayout>
+
+                        <ImageView
+                            android:id="@+id/imageDeviceStatusIcon"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_battery_circle"
+                            app:tint="?attr/colorPrimary" />
 
                     </LinearLayout>
 
-                    <FrameLayout
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:clipChildren="false">
+                        android:layout_marginTop="16dp"
+                        android:orientation="horizontal">
 
-                        <com.google.android.material.slider.Slider
-                            android:id="@+id/sliderBatteryLevel"
-                            style="@style/Widget.CircleBattery.Slider"
-                            android:layout_width="match_parent"
+                        <LinearLayout
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:stepSize="1.0"
-                            android:value="85.0"
-                            android:valueFrom="0.0"
-                            android:valueTo="100.0"
-                            app:labelBehavior="withinBounds" />
+                            android:layout_weight="1"
+                            android:orientation="vertical">
 
-                        <ImageView
-                            android:id="@+id/imageSliderBolt"
-                            android:layout_width="16dp"
-                            android:layout_height="16dp"
-                            android:layout_gravity="start|center_vertical"
-                            android:layout_marginStart="24dp"
-                            android:contentDescription="@null"
-                            android:src="@drawable/ic_bolt"
-                            app:tint="?attr/colorOnPrimary" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/device_battery_source"
+                                android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
+                                android:textColor="?android:attr/textColorSecondary" />
 
-                    </FrameLayout>
+                            <TextView
+                                android:id="@+id/textDeviceSource"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="--"
+                                android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+                                android:textStyle="bold" />
 
-                    <com.google.android.material.button.MaterialButtonToggleGroup
-                        android:id="@+id/groupQuickLevels"
-                        style="@style/Widget.Material3Expressive.MaterialButtonToggleGroup"
-                        android:layout_width="match_parent"
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/device_battery_temp"
+                                android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
+                                android:textColor="?android:attr/textColorSecondary" />
+
+                            <TextView
+                                android:id="@+id/textDeviceTemp"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="--"
+                                android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+                                android:textStyle="bold" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/device_battery_voltage"
+                                android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
+                                android:textColor="?android:attr/textColorSecondary" />
+
+                            <TextView
+                                android:id="@+id/textDeviceVoltage"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="--"
+                                android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+                                android:textStyle="bold" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/device_battery_health"
+                                android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
+                                android:textColor="?android:attr/textColorSecondary" />
+
+                            <TextView
+                                android:id="@+id/textDeviceHealth"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="--"
+                                android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+                                android:textStyle="bold" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:gravity="center"
-                        app:checkedButton="@+id/chipLevel80"
-                        app:selectionRequired="false"
-                        app:singleSelection="true">
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/chipLevel20"
-                            style="@style/Widget.Material3.Button.OutlinedButton"
-                            android:layout_width="0dp"
-                            android:layout_height="48dp"
-                            android:layout_weight="1"
-                            android:text="20%" />
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/chipLevel50"
-                            style="@style/Widget.Material3.Button.OutlinedButton"
-                            android:layout_width="0dp"
-                            android:layout_height="48dp"
-                            android:layout_weight="1"
-                            android:text="50%" />
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/chipLevel80"
-                            style="@style/Widget.Material3.Button.OutlinedButton"
-                            android:layout_width="0dp"
-                            android:layout_height="48dp"
-                            android:layout_weight="1"
-                            android:text="80%" />
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/chipLevel100"
-                            style="@style/Widget.Material3.Button.OutlinedButton"
-                            android:layout_width="0dp"
-                            android:layout_height="48dp"
-                            android:layout_weight="1"
-                            android:text="100%" />
-
-                    </com.google.android.material.button.MaterialButtonToggleGroup>
+                        android:layout_marginTop="12dp"
+                        android:text="@string/device_battery_mirror_desc"
+                        android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+                        android:textColor="?android:attr/textColorSecondary" />
 
                 </LinearLayout>
 
-            </FrameLayout>
+            </com.google.android.material.card.MaterialCardView>
 
             <TextView
                 android:layout_width="wrap_content"

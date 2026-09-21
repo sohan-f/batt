@@ -19,7 +19,7 @@ Fork / stripped-down build of Iconify focused on a single tweak: `BATTERY_STYLE_
 - Swap icon & percentage: flips `BatteryMeterView` to `LAYOUT_DIRECTION_RTL` so `%` renders before the icon (`BatteryStyleManager.kt:989-994`, `MainActivity.kt:113-117`). Default ON.
 - App UI (`MainActivity.kt`, `res/layout/activity_main.xml`):
   - Module status card (active check via `xposed/utils/HookCheck.kt`)
-  - Live icon preview with level slider (0-100) + simulate charging switch
+  - Live icon preview mirroring real device battery + device battery card (level, charging, source, temp, voltage, health)
   - Swap toggle + size slider persisted to `RPrefs`
   - Restart button (requires root)
 - Defaults on first launch: style = Circle (35), swap = true (`MainActivity.kt:52-60`)

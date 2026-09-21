@@ -3,10 +3,15 @@ package com.sysui.batt
 import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
 import android.animation.ValueAnimator
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.AnimatedVectorDrawable
 import android.graphics.drawable.Drawable
+import android.os.BatteryManager
 import android.os.Bundle
 import android.os.SystemClock
 import android.text.method.LinkMovementMethod
@@ -16,7 +21,6 @@ import android.view.View
 import android.view.animation.PathInterpolator
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.graphics.ColorUtils
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
@@ -47,13 +51,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private var statusBarBatteryDrawable: BatteryDrawable? = null
     private var heroBatteryDrawable: BatteryDrawable? = null
-    private var currentBatteryLevel = 85
-    private var isSimulatingCharging = false
+    private var realBatteryLevel = 100
+    private var isDeviceCharging = false
     private var isLightStatusBarMode = false
     private var currentRingStyle = BATTERY_STYLE_CIRCLE
     private var glowPulseAnimator: ObjectAnimator? = null
-    private var chargingButtonAnimator: ValueAnimator? = null
-    private var levelAnimator: ValueAnimator? = null
     private val emphasized = PathInterpolator(0.05f, 0.7f, 0.1f, 1f)
     private val emphasizedAccelerate = PathInterpolator(0.3f, 0f, 0.8f, 0.15f)
 
@@ -84,13 +86,21 @@ class MainActivity : AppCompatActivity() {
         if (::binding.isInitialized) {
             refreshModuleStatus()
             updatePreviewTime()
+            registerBatteryReceiver()
+            refreshDeviceBattery(registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED)))
         }
+    }
+
+    override fun onPause() {
+        try {
+            unregisterReceiver(batteryReceiver)
+        } catch (_: Throwable) {
+        }
+        super.onPause()
     }
 
     override fun onDestroy() {
         glowPulseAnimator?.cancel()
-        chargingButtonAnimator?.cancel()
-        levelAnimator?.cancel()
         restartAnimator?.cancel()
         cardColorAnimators.values.forEach { it.cancel() }
         super.onDestroy()
@@ -167,8 +177,8 @@ class MainActivity : AppCompatActivity() {
             }
         }
         d.setColors(fg, bg, fg)
-        d.setBatteryLevel(currentBatteryLevel)
-        d.setChargingEnabled(isSimulatingCharging)
+        d.setBatteryLevel(realBatteryLevel)
+        d.setChargingEnabled(isDeviceCharging)
         return d
     }
 
@@ -180,36 +190,12 @@ class MainActivity : AppCompatActivity() {
         updatePreviewTime()
         recreateBatteryDrawables()
         updatePreviewLayoutDirection(RPrefs.getBoolean(CUSTOM_BATTERY_SWAP_PERCENTAGE, true))
-        binding.sliderBatteryLevel.addOnChangeListener { _, value, _ -> updateBatteryLevel(value.toInt(), animate = false) }
-        binding.sliderBatteryLevel.addOnSliderTouchListener(object : com.google.android.material.slider.Slider.OnSliderTouchListener {
-            override fun onStartTrackingTouch(s: com.google.android.material.slider.Slider) = Unit
-            override fun onStopTrackingTouch(s: com.google.android.material.slider.Slider) {
-                bounceHeroDial()
-                itHaptic(s)
-            }
-        })
-        attachMorphThumb(binding.sliderBatteryLevel)
-        binding.groupQuickLevels.addOnButtonCheckedListener { _, checkedId, isChecked ->
-            if (!isChecked) return@addOnButtonCheckedListener
-            val v = when (checkedId) {
-                R.id.chipLevel20 -> 20f
-                R.id.chipLevel50 -> 50f
-                R.id.chipLevel80 -> 80f
-                R.id.chipLevel100 -> 100f
-                else -> return@addOnButtonCheckedListener
-            }
-            jumpToLevel(v)
-        }
-        binding.btnToggleCharging.setOnClickListener {
-            isSimulatingCharging = !isSimulatingCharging
-            updateChargingState(isSimulatingCharging)
-            itHaptic(it)
-        }
         binding.btnToggleThemeMode.setOnClickListener {
             isLightStatusBarMode = !isLightStatusBarMode
             applyThemeMode(isLightStatusBarMode)
             itHaptic(it)
         }
+        refreshDeviceBattery(registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED)))
     }
 
     private fun recreateBatteryDrawables() {
@@ -233,7 +219,6 @@ class MainActivity : AppCompatActivity() {
             binding.btnToggleThemeMode.setIconResource(R.drawable.ic_moon)
             binding.btnToggleThemeMode.iconTint = ColorStateList.valueOf(fg)
             binding.btnToggleThemeMode.strokeColor = ColorStateList.valueOf(Color.parseColor("#40000000"))
-            binding.textSimulationLabel.setTextColor(Color.parseColor("#5A6070"))
         } else {
             binding.layoutPhoneStage.setBackgroundResource(R.drawable.bg_phone_stage)
             binding.textPreviewTime.setTextColor(Color.WHITE)
@@ -244,92 +229,82 @@ class MainActivity : AppCompatActivity() {
             binding.btnToggleThemeMode.setIconResource(R.drawable.ic_sun)
             binding.btnToggleThemeMode.iconTint = ColorStateList.valueOf(Color.WHITE)
             binding.btnToggleThemeMode.strokeColor = ColorStateList.valueOf(Color.parseColor("#40FFFFFF"))
-            binding.textSimulationLabel.setTextColor(Color.parseColor("#A0A0A0"))
         }
         recreateBatteryDrawables()
-        updateChargingState(isSimulatingCharging, animate = false)
+        applyPreviewChargingGlow()
     }
 
-    private fun updateBatteryLevel(level: Int, animate: Boolean = true) {
-        if (animate) {
-            levelAnimator?.cancel()
-            val from = currentBatteryLevel
-            currentBatteryLevel = level
-            levelAnimator = ValueAnimator.ofInt(from, level).apply {
-                duration = 350
-                interpolator = emphasized
-                addUpdateListener { a ->
-                    val v = a.animatedValue as Int
-                    statusBarBatteryDrawable?.setBatteryLevel(v)
-                    heroBatteryDrawable?.setBatteryLevel(v)
-                    binding.textStatusBarPercent.text = "$v%"
-                    binding.textHeroPercent.text = "$v%"
-                    binding.textScrubLevelBadge.text = "$v%"
-                    binding.imageSliderBolt.visibility = if (v > 0) View.VISIBLE else View.GONE
-                }
-                start()
-            }
-        } else {
-            currentBatteryLevel = level
-            statusBarBatteryDrawable?.setBatteryLevel(level)
-            heroBatteryDrawable?.setBatteryLevel(level)
-            binding.textStatusBarPercent.text = "$level%"
-            binding.textHeroPercent.text = "$level%"
-            binding.textScrubLevelBadge.text = "$level%"
-            binding.imageSliderBolt.visibility = if (level > 0) View.VISIBLE else View.GONE
+    private val batteryReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == Intent.ACTION_BATTERY_CHANGED) refreshDeviceBattery(intent)
         }
     }
 
-    private fun jumpToLevel(value: Float) {
-        binding.sliderBatteryLevel.value = value
-        updateBatteryLevel(value.toInt())
-        bounceHeroDial()
+    private fun registerBatteryReceiver() {
+        try {
+            registerReceiver(batteryReceiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+        } catch (_: Throwable) {
+        }
     }
 
-    private fun bounceHeroDial() {
-        binding.imageHeroBattery.animate().scaleX(1.08f).scaleY(1.08f).setDuration(120).setInterpolator(emphasized)
-            .withEndAction {
-                binding.imageHeroBattery.animate().scaleX(1f).scaleY(1f).setDuration(300).setInterpolator(emphasized).start()
-            }.start()
-    }
-
-    private fun updateChargingState(charging: Boolean, animate: Boolean = true) {
+    private fun refreshDeviceBattery(intent: Intent?) {
+        if (intent == null) return
+        val level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
+        val scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, 100).takeIf { it > 0 } ?: 100
+        val pct = if (level >= 0) (level * 100 / scale).coerceIn(0, 100) else return
+        val status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, BatteryManager.BATTERY_STATUS_UNKNOWN)
+        val plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0)
+        val charging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
+            status == BatteryManager.BATTERY_STATUS_FULL && plugged != 0
+        val tempTenths = intent.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, Int.MIN_VALUE)
+        val voltageMv = intent.getIntExtra(BatteryManager.EXTRA_VOLTAGE, Int.MIN_VALUE)
+        val health = intent.getIntExtra(BatteryManager.EXTRA_HEALTH, BatteryManager.BATTERY_HEALTH_UNKNOWN)
+        realBatteryLevel = pct
+        isDeviceCharging = charging
+        statusBarBatteryDrawable?.setBatteryLevel(pct)
         statusBarBatteryDrawable?.setChargingEnabled(charging)
+        heroBatteryDrawable?.setBatteryLevel(pct)
         heroBatteryDrawable?.setChargingEnabled(charging)
-        val (fg, _) = getPreviewColors()
-        val amber = Color.parseColor("#FFD54F")
-        val amberFill = Color.parseColor("#33FFB300")
-        val baseStroke = if (isLightStatusBarMode) Color.parseColor("#40000000") else Color.parseColor("#40FFFFFF")
-        val activeStroke = Color.parseColor("#66FFB300")
-        binding.btnToggleCharging.setText(if (charging) R.string.preview_stop_simulation else R.string.preview_simulate_charging)
-        if (charging) startGlowPulseAnimation() else stopGlowPulseAnimation()
-        chargingButtonAnimator?.cancel()
-        if (!animate) {
-            applyChargingButtonColors(if (charging) 1f else 0f, fg, amber, amberFill, baseStroke, activeStroke)
-        } else {
-            chargingButtonAnimator = ValueAnimator.ofFloat(if (charging) 0f else 1f, if (charging) 1f else 0f).apply {
-                duration = 250
-                interpolator = emphasized
-                addUpdateListener { a ->
-                    applyChargingButtonColors(a.animatedValue as Float, fg, amber, amberFill, baseStroke, activeStroke)
-                }
-                start()
-            }
-        }
-        binding.imageHeroBattery.animate().scaleX(1.15f).scaleY(1.15f).setDuration(150).setInterpolator(emphasizedAccelerate)
-            .withEndAction {
-                binding.imageHeroBattery.animate().scaleX(1f).scaleY(1f).setDuration(350).setInterpolator(emphasized).start()
-            }.start()
+        binding.textStatusBarPercent.text = "$pct%"
+        binding.textHeroPercent.text = "$pct%"
+        binding.textDeviceLevel.text = "$pct%"
+        binding.textDeviceStatus.text = deviceStatusText(status, charging)
+        binding.textDeviceSource.text = deviceSourceText(plugged)
+        binding.textDeviceTemp.text = if (tempTenths != Int.MIN_VALUE) "%.1f°C".format(tempTenths / 10f) else "--"
+        binding.textDeviceVoltage.text = if (voltageMv != Int.MIN_VALUE) "%.2fV".format(voltageMv / 1000f) else "--"
+        binding.textDeviceHealth.text = deviceHealthText(health)
+        binding.imageDeviceStatusIcon.setImageResource(
+            if (charging) R.drawable.ic_bolt else R.drawable.ic_battery_circle,
+        )
+        applyPreviewChargingGlow()
     }
 
-    private fun applyChargingButtonColors(f: Float, fg: Int, amber: Int, amberFill: Int, baseStroke: Int, activeStroke: Int) {
-        binding.btnToggleCharging.backgroundTintList =
-            ColorStateList.valueOf(ColorUtils.blendARGB(Color.TRANSPARENT, amberFill, f))
-        val tc = ColorUtils.blendARGB(fg, amber, f)
-        binding.btnToggleCharging.setTextColor(tc)
-        binding.btnToggleCharging.iconTint = ColorStateList.valueOf(tc)
-        binding.btnToggleCharging.strokeColor =
-            ColorStateList.valueOf(ColorUtils.blendARGB(baseStroke, activeStroke, f))
+    private fun deviceStatusText(status: Int, charging: Boolean): String = when {
+        status == BatteryManager.BATTERY_STATUS_FULL -> getString(R.string.device_status_full)
+        charging || status == BatteryManager.BATTERY_STATUS_CHARGING -> getString(R.string.device_status_charging)
+        status == BatteryManager.BATTERY_STATUS_DISCHARGING -> getString(R.string.device_status_discharging)
+        status == BatteryManager.BATTERY_STATUS_NOT_CHARGING -> getString(R.string.device_status_discharging)
+        else -> getString(R.string.device_status_unknown)
+    }
+
+    private fun deviceSourceText(plugged: Int): String = when {
+        plugged and BatteryManager.BATTERY_PLUGGED_AC != 0 -> getString(R.string.device_source_ac)
+        plugged and BatteryManager.BATTERY_PLUGGED_USB != 0 -> getString(R.string.device_source_usb)
+        plugged and BatteryManager.BATTERY_PLUGGED_WIRELESS != 0 -> getString(R.string.device_source_wireless)
+        else -> getString(R.string.device_source_unplugged)
+    }
+
+    private fun deviceHealthText(health: Int): String = when (health) {
+        BatteryManager.BATTERY_HEALTH_GOOD -> getString(R.string.device_health_good)
+        BatteryManager.BATTERY_HEALTH_OVERHEAT -> getString(R.string.device_health_overheat)
+        BatteryManager.BATTERY_HEALTH_DEAD -> getString(R.string.device_health_dead)
+        BatteryManager.BATTERY_HEALTH_OVER_VOLTAGE -> getString(R.string.device_health_over_voltage)
+        BatteryManager.BATTERY_HEALTH_COLD -> getString(R.string.device_health_cold)
+        else -> getString(R.string.device_health_unknown)
+    }
+
+    private fun applyPreviewChargingGlow() {
+        if (isDeviceCharging) startGlowPulseAnimation() else stopGlowPulseAnimation()
     }
 
     private fun startGlowPulseAnimation() {

@@ -14,8 +14,6 @@
     <string name="layout_order_subtitle">Position of percentage relative to circle</string>
     <string name="order_percent_first_desc">% before circle icon</string>
     <string name="order_icon_first_desc">Standard SystemUI order</string>
-    <string name="layout_percent_first_msg">Layout: Percent First</string>
-    <string name="layout_icon_first_msg">Layout: Icon First</string>
     <string name="ring_style_title">Ring Geometry</string>
     <string name="ring_style_continuous">Continuous</string>
     <string name="ring_style_dotted">Dotted</string>

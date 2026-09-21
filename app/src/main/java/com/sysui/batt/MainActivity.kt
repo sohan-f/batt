@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.res.Configuration
 import android.graphics.Color
 import android.os.BatteryManager
 import android.os.Bundle
@@ -17,6 +18,7 @@ import kotlin.math.roundToInt
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.updatePadding
 import com.sysui.batt.data.common.Preferences.BATTERY_STYLE_CIRCLE
 import com.sysui.batt.data.common.Preferences.BATTERY_STYLE_DOTTED_CIRCLE
@@ -38,7 +40,6 @@ import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.progressindicator.CircularProgressIndicatorSpec
 import com.google.android.material.progressindicator.IndeterminateDrawable
-import com.google.android.material.snackbar.Snackbar
 
 class MainActivity : AppCompatActivity() {
 
@@ -71,6 +72,12 @@ class MainActivity : AppCompatActivity() {
         setupSizeController()
         setupActions()
         binding.textAboutDesc.movementMethod = LinkMovementMethod.getInstance()
+        updateSystemBarContrast()
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        if (::binding.isInitialized) updateSystemBarContrast()
     }
 
     override fun onResume() {
@@ -96,6 +103,14 @@ class MainActivity : AppCompatActivity() {
         restartSpin?.stop()
         cardColorAnimators.values.forEach { it.cancel() }
         super.onDestroy()
+    }
+
+    private fun updateSystemBarContrast() {
+        val night = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK ==
+            Configuration.UI_MODE_NIGHT_YES
+        val controller = WindowInsetsControllerCompat(window, binding.root)
+        controller.isAppearanceLightStatusBars = !night
+        controller.isAppearanceLightNavigationBars = !night
     }
 
     private fun setupEdgeToEdge() {
@@ -360,7 +375,6 @@ class MainActivity : AppCompatActivity() {
                 RPrefs.putBoolean(CUSTOM_BATTERY_SWAP_PERCENTAGE, true)
                 updateOrderCardVisuals(true)
                 itHaptic(it)
-                Snackbar.make(binding.root, R.string.layout_percent_first_msg, Snackbar.LENGTH_SHORT).show()
             }
         }
         binding.cardOrderIconFirst.setOnClickListener {
@@ -368,7 +382,6 @@ class MainActivity : AppCompatActivity() {
                 RPrefs.putBoolean(CUSTOM_BATTERY_SWAP_PERCENTAGE, false)
                 updateOrderCardVisuals(false)
                 itHaptic(it)
-                Snackbar.make(binding.root, R.string.layout_icon_first_msg, Snackbar.LENGTH_SHORT).show()
             }
         }
     }

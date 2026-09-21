@@ -77,3 +77,10 @@
 -keep interface **.I* { *; }
 -keep class **.I*$Stub { *; }
 -keep class **.I*$Stub$Proxy { *; }
+
+# Circle Battery: LSPosed loads InitHook by name from assets/xposed_init,
+# invisible to R8. Keep the whole xposed package plus app entry points.
+-keep class com.drdisagree.iconify.xposed.** { *; }
+-keep class com.drdisagree.iconify.Iconify { *; }
+-keep class com.drdisagree.iconify.MainActivity { *; }
+-keep class com.drdisagree.iconify.data.provider.** { *; }

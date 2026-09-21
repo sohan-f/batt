@@ -8,10 +8,6 @@ plugins {
     alias(libs.plugins.kotlin.parcelize)
 }
 
-ksp {
-    arg("room.schemaLocation", "$projectDir/schemas")
-}
-
 android {
     namespace = "com.drdisagree.iconify"
     compileSdk = 35
@@ -53,10 +49,14 @@ android {
         }
 
         release {
-            isMinifyEnabled = false
-            isShrinkResources = false
-            isCrunchPngs = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            isCrunchPngs = true
             resValue("string", "derived_app_name", "Circle Battery")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
             signingConfig = releaseSigning
         }
     }
@@ -146,7 +146,6 @@ dependencies {
 
     // Data Binding
     implementation(libs.library)
-    implementation(libs.androidx.palette.ktx)
 
     // Xposed API
     // F-Droid disallow `api.xposed.info` since it's not a "Trusted Maven Repository".
@@ -164,93 +163,16 @@ dependencies {
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
 
-    // Color Picker
-    implementation(libs.jaredrummler.colorpicker)
-
-    // Splash Screen
-    implementation(libs.androidx.core.splashscreen)
-
     // Material Components
     implementation(libs.material)
-
-    // APK Signer
-    implementation(libs.bcpkix.jdk18on)
-
-    // Zip Util
-    implementation(libs.zip4j)
-
-    // Preference
-    implementation(libs.androidx.preference.ktx)
 
     // Remote Preference
     implementation(libs.remotepreferences)
 
-    // Flexbox
-    implementation(libs.flexbox)
-
-    // Glide
-    implementation(libs.glide)
-    ksp(libs.glide.compiler)
-
-    // RecyclerView
-    implementation(libs.androidx.recyclerview)
-    implementation(libs.androidx.recyclerview.selection)
-
-    // ViewPager2
-    implementation(libs.androidx.viewpager2)
-
-    // Circle Indicator
-    implementation(libs.circleindicator)
-
-    // Lottie Animation
-    implementation(libs.lottie)
-
-    // HTML Parser
-    implementation(libs.jsoup)
-
-    // Collapsing Toolbar with subtitle
-    implementation(libs.collapsingtoolbarlayout.subtitle)
-
-    // Navigation Component
-    implementation(libs.androidx.navigation.fragment.ktx)
-    implementation(libs.androidx.navigation.ui.ktx)
-
-    // Concurrency
-    implementation(libs.androidx.work.runtime)
-    implementation(libs.androidx.concurrent.futures)
-    implementation(libs.guava)
-
-    // Event Bus
-    implementation(libs.eventbus)
-
-    // Dots Indicator
-    implementation(libs.dotsindicator)
-
-    // Fading Edge Layout
-    implementation(libs.fadingedgelayout)
-
-    // Google Subject Segmentation - MLKit (commented out as unused)
-    // implementation(libs.com.google.android.gms.play.services.mlkit.subject.segmentation)
-    // implementation(libs.play.services.base)
-
-    // Blur View
-    implementation(libs.blurview)
-
     // Misc
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.constraintlayout)
-    implementation(libs.androidx.work.runtime)
-    implementation(libs.androidx.work.runtime.ktx)
-    implementation(libs.slf4j.api)
-    implementation(libs.commons.text)
-
-    // OkHttp
-    implementation(libs.okhttp)
-
-    // Room Database
-    implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
-    ksp(libs.room.compiler)
+    implementation(libs.androidx.interpolator)
 }
 
 tasks.register("printVersionName") {

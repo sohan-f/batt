@@ -42,7 +42,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/app_moto"
                     android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-                    android:textColor="?android:attr/textColorSecondary" />
+                    android:textColor="?attr/colorOnSurfaceVariant" />
 
             </LinearLayout>
 
@@ -158,7 +158,7 @@
                                 android:singleLine="true"
                                 android:text="@string/device_status_unknown"
                                 android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-                                android:textColor="?android:attr/textColorSecondary" />
+                                android:textColor="?attr/colorOnSurfaceVariant" />
 
                         </LinearLayout>
 
@@ -203,7 +203,7 @@
                                     android:layout_height="wrap_content"
                                     android:text="@string/device_battery_source"
                                     android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
-                                    android:textColor="?android:attr/textColorSecondary" />
+                                    android:textColor="?attr/colorOnSurfaceVariant" />
 
                                 <TextView
                                     android:id="@+id/textDeviceSource"
@@ -229,7 +229,7 @@
                                     android:layout_height="wrap_content"
                                     android:text="@string/device_battery_temp"
                                     android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
-                                    android:textColor="?android:attr/textColorSecondary" />
+                                    android:textColor="?attr/colorOnSurfaceVariant" />
 
                                 <TextView
                                     android:id="@+id/textDeviceTemp"
@@ -264,7 +264,7 @@
                                     android:layout_height="wrap_content"
                                     android:text="@string/device_battery_voltage"
                                     android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
-                                    android:textColor="?android:attr/textColorSecondary" />
+                                    android:textColor="?attr/colorOnSurfaceVariant" />
 
                                 <TextView
                                     android:id="@+id/textDeviceVoltage"
@@ -290,7 +290,7 @@
                                     android:layout_height="wrap_content"
                                     android:text="@string/device_battery_health"
                                     android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
-                                    android:textColor="?android:attr/textColorSecondary" />
+                                    android:textColor="?attr/colorOnSurfaceVariant" />
 
                                 <TextView
                                     android:id="@+id/textDeviceHealth"
@@ -735,7 +735,7 @@
                                 android:layout_height="wrap_content"
                                 android:text="@string/footprint_label"
                                 android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-                                android:textColor="?android:attr/textColorSecondary" />
+                                android:textColor="?attr/colorOnSurfaceVariant" />
 
                         </LinearLayout>
 
@@ -831,7 +831,7 @@
                     android:gravity="center"
                     android:text="@string/about_desc"
                     android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-                    android:textColor="?android:attr/textColorSecondary" />
+                    android:textColor="?attr/colorOnSurfaceVariant" />
 
             </LinearLayout>
 

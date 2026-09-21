@@ -17,10 +17,10 @@
         <item name="fontFamily">sans-serif</item>
         <item name="android:fontFamily">sans-serif</item>
         <item name="android:lineSpacingMultiplier">1.4</item>
-        <item name="android:textColorPrimary">@color/text_color_primary</item>
-        <item name="android:textColorSecondary">@color/text_color_secondary</item>
-        <item name="android:colorControlNormal">@color/text_color_primary</item>
-        <item name="android:colorControlActivated">@color/text_color_primary</item>
+        <item name="android:textColorPrimary">?attr/colorOnSurface</item>
+        <item name="android:textColorSecondary">?attr/colorOnSurfaceVariant</item>
+        <item name="android:colorControlNormal">?attr/colorOnSurfaceVariant</item>
+        <item name="android:colorControlActivated">?attr/colorPrimary</item>
         <item name="android:colorControlHighlight">@color/colorAccent</item>
         <item name="selectableItemBackground">?android:selectableItemBackground</item>
         <item name="selectableItemBackgroundBorderless">?android:selectableItemBackground</item>

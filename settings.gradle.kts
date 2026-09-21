@@ -20,6 +20,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Iconify"
+rootProject.name = "Circle Battery"
 
 include(":app")

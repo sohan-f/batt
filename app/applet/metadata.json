@@ -1,0 +1,6 @@
+{
+  "name": "Circle Battery",
+  "description": "Xposed/LSPosed module to replace battery icon with circle style and swap percentage position",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

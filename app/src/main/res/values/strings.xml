@@ -1,6 +1,19 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
-    <string name="app_name" translatable="false">Iconify</string>
-    <string name="app_moto">Customize Boring Android UI</string>
+    <string name="app_name" translatable="false">Circle Battery</string>
+    <string name="app_moto">Replace battery icon with circle style and swap percentage</string>
+
+    <string name="status_module_active">Active in SystemUI</string>
+    <string name="status_module_inactive">Module Not Active in LSPosed</string>
+    <string name="status_module_desc">Enable Circle Battery in LSPosed Manager for SystemUI, then restart SystemUI.</string>
+    <string name="battery_style_circle_title">Circle Battery</string>
+    <string name="battery_style_circle_desc">Replaces system battery icon with a sleek circular gauge</string>
+    <string name="swap_percentage_title">Swap Icon &amp; Percentage</string>
+    <string name="swap_percentage_desc">Displays the percentage text before the circle battery icon in the status bar</string>
+    <string name="btn_restart_sysui">Restart SystemUI</string>
+    <string name="restart_sysui_success">SystemUI restarted</string>
+    <string name="restart_sysui_no_root">Root access required to restart SystemUI. Please reboot device or run \'killall com.android.systemui\' as root.</string>
+    <string name="preview_title">Live Icon Preview</string>
+    <string name="preview_simulate_charging">Simulate Charging</string>
 
     <!-- Onboarding -->
     <string name="init_module_installation">Initializing setup</string>

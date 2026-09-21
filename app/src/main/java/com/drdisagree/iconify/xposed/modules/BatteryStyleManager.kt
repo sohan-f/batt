@@ -169,7 +169,7 @@ class BatteryStyleManager(context: Context) : ModPack(context) {
     private var mCustomFillGradColor = Color.BLACK
     private var mCustomPowerSaveColor = Color.BLACK
     private var mCustomPowerSaveFillColor = Color.BLACK
-    private var mSwapPercentage = false
+    private var mSwapPercentage = true
     private val mChargingIconView: ImageView? = null
     private var mChargingIconSwitch = false
     private var mChargingIconStyle = 0
@@ -181,7 +181,7 @@ class BatteryStyleManager(context: Context) : ModPack(context) {
         var batteryStyle: Int
 
         Xprefs.apply {
-            batteryStyle = getString(CUSTOM_BATTERY_STYLE, "0")!!.toInt()
+            batteryStyle = getString(CUSTOM_BATTERY_STYLE, "$BATTERY_STYLE_CIRCLE")!!.toInt()
 
             val hidePercentage = getBoolean(CUSTOM_BATTERY_HIDE_PERCENTAGE, false)
             val defaultInsidePercentage = batteryStyle in listOf(
@@ -224,7 +224,7 @@ class BatteryStyleManager(context: Context) : ModPack(context) {
             mCustomFillGradColor = getInt(CUSTOM_BATTERY_FILL_GRAD_COLOR, Color.BLACK)
             mCustomPowerSaveColor = getInt(CUSTOM_BATTERY_POWERSAVE_INDICATOR_COLOR, Color.BLACK)
             mCustomPowerSaveFillColor = getInt(CUSTOM_BATTERY_POWERSAVE_FILL_COLOR, Color.BLACK)
-            mSwapPercentage = getBoolean(CUSTOM_BATTERY_SWAP_PERCENTAGE, false)
+            mSwapPercentage = getBoolean(CUSTOM_BATTERY_SWAP_PERCENTAGE, true)
             mChargingIconSwitch = getBoolean(CUSTOM_BATTERY_CHARGING_ICON_SWITCH, false)
             mChargingIconStyle = getString(CUSTOM_BATTERY_CHARGING_ICON_STYLE, "0")!!.toInt()
             mChargingIconML = getSliderInt(CUSTOM_BATTERY_CHARGING_ICON_MARGIN_LEFT, 1)
@@ -236,19 +236,20 @@ class BatteryStyleManager(context: Context) : ModPack(context) {
             mBatteryMarginBottom = mContext.toPx(getSliderInt(CUSTOM_BATTERY_MARGIN_BOTTOM, 0))
         }
 
-        if (mBatteryStyle != batteryStyle) {
-            mBatteryStyle = batteryStyle
+        val styleChanged = mBatteryStyle != batteryStyle
+        mBatteryStyle = batteryStyle
 
-            for (view in batteryViews) {
-                val mBatteryIconView = view.getFieldSilently("mBatteryIconView") as? ImageView
-                mBatteryIconView?.let {
-                    updateBatteryRotation(it)
-                    updateFlipper(it.parent)
-                }
+        for (view in batteryViews) {
+            val mBatteryIconView = view.getFieldSilently("mBatteryIconView") as? ImageView
+            mBatteryIconView?.let {
+                updateBatteryRotation(it)
+                updateFlipper(it.parent)
+            }
 
-                val mBatteryPercentView = view.getFieldSilently("mBatteryPercentView") as? TextView
-                mBatteryPercentView?.visibility = if (mHidePercentage) View.GONE else View.VISIBLE
+            val mBatteryPercentView = view.getFieldSilently("mBatteryPercentView") as? TextView
+            mBatteryPercentView?.visibility = if (mHidePercentage) View.GONE else View.VISIBLE
 
+            if (styleChanged) {
                 val mCharging = view.isBatteryCharging()
                 val mLevel = view.getField("mLevel") as Int
 
@@ -935,135 +936,7 @@ class BatteryStyleManager(context: Context) : ModPack(context) {
             thisObject.addView(mChargingIconView, 1)
         }
 
-        val drawable = when (mChargingIconStyle) {
-            0 -> ResourcesCompat.getDrawable(
-                modRes,
-                R.drawable.ic_charging_bold,
-                mContext.theme
-            )
-
-            1 -> ResourcesCompat.getDrawable(
-                modRes,
-                R.drawable.ic_charging_asus,
-                mContext.theme
-            )
-
-            2 -> ResourcesCompat.getDrawable(
-                modRes,
-                R.drawable.ic_charging_buddy,
-                mContext.theme
-            )
-
-            3 -> ResourcesCompat.getDrawable(
-                modRes,
-                R.drawable.ic_charging_evplug,
-                mContext.theme
-            )
-
-            4 -> ResourcesCompat.getDrawable(
-                modRes,
-                R.drawable.ic_charging_idc,
-                mContext.theme
-            )
-
-            5 -> ResourcesCompat.getDrawable(
-                modRes,
-                R.drawable.ic_charging_ios,
-                mContext.theme
-            )
-
-            6 -> ResourcesCompat.getDrawable(
-                modRes,
-                R.drawable.ic_charging_koplak,
-                mContext.theme
-            )
-
-            7 -> ResourcesCompat.getDrawable(
-                modRes,
-                R.drawable.ic_charging_miui,
-                mContext.theme
-            )
-
-            8 -> ResourcesCompat.getDrawable(
-                modRes,
-                R.drawable.ic_charging_mmk,
-                mContext.theme
-            )
-
-            9 -> ResourcesCompat.getDrawable(
-                modRes,
-                R.drawable.ic_charging_moto,
-                mContext.theme
-            )
-
-            10 -> ResourcesCompat.getDrawable(
-                modRes,
-                R.drawable.ic_charging_nokia,
-                mContext.theme
-            )
-
-            11 -> ResourcesCompat.getDrawable(
-                modRes,
-                R.drawable.ic_charging_plug,
-                mContext.theme
-            )
-
-            12 -> ResourcesCompat.getDrawable(
-                modRes,
-                R.drawable.ic_charging_powercable,
-                mContext.theme
-            )
-
-            13 -> ResourcesCompat.getDrawable(
-                modRes,
-                R.drawable.ic_charging_powercord,
-                mContext.theme
-            )
-
-            14 -> ResourcesCompat.getDrawable(
-                modRes,
-                R.drawable.ic_charging_powerstation,
-                mContext.theme
-            )
-
-            15 -> ResourcesCompat.getDrawable(
-                modRes,
-                R.drawable.ic_charging_realme,
-                mContext.theme
-            )
-
-            16 -> ResourcesCompat.getDrawable(
-                modRes,
-                R.drawable.ic_charging_soak,
-                mContext.theme
-            )
-
-            17 -> ResourcesCompat.getDrawable(
-                modRes,
-                R.drawable.ic_charging_stres,
-                mContext.theme
-            )
-
-            18 -> ResourcesCompat.getDrawable(
-                modRes,
-                R.drawable.ic_charging_strip,
-                mContext.theme
-            )
-
-            19 -> ResourcesCompat.getDrawable(
-                modRes,
-                R.drawable.ic_charging_usbcable,
-                mContext.theme
-            )
-
-            20 -> ResourcesCompat.getDrawable(
-                modRes,
-                R.drawable.ic_charging_xiaomi,
-                mContext.theme
-            )
-
-            else -> null
-        }
+        val drawable: Drawable? = null
 
         if (drawable != null && drawable !== mChargingIconView.getDrawable()) {
             mChargingIconView.setImageDrawable(drawable)
@@ -1235,12 +1108,12 @@ class BatteryStyleManager(context: Context) : ModPack(context) {
 
     companion object {
         private val batteryViews = ArrayList<View>()
-        private var mBatteryStyle = 0
+        private var mBatteryStyle = BATTERY_STYLE_CIRCLE
         private var mShowPercentInside = false
         private var mHidePercentage = false
         private var mHideBattery = false
         private var mBatteryRotation = 0
-        private var customBatteryEnabled = false
+        private var customBatteryEnabled = true
         private var mBatteryScaleWidth = 20
         private var mBatteryScaleHeight = 20
         private var mBatteryCustomDimension = false

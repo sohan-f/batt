@@ -6,10 +6,13 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
+import com.drdisagree.iconify.BuildConfig
 import com.drdisagree.iconify.data.common.Const.ACTION_HOOK_CHECK_REQUEST
 import com.drdisagree.iconify.data.common.Const.ACTION_HOOK_CHECK_RESULT
 import com.drdisagree.iconify.data.common.Const.SYSTEMUI_PACKAGE
 import com.drdisagree.iconify.xposed.ModPack
+import de.robv.android.xposed.XC_MethodReplacement
+import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
 
 class HookCheck(context: Context) : ModPack(context) {
@@ -31,6 +34,18 @@ class HookCheck(context: Context) : ModPack(context) {
 
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun handleLoadPackage(loadPackageParam: LoadPackageParam) {
+        if (loadPackageParam.packageName == BuildConfig.APPLICATION_ID) {
+            try {
+                XposedHelpers.findAndHookMethod(
+                    HookCheck::class.java.name,
+                    loadPackageParam.classLoader,
+                    "isModuleActive",
+                    XC_MethodReplacement.returnConstant(true)
+                )
+            } catch (_: Throwable) {
+            }
+        }
+
         if (!broadcastRegistered && loadPackageParam.packageName == SYSTEMUI_PACKAGE) {
             broadcastRegistered = true
 
@@ -56,5 +71,10 @@ class HookCheck(context: Context) : ModPack(context) {
                 mContext.registerReceiver(broadcastReceiver, intentFilter)
             }
         }
+    }
+
+    companion object {
+        @JvmStatic
+        fun isModuleActive(): Boolean = false
     }
 }

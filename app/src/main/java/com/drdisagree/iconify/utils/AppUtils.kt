@@ -48,7 +48,7 @@ object AppUtils {
 
     @SuppressLint("UseCompatLoadingForDrawables")
     fun getAppIcon(packageName: String): Drawable? {
-        var appIcon = ContextCompat.getDrawable(appContext, R.drawable.ic_android)
+        var appIcon = ContextCompat.getDrawable(appContext, R.drawable.ic_launcher_foreground)
 
         try {
             appIcon = appContext.packageManager.getApplicationIcon(packageName)

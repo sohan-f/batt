@@ -5,7 +5,6 @@ import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import com.drdisagree.iconify.Iconify.Companion.appContext
 import com.drdisagree.iconify.data.common.Resources.SHARED_XPREFERENCES
-import com.drdisagree.iconify.ui.preferences.SliderPreference
 
 @Suppress("unused")
 object RPrefs : SharedPreferences {
@@ -68,15 +67,31 @@ object RPrefs : SharedPreferences {
 
     // Custom slider preference methods
     fun getSliderInt(key: String?, defaultVal: Int): Int {
-        return SliderPreference.getSingleIntValue(this, key, defaultVal)
+        return try {
+            getInt(key, defaultVal)
+        } catch (_: Exception) {
+            try {
+                getString(key)?.toIntOrNull() ?: defaultVal
+            } catch (_: Exception) {
+                defaultVal
+            }
+        }
     }
 
     fun getSliderValues(key: String?, defaultValue: Float): List<Float> {
-        return SliderPreference.getValues(this, key, defaultValue)
+        return listOf(getSliderFloat(key, defaultValue))
     }
 
     fun getSliderFloat(key: String?, defaultVal: Float): Float {
-        return SliderPreference.getSingleFloatValue(this, key, defaultVal)
+        return try {
+            getFloat(key, defaultVal)
+        } catch (_: Exception) {
+            try {
+                getString(key)?.toFloatOrNull() ?: defaultVal
+            } catch (_: Exception) {
+                defaultVal
+            }
+        }
     }
 
     // Clear methods

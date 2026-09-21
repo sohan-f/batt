@@ -42,18 +42,6 @@ class TileRestartSystemUI : TileService() {
     }
 
     private fun updateTileIcon(tile: Tile) {
-        var iconResId = R.drawable.ic_tile_restart_systemui
-
-        if (OverlayUtils.isOverlayEnabled("IconifyComponentIPAS1.overlay")) {
-            iconResId = R.drawable.ic_tile_restart_systemui_aurora
-        } else if (OverlayUtils.isOverlayEnabled("IconifyComponentIPAS2.overlay")) {
-            iconResId = R.drawable.ic_tile_restart_systemui_gradicon
-        } else if (OverlayUtils.isOverlayEnabled("IconifyComponentIPAS3.overlay")) {
-            iconResId = R.drawable.ic_tile_restart_systemui_lorn
-        } else if (OverlayUtils.isOverlayEnabled("IconifyComponentIPAS4.overlay")) {
-            iconResId = R.drawable.ic_tile_restart_systemui_plumpy
-        }
-
-        tile.icon = Icon.createWithResource(this, iconResId)
+        tile.icon = Icon.createWithResource(this, R.drawable.ic_launcher_foreground)
     }
 }

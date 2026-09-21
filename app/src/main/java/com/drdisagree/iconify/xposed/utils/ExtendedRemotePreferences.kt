@@ -2,7 +2,6 @@ package com.drdisagree.iconify.xposed.utils
 
 import android.content.Context
 import com.crossbowffs.remotepreferences.RemotePreferences
-import com.drdisagree.iconify.ui.preferences.SliderPreference
 
 @Suppress("unused")
 class ExtendedRemotePreferences : RemotePreferences {
@@ -25,14 +24,30 @@ class ExtendedRemotePreferences : RemotePreferences {
     }
 
     fun getSliderInt(key: String?, defaultVal: Int): Int {
-        return SliderPreference.getSingleIntValue(this, key, defaultVal)
+        return try {
+            getInt(key, defaultVal)
+        } catch (_: Exception) {
+            try {
+                getString(key, null)?.toIntOrNull() ?: defaultVal
+            } catch (_: Exception) {
+                defaultVal
+            }
+        }
     }
 
     fun getSliderFloat(key: String?, defaultVal: Float): Float {
-        return SliderPreference.getSingleFloatValue(this, key, defaultVal)
+        return try {
+            getFloat(key, defaultVal)
+        } catch (_: Exception) {
+            try {
+                getString(key, null)?.toFloatOrNull() ?: defaultVal
+            } catch (_: Exception) {
+                defaultVal
+            }
+        }
     }
 
     fun getSliderValues(key: String?, defaultValue: Float): List<Float> {
-        return SliderPreference.getValues(this, key, defaultValue)
+        return listOf(getSliderFloat(key, defaultValue))
     }
 }

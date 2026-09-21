@@ -169,8 +169,7 @@
                             android:background="@drawable/bg_icon_chip"
                             android:contentDescription="@null"
                             android:padding="12dp"
-                            android:src="@drawable/ic_battery_circle"
-                            app:tint="?attr/colorPrimary" />
+                            android:src="@drawable/ic_battery_circle" />
 
                     </LinearLayout>
 

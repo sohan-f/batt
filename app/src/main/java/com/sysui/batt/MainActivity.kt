@@ -30,6 +30,9 @@ import com.sysui.batt.data.common.Preferences.CUSTOM_BATTERY_WIDTH
 import com.sysui.batt.data.config.RPrefs
 import com.sysui.batt.databinding.ActivityMainBinding
 import com.sysui.batt.utils.SystemUtils
+import com.sysui.batt.xposed.modules.batterystyles.BatteryDrawable
+import com.sysui.batt.xposed.modules.batterystyles.CircleBattery
+import com.sysui.batt.xposed.modules.batterystyles.CircleFilledBattery
 import com.sysui.batt.xposed.utils.HookCheck
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.color.MaterialColors
@@ -40,6 +43,9 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private var currentRingStyle = BATTERY_STYLE_CIRCLE
+    private var deviceBatteryDrawable: BatteryDrawable? = null
+    private var lastBatteryLevel = -1
+    private var lastCharging = false
     private val emphasized = PathInterpolator(0.05f, 0.7f, 0.1f, 1f)
     private val emphasizedAccelerate = PathInterpolator(0.3f, 0f, 0.8f, 0.15f)
 
@@ -173,9 +179,35 @@ class MainActivity : AppCompatActivity() {
         binding.textDeviceTemp.text = if (tempTenths != Int.MIN_VALUE) getString(R.string.device_temp_format, tempTenths / 10f) else "--"
         binding.textDeviceVoltage.text = if (voltageMv != Int.MIN_VALUE) getString(R.string.device_voltage_format, voltageMv / 1000f) else "--"
         binding.textDeviceHealth.text = deviceHealthText(health)
-        binding.imageDeviceStatusIcon.setImageResource(
-            if (charging) R.drawable.ic_bolt else R.drawable.ic_battery_circle,
-        )
+        lastBatteryLevel = pct
+        lastCharging = charging
+        updateDeviceBatteryIcon(pct, charging)
+    }
+
+    private fun createDeviceBatteryDrawable(): BatteryDrawable {
+        val primary = MaterialColors.getColor(binding.root, android.R.attr.colorPrimary)
+        val outline = MaterialColors.getColor(binding.root, com.google.android.material.R.attr.colorOutlineVariant)
+        val d: BatteryDrawable = when (currentRingStyle) {
+            BATTERY_STYLE_FILLED_CIRCLE -> CircleFilledBattery(this, primary)
+            else -> CircleBattery(this, primary).apply {
+                setMeterStyle(if (currentRingStyle == BATTERY_STYLE_DOTTED_CIRCLE) BATTERY_STYLE_DOTTED_CIRCLE else BATTERY_STYLE_CIRCLE)
+            }
+        }
+        d.setColors(primary, outline, primary)
+        if (lastBatteryLevel >= 0) d.setBatteryLevel(lastBatteryLevel)
+        d.setChargingEnabled(lastCharging)
+        return d
+    }
+
+    private fun updateDeviceBatteryIcon(level: Int, charging: Boolean) {
+        var d = deviceBatteryDrawable
+        if (d == null) {
+            d = createDeviceBatteryDrawable()
+            deviceBatteryDrawable = d
+            binding.imageDeviceStatusIcon.setImageDrawable(d)
+        }
+        d.setBatteryLevel(level)
+        d.setChargingEnabled(charging)
     }
 
     private fun deviceStatusText(status: Int, charging: Boolean): String = when {
@@ -230,6 +262,9 @@ class MainActivity : AppCompatActivity() {
     private fun applyRingStyle(style: Int) {
         RPrefs.putString(CUSTOM_BATTERY_STYLE, "$style")
         updateRingGeometryVisuals(style)
+        val d = createDeviceBatteryDrawable()
+        deviceBatteryDrawable = d
+        binding.imageDeviceStatusIcon.setImageDrawable(d)
     }
 
     private val cardColorAnimators = mutableMapOf<View, ValueAnimator>()

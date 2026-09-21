@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Configuration
-import android.graphics.Color
 import android.os.BatteryManager
 import android.os.Bundle
 import android.text.method.LinkMovementMethod
@@ -38,8 +37,6 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.progressindicator.CircularProgressIndicatorSpec
-import com.google.android.material.progressindicator.IndeterminateDrawable
 
 class MainActivity : AppCompatActivity() {
 
@@ -271,6 +268,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupRingGeometrySelector() {
         updateRingGeometryVisuals(currentRingStyle, animate = false)
+        setupRingPreviewIcons()
         binding.cardStyleRing.setOnClickListener {
             if (currentRingStyle != BATTERY_STYLE_CIRCLE) {
                 currentRingStyle = BATTERY_STYLE_CIRCLE
@@ -309,11 +307,9 @@ class MainActivity : AppCompatActivity() {
         val surfaceLow = MaterialColors.getColor(binding.root, com.google.android.material.R.attr.colorSurfaceContainerLow)
         val onSurface = MaterialColors.getColor(binding.root, com.google.android.material.R.attr.colorOnSurface)
         val outlineVariant = MaterialColors.getColor(binding.root, com.google.android.material.R.attr.colorOutlineVariant)
-        val textSecondary = MaterialColors.getColor(binding.root, android.R.attr.textColorSecondary)
         val density = resources.displayMetrics.density
         fun paint(
             card: com.google.android.material.card.MaterialCardView,
-            icon: android.widget.ImageView,
             title: android.widget.TextView,
             badge: android.widget.ImageView,
             selected: Boolean,
@@ -341,7 +337,6 @@ class MainActivity : AppCompatActivity() {
                 card.strokeColor = targetStroke
             }
             card.strokeWidth = if (selected) (2 * density).toInt() else (1 * density).toInt()
-            icon.setColorFilter(if (selected) primaryColor else textSecondary)
             title.setTextColor(if (selected) onPrimaryContainer else onSurface)
             card.contentDescription = "${title.text}, ${if (selected) "selected" else "not selected"}"
             if (selected) {
@@ -362,9 +357,31 @@ class MainActivity : AppCompatActivity() {
                 badge.visibility = View.GONE
             }
         }
-        paint(binding.cardStyleRing, binding.iconStyleRing, binding.textStyleRingTitle, binding.checkStyleRing, selectedStyle == BATTERY_STYLE_CIRCLE)
-        paint(binding.cardStyleDotted, binding.iconStyleDotted, binding.textStyleDottedTitle, binding.checkStyleDotted, selectedStyle == BATTERY_STYLE_DOTTED_CIRCLE)
-        paint(binding.cardStyleFilled, binding.iconStyleFilled, binding.textStyleFilledTitle, binding.checkStyleFilled, selectedStyle == BATTERY_STYLE_FILLED_CIRCLE)
+        paint(binding.cardStyleRing, binding.textStyleRingTitle, binding.checkStyleRing, selectedStyle == BATTERY_STYLE_CIRCLE)
+        paint(binding.cardStyleDotted, binding.textStyleDottedTitle, binding.checkStyleDotted, selectedStyle == BATTERY_STYLE_DOTTED_CIRCLE)
+        paint(binding.cardStyleFilled, binding.textStyleFilledTitle, binding.checkStyleFilled, selectedStyle == BATTERY_STYLE_FILLED_CIRCLE)
+    }
+
+    // Static full-charge renderings of each ring geometry. Not live: they
+    // showcase the shape, while the Device Battery card shows live state.
+    private fun setupRingPreviewIcons() {
+        val primary = MaterialColors.getColor(binding.root, android.R.attr.colorPrimary)
+        val outline = MaterialColors.getColor(binding.root, com.google.android.material.R.attr.colorOutlineVariant)
+        fun make(style: Int): BatteryDrawable {
+            val d: BatteryDrawable = when (style) {
+                BATTERY_STYLE_FILLED_CIRCLE -> CircleFilledBattery(this, primary)
+                else -> CircleBattery(this, primary).apply {
+                    setMeterStyle(if (style == BATTERY_STYLE_DOTTED_CIRCLE) BATTERY_STYLE_DOTTED_CIRCLE else BATTERY_STYLE_CIRCLE)
+                }
+            }
+            d.setColors(primary, outline, primary)
+            d.setBatteryLevel(100)
+            d.setChargingEnabled(false)
+            return d
+        }
+        binding.iconStyleRing.setImageDrawable(make(BATTERY_STYLE_CIRCLE))
+        binding.iconStyleDotted.setImageDrawable(make(BATTERY_STYLE_DOTTED_CIRCLE))
+        binding.iconStyleFilled.setImageDrawable(make(BATTERY_STYLE_FILLED_CIRCLE))
     }
 
     private fun setupOrderSelector() {
@@ -552,29 +569,36 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private var restartSpin: IndeterminateDrawable<CircularProgressIndicatorSpec>? = null
     private var restartIconFade: ValueAnimator? = null
 
     // Expressive loading button: gentle press, then the restart glyph fades
-    // out and an indeterminate spinner fades in at the same icon slot while
-    // the label reads "Restarting…". Restore plays the same fade in reverse
-    // plus a small settle pop so completion reads intuitively. The spinner
-    // honors the system animator duration scale for reduced motion.
+    // out while an indeterminate spinner fades in over the button and the
+    // label reads "Restarting…". Restore reverses the fades plus a small
+    // settle pop so completion reads intuitively.
     private fun playRestartAnimation(v: View) {
         val btn = binding.btnRestartSystemUI
-        restartSpin?.stop()
-        restartSpin = null
+        val spin = binding.restartSpinner
         restartIconFade?.cancel()
+        spin.animate().cancel()
+        spin.visibility = View.GONE
         btn.isEnabled = false
         val origText = btn.text.toString()
         v.animate().scaleX(0.97f).scaleY(0.97f).setDuration(120).setInterpolator(emphasizedAccelerate)
             .withEndAction {
                 v.animate().scaleX(1f).scaleY(1f).setDuration(450).setInterpolator(emphasized).start()
                 btn.text = "$origText…"
-                fadeSwapRestartIcon(btn, showSpinner = true)
+                fadeRestartIcon(btn, visible = false) {
+                    btn.icon = null
+                    spin.alpha = 0f
+                    spin.visibility = View.VISIBLE
+                    spin.animate().alpha(1f).setDuration(220).setInterpolator(emphasized).start()
+                }
                 v.postDelayed({
                     if (isFinishing || isDestroyed) return@postDelayed
-                    fadeSwapRestartIcon(btn, showSpinner = false)
+                    spin.animate().alpha(0f).setDuration(150).setInterpolator(emphasizedAccelerate)
+                        .withEndAction { spin.visibility = View.GONE }.start()
+                    btn.icon = getDrawable(R.drawable.ic_restart)
+                    fadeRestartIcon(btn, visible = true)
                     v.animate().scaleX(1.02f).scaleY(1.02f).setDuration(150).setInterpolator(emphasizedAccelerate)
                         .withEndAction {
                             v.animate().scaleX(1f).scaleY(1f).setDuration(350).setInterpolator(emphasized).start()
@@ -588,59 +612,27 @@ class MainActivity : AppCompatActivity() {
             }.start()
     }
 
-    private fun fadeSwapRestartIcon(btn: MaterialButton, showSpinner: Boolean) {
+    private fun fadeRestartIcon(btn: MaterialButton, visible: Boolean, onDone: (() -> Unit)? = null) {
         restartIconFade?.cancel()
-        val outgoing = btn.icon?.mutate()
-        val incoming = if (showSpinner) {
-            createRestartSpinner().also {
-                restartSpin = it
-                it.start()
-            }
-        } else {
-            restartSpin?.stop()
-            restartSpin = null
-            getDrawable(R.drawable.ic_restart) ?: return
-        }
-        if (outgoing == null) {
-            btn.icon = incoming
+        val icon = btn.icon?.mutate()
+        if (icon == null) {
+            onDone?.invoke()
             return
         }
-        restartIconFade = ValueAnimator.ofInt(255, 0).apply {
-            duration = 150
-            interpolator = emphasizedAccelerate
+        restartIconFade = ValueAnimator.ofInt(if (visible) 0 else 255, if (visible) 255 else 0).apply {
+            duration = if (visible) 220 else 150
+            interpolator = if (visible) emphasized else emphasizedAccelerate
             addUpdateListener { a ->
-                outgoing.alpha = a.animatedValue as Int
+                icon.alpha = a.animatedValue as Int
                 btn.invalidate()
             }
             addListener(object : android.animation.AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: android.animation.Animator) {
-                    incoming.alpha = 0
-                    btn.icon = incoming
-                    btn.invalidate()
-                    restartIconFade = ValueAnimator.ofInt(0, 255).apply {
-                        duration = 220
-                        interpolator = emphasized
-                        addUpdateListener { b ->
-                            incoming.alpha = b.animatedValue as Int
-                            btn.invalidate()
-                        }
-                        start()
-                    }
+                    onDone?.invoke()
                 }
             })
             start()
         }
-    }
-
-    private fun createRestartSpinner(): IndeterminateDrawable<CircularProgressIndicatorSpec> {
-        val density = resources.displayMetrics.density
-        val onPrimary = MaterialColors.getColor(binding.btnRestartSystemUI, com.google.android.material.R.attr.colorOnPrimary)
-        val spec = CircularProgressIndicatorSpec(this, null)
-        spec.indicatorSize = (24 * density).toInt()
-        spec.trackThickness = (3 * density).toInt()
-        spec.indicatorColors = intArrayOf(onPrimary)
-        spec.trackColor = Color.TRANSPARENT
-        return IndeterminateDrawable.createCircularDrawable(this, spec)
     }
 
     private fun itHaptic(v: View) {

@@ -851,17 +851,34 @@
         android:paddingTop="8dp"
         android:paddingBottom="16dp">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnRestartSystemUI"
-            style="@style/Widget.CircleBattery.Button.Primary"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="64dp"
-            android:text="@string/btn_restart_sysui"
-            android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
-            app:cornerRadius="32dp"
-            app:icon="@drawable/ic_restart"
-            app:iconGravity="textStart"
-            app:iconSize="24dp" />
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnRestartSystemUI"
+                style="@style/Widget.CircleBattery.Button.Primary"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:text="@string/btn_restart_sysui"
+                android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
+                app:cornerRadius="32dp"
+                app:icon="@drawable/ic_restart"
+                app:iconGravity="textStart"
+                app:iconSize="24dp" />
+
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:id="@+id/restartSpinner"
+                style="@style/Widget.Material3Expressive.CircularProgressIndicator"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="center"
+                android:indeterminate="true"
+                android:visibility="gone"
+                app:indicatorColor="?attr/colorOnPrimary"
+                app:trackColor="@android:color/transparent" />
+
+        </FrameLayout>
 
     </LinearLayout>
 

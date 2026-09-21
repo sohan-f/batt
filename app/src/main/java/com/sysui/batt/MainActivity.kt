@@ -13,6 +13,7 @@ import android.view.HapticFeedbackConstants
 import android.view.View
 import android.view.animation.PathInterpolator
 import android.widget.Toast
+import kotlin.math.roundToInt
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -86,6 +87,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         restartAnimator?.cancel()
+        sizeAnimator?.cancel()
         cardColorAnimators.values.forEach { it.cancel() }
         super.onDestroy()
     }
@@ -421,21 +423,57 @@ class MainActivity : AppCompatActivity() {
             if (fromUser) applyBatterySize(s)
             syncPresetChecked(s)
         }
+        binding.sliderBatterySize.addOnSliderTouchListener(object : com.google.android.material.slider.Slider.OnSliderTouchListener {
+            override fun onStartTrackingTouch(s: com.google.android.material.slider.Slider) {
+                sizeAnimator?.cancel()
+            }
+
+            override fun onStopTrackingTouch(s: com.google.android.material.slider.Slider) {
+                val snapped = s.value.roundToInt().coerceIn(MIN_BATTERY_SIZE_DP, MAX_BATTERY_SIZE_DP)
+                s.value = snapped.toFloat()
+                applyBatterySize(snapped)
+                syncPresetChecked(snapped)
+                itHaptic(s)
+            }
+        })
         binding.btnSizeMinus.setOnClickListener {
-            val c = binding.sliderBatterySize.value.toInt()
+            val c = binding.sliderBatterySize.value.roundToInt()
             if (c > MIN_BATTERY_SIZE_DP) {
-                binding.sliderBatterySize.value = (c - 1).toFloat()
-                applyBatterySize(c - 1)
+                animateSliderTo(c - 1)
                 itHaptic(it)
             }
         }
         binding.btnSizePlus.setOnClickListener {
-            val c = binding.sliderBatterySize.value.toInt()
+            val c = binding.sliderBatterySize.value.roundToInt()
             if (c < MAX_BATTERY_SIZE_DP) {
-                binding.sliderBatterySize.value = (c + 1).toFloat()
-                applyBatterySize(c + 1)
+                animateSliderTo(c + 1)
                 itHaptic(it)
             }
+        }
+    }
+
+    private var sizeAnimator: ValueAnimator? = null
+
+    private fun animateSliderTo(targetDp: Int) {
+        val target = targetDp.coerceIn(MIN_BATTERY_SIZE_DP, MAX_BATTERY_SIZE_DP).toFloat()
+        sizeAnimator?.cancel()
+        val slider = binding.sliderBatterySize
+        if (slider.value == target) {
+            applyBatterySize(targetDp)
+            syncPresetChecked(targetDp)
+            return
+        }
+        sizeAnimator = ValueAnimator.ofFloat(slider.value, target).apply {
+            duration = 350
+            interpolator = emphasized
+            addUpdateListener { a -> slider.value = a.animatedValue as Float }
+            addListener(object : android.animation.AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: android.animation.Animator) {
+                    applyBatterySize(targetDp)
+                    syncPresetChecked(targetDp)
+                }
+            })
+            start()
         }
     }
 
@@ -455,8 +493,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setPresetSize(sizeDp: Int) {
-        binding.sliderBatterySize.value = sizeDp.toFloat()
-        applyBatterySize(sizeDp)
+        animateSliderTo(sizeDp)
     }
 
     private fun applyBatterySize(sizeDp: Int) {

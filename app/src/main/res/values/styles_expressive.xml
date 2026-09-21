@@ -30,9 +30,6 @@
     </style>
     <style name="Widget.CircleBattery.Slider.Small" parent="Widget.Material3Expressive.Slider.Medium">
         <item name="labelBehavior">withinBounds</item>
-        <item name="trackIconActiveStart">@drawable/ic_slider_size_track</item>
-        <item name="trackIconActiveColor">?attr/colorOnPrimary</item>
-        <item name="trackIconSize">16dp</item>
     </style>
     <style name="Text.CircleBattery.SectionTitle" parent="TextAppearance.Material3.TitleMedium">
         <item name="android:textStyle">bold</item>

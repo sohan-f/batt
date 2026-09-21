@@ -111,7 +111,7 @@ open class CircleFilledBattery(private val mContext: Context, frameColor: Int) :
 
         paint.setShader(null)
         if (charging && batteryLevel < 100) {
-            paint.color = chargingColor
+            paint.color = mChargingColor
             return
         } else if (powerSaveEnabled) {
             paint.color = mPowerSaveColor

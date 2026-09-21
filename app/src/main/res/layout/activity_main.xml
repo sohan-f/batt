@@ -744,7 +744,7 @@
                         style="@style/Widget.CircleBattery.Slider.Small"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
+                        android:layout_marginTop="8dp"
                         android:contentDescription="@string/footprint_slider_desc"
                         android:value="20.0"
                         android:valueFrom="12.0"

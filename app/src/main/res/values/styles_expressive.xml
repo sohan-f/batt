@@ -29,7 +29,7 @@
         <item name="cardElevation">1dp</item>
     </style>
     <style name="Widget.CircleBattery.Slider.Small" parent="Widget.Material3Expressive.Slider.Medium">
-        <item name="labelBehavior">withinBounds</item>
+        <item name="labelBehavior">floating</item>
     </style>
     <style name="Text.CircleBattery.SectionTitle" parent="TextAppearance.Material3.TitleMedium">
         <item name="android:textStyle">bold</item>

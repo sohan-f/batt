@@ -211,9 +211,12 @@
                         android:orientation="vertical"
                         android:paddingVertical="14dp">
 
+                        <!-- NB: the charging pulse scales the glow to ~1.25x (120dp),
+                             so clipping must stay off or the halo gets cut. -->
                         <FrameLayout
                             android:layout_width="96dp"
-                            android:layout_height="96dp">
+                            android:layout_height="96dp"
+                            android:clipChildren="false">
 
                             <!-- Ambient glow aura -->
                             <View

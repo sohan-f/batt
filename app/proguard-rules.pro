@@ -83,3 +83,7 @@
 -keep class com.sysui.batt.BattApp { *; }
 -keep class com.sysui.batt.MainActivity { *; }
 -keep class com.sysui.batt.data.provider.** { *; }
+
+# R8 full-mode refs javax.lang.model via error-prone annotations; Android
+# runtime never needs it.
+-dontwarn javax.lang.model.**

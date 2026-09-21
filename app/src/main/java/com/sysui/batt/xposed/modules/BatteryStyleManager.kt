@@ -211,8 +211,8 @@ class BatteryStyleManager(context: Context) : ModPack(context) {
             mHideBattery = getBoolean(CUSTOM_BATTERY_HIDE_BATTERY, false)
             mBatteryLayoutReverse = getBoolean(CUSTOM_BATTERY_LAYOUT_REVERSE, false)
             mBatteryCustomDimension = getBoolean(CUSTOM_BATTERY_DIMENSION, false)
-            mBatteryScaleWidth = getSliderInt(CUSTOM_BATTERY_WIDTH, 20)
-            mBatteryScaleHeight = getSliderInt(CUSTOM_BATTERY_HEIGHT, 20)
+            mBatteryScaleWidth = getSliderInt(CUSTOM_BATTERY_WIDTH, 16)
+            mBatteryScaleHeight = getSliderInt(CUSTOM_BATTERY_HEIGHT, 16)
             mScaledPerimeterAlpha = getBoolean(CUSTOM_BATTERY_PERIMETER_ALPHA, false)
             mScaledFillAlpha = getBoolean(CUSTOM_BATTERY_FILL_ALPHA, false)
             mRainbowFillColor = getBoolean(CUSTOM_BATTERY_RAINBOW_FILL_COLOR, false)
@@ -1199,8 +1199,8 @@ class BatteryStyleManager(context: Context) : ModPack(context) {
         private var mHideBattery = false
         private var mBatteryRotation = 0
         private var customBatteryEnabled = true
-        private var mBatteryScaleWidth = 20
-        private var mBatteryScaleHeight = 20
+        private var mBatteryScaleWidth = 16
+        private var mBatteryScaleHeight = 16
         private var mBatteryCustomDimension = false
         private var mBatteryMarginLeft = 0
         private var mBatteryMarginTop = 0

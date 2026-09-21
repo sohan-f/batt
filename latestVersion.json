@@ -1,8 +1,8 @@
 {
-  "versionName": "7.3.0",
-  "versionCode": 25,
-  "apkUrl": "https://github.com/sohan-f/batt/releases/download/v7.3.0/CircleBattery-7.3.0-release.apk",
+  "versionName": "16",
+  "versionCode": 16,
+  "apkUrl": "https://github.com/sohan-f/batt/releases/download/v16/CircleBattery-16-release.apk",
   "changelog": [
-    "### Circle Battery v7.3.0 (fork of Iconify v7.3.0)\nStripped-down build focused on the Circle Battery tweak only. See https://github.com/sohan-f/batt for source."
+    "Circle Battery v16 — first release: circle gauge with Continuous, Dotted and Filled styles, percent-first layout option, adjustable footprint, and live device battery readout."
   ]
 }

@@ -16,8 +16,8 @@ android {
         applicationId = "com.sysui.batt"
         minSdk = 31
         targetSdk = 35
-        versionCode = 25
-        versionName = "7.3.0"
+        versionCode = 16
+        versionName = "16"
         multiDexEnabled = true
         buildConfigField("int", "MIN_SDK_VERSION", "$minSdk")
     }

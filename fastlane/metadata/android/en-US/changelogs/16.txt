@@ -1,8 +1,8 @@
-Iconify v6.6.0 has arrived! It has the following new changes:
+Circle Battery v16 — first release.
 
-Feature Changes:
-• Fully compatible with Android 14 November stable release
-• Improve application UI and UX
-• and many more!
-
-Full changelog at https://github.com/Mahmud0808/Iconify/releases/tag/v6.6.0
+• Circle battery gauge for SystemUI with Continuous, Dotted, and Filled ring styles
+• Percent-first or icon-first status bar layout
+• Adjustable circle footprint (12–32 dp) with presets
+• Live device battery readout: level, charging, source, temperature, voltage, health
+• Material 3 Expressive UI with dynamic color
+• LSPosed modern API (102), SystemUI scope

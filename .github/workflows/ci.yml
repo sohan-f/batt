@@ -42,6 +42,11 @@ jobs:
       - name: Run Build
         run: ./gradlew assembleDebug -PsplitApks -PtargetAbi=arm64-v8a
 
+      - name: Verify APK Signature (must stay stable across runs)
+        run: |
+          APKSIGNER=$(echo "$ANDROID_HOME"/build-tools/*/apksigner | tr ' ' '\n' | sort -V | tail -n1)
+          "$APKSIGNER" verify --print-certs app/build/outputs/apk/debug/*.apk
+
       - name: Upload Debug APK
         uses: actions/upload-artifact@v6
         with:

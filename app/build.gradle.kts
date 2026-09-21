@@ -40,12 +40,31 @@ android {
     } catch (_: Exception) {
     }
 
+    // Stable debug key shared by local and CI builds so consecutive
+    // debug APKs keep the same signature (ephemeral runner keys
+    // previously forced an uninstall on every update).
+    var debugSigning = signingConfigs.getByName("debug")
+
+    try {
+        val stableDebugKeystore = rootProject.file("app/debug.keystore")
+        check(stableDebugKeystore.exists())
+
+        debugSigning = signingConfigs.create("stableDebug") {
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+            storeFile = stableDebugKeystore
+            storePassword = "android"
+        }
+    } catch (_: Exception) {
+    }
+
     buildTypes {
         debug {
             isMinifyEnabled = false
             isShrinkResources = false
             isCrunchPngs = false
             resValue("string", "derived_app_name", "Circle Battery")
+            signingConfig = debugSigning
         }
 
         release {

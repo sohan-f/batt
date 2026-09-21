@@ -28,7 +28,7 @@ object Const {
     const val PL_ENHANCED_PACKAGE = "com.drdisagree.pixellauncherenhanced"
 
     // Github repo
-    const val GITHUB_REPO = "https://github.com/Mahmud0808/Iconify"
+    const val GITHUB_REPO = "https://github.com/sohan-f/batt"
 
     // Telegram group
     const val TELEGRAM_GROUP = "https://t.me/IconifyDiscussion"
@@ -38,10 +38,10 @@ object Const {
 
     // Parse new update
     const val LATEST_VERSION_URL =
-        "https://raw.githubusercontent.com/Mahmud0808/Iconify/stable/latestVersion.json"
+        "https://raw.githubusercontent.com/sohan-f/batt/main/latestVersion.json"
 
     // Parse changelogs
-    const val CHANGELOG_URL = "https://api.github.com/repos/Mahmud0808/Iconify/releases/tags/v"
+    const val CHANGELOG_URL = "https://api.github.com/repos/sohan-f/batt/releases/tags/v"
 
     // ColorBlender URL
     const val COLORBLENDR_URL = "https://github.com/Mahmud0808/ColorBlendr"

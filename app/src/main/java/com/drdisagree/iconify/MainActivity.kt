@@ -2,6 +2,7 @@ package com.drdisagree.iconify
 
 import android.graphics.Color
 import android.os.Bundle
+import android.text.method.LinkMovementMethod
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -34,6 +35,7 @@ class MainActivity : AppCompatActivity() {
         setupBatteryPreview()
         setupOptions()
         setupActions()
+        setupAbout()
     }
 
     private fun setupEdgeToEdge() {
@@ -125,5 +127,9 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, R.string.restart_sysui_no_root, Toast.LENGTH_LONG).show()
             }
         }
+    }
+
+    private fun setupAbout() {
+        binding.textAboutDesc.movementMethod = LinkMovementMethod.getInstance()
     }
 }

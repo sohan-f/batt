@@ -82,4 +82,18 @@ Release signing falls back to debug keys unless `keystore.properties` is present
 
 ## License
 
-GPL-3.0, see `LICENSE`. Derived from [Iconify](https://github.com/Mahmud0808/Iconify).
+GPL-3.0-only, see `LICENSE`.
+
+Circle Battery is a modified version of [Iconify](https://github.com/Mahmud0808/Iconify)
+by Mahmudul Hasan (DrDisagree / Mahmud0808).
+
+- Modified by sohan-f in 2026: stripped to the Circle Battery tweak only,
+  rebranded app name/motto, replaced `MainActivity`, removed unused
+  activities/fragments/adapters/services, added CI/release workflows.
+- The entire work is conveyed under GPL-3.0, same as the Program.
+- Corresponding Source: this repository (`https://github.com/sohan-f/batt`).
+
+Upstream credits (preserved from Iconify): Android Open Source Project,
+Substratum overlay tricks, [AOSPMods](https://github.com/siavash79/AOSPMods),
+icons8.com / iconsax.io artwork, and all
+[contributors](docs/contributors.md) and [translators](docs/translators.md).

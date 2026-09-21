@@ -1453,4 +1453,8 @@
     <string name="device_rotation_required_title">Device Rotation Theme</string>
     <string name="device_rotation_required_desc">Switch rotation of your device for this change to take effect.</string>
 
+    <!-- About / Legal -->
+    <string name="about_title">About</string>
+    <string name="about_desc">Circle Battery is a modified version of Iconify by Mahmudul Hasan (Mahmud0808). Source: https://github.com/sohan-f/batt — Fork: https://github.com/Mahmud0808/Iconify. This program is free software under GPL-3.0-only, WITHOUT ANY WARRANTY. See LICENSE.</string>
+
 </resources>

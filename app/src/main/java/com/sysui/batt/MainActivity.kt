@@ -92,6 +92,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         sizeAnimator?.cancel()
+        restartIconFade?.cancel()
         restartSpin?.stop()
         cardColorAnimators.values.forEach { it.cancel() }
         super.onDestroy()
@@ -539,67 +540,94 @@ class MainActivity : AppCompatActivity() {
     }
 
     private var restartSpin: IndeterminateDrawable<CircularProgressIndicatorSpec>? = null
+    private var restartIconFade: ValueAnimator? = null
 
-    // Expressive loading button: gentle press, then the restart glyph
-    // crossfades into an indeterminate spinner in the icon slot while the
-    // label reads "Restarting…". The spinner honors the system animator
-    // duration scale, so reduced-motion users get a calm static arc.
+    // Expressive loading button: gentle press, then the restart glyph fades
+    // out and an indeterminate spinner fades in at the same icon slot while
+    // the label reads "Restarting…". Restore plays the same fade in reverse
+    // plus a small settle pop so completion reads intuitively. The spinner
+    // honors the system animator duration scale for reduced motion.
     private fun playRestartAnimation(v: View) {
         val btn = binding.btnRestartSystemUI
         restartSpin?.stop()
         restartSpin = null
+        restartIconFade?.cancel()
         btn.isEnabled = false
         val origText = btn.text.toString()
         v.animate().scaleX(0.97f).scaleY(0.97f).setDuration(120).setInterpolator(emphasizedAccelerate)
             .withEndAction {
                 v.animate().scaleX(1f).scaleY(1f).setDuration(450).setInterpolator(emphasized).start()
-                crossfadeRestartIconToSpinner(btn)
                 btn.text = "$origText…"
+                fadeSwapRestartIcon(btn, showSpinner = true)
                 v.postDelayed({
                     if (isFinishing || isDestroyed) return@postDelayed
-                    restartSpin?.stop()
-                    restartSpin = null
-                    btn.icon = getDrawable(R.drawable.ic_restart)
-                    btn.text = origText
-                    btn.isEnabled = true
+                    fadeSwapRestartIcon(btn, showSpinner = false)
+                    v.animate().scaleX(1.02f).scaleY(1.02f).setDuration(150).setInterpolator(emphasizedAccelerate)
+                        .withEndAction {
+                            v.animate().scaleX(1f).scaleY(1f).setDuration(350).setInterpolator(emphasized).start()
+                        }.start()
+                    v.postDelayed({
+                        if (isFinishing || isDestroyed) return@postDelayed
+                        btn.text = origText
+                        btn.isEnabled = true
+                    }, 300)
                 }, 1400)
             }.start()
     }
 
-    private fun crossfadeRestartIconToSpinner(btn: MaterialButton) {
-        val icon = btn.icon?.mutate()
-        if (icon == null) {
-            startRestartSpinner(btn)
+    private fun fadeSwapRestartIcon(btn: MaterialButton, showSpinner: Boolean) {
+        restartIconFade?.cancel()
+        val outgoing = btn.icon?.mutate()
+        val incoming = if (showSpinner) {
+            createRestartSpinner().also {
+                restartSpin = it
+                it.start()
+            }
+        } else {
+            restartSpin?.stop()
+            restartSpin = null
+            getDrawable(R.drawable.ic_restart) ?: return
+        }
+        if (outgoing == null) {
+            btn.icon = incoming
             return
         }
-        ValueAnimator.ofInt(255, 0).apply {
-            duration = 180
-            interpolator = emphasized
+        restartIconFade = ValueAnimator.ofInt(255, 0).apply {
+            duration = 150
+            interpolator = emphasizedAccelerate
             addUpdateListener { a ->
-                icon.alpha = a.animatedValue as Int
+                outgoing.alpha = a.animatedValue as Int
                 btn.invalidate()
             }
             addListener(object : android.animation.AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: android.animation.Animator) {
-                    startRestartSpinner(btn)
+                    incoming.alpha = 0
+                    btn.icon = incoming
+                    btn.invalidate()
+                    restartIconFade = ValueAnimator.ofInt(0, 255).apply {
+                        duration = 220
+                        interpolator = emphasized
+                        addUpdateListener { b ->
+                            incoming.alpha = b.animatedValue as Int
+                            btn.invalidate()
+                        }
+                        start()
+                    }
                 }
             })
             start()
         }
     }
 
-    private fun startRestartSpinner(btn: MaterialButton) {
+    private fun createRestartSpinner(): IndeterminateDrawable<CircularProgressIndicatorSpec> {
         val density = resources.displayMetrics.density
-        val onPrimary = MaterialColors.getColor(btn, com.google.android.material.R.attr.colorOnPrimary)
+        val onPrimary = MaterialColors.getColor(binding.btnRestartSystemUI, com.google.android.material.R.attr.colorOnPrimary)
         val spec = CircularProgressIndicatorSpec(this, null)
         spec.indicatorSize = (24 * density).toInt()
         spec.trackThickness = (3 * density).toInt()
         spec.indicatorColors = intArrayOf(onPrimary)
         spec.trackColor = Color.TRANSPARENT
-        val spin = IndeterminateDrawable.createCircularDrawable(this, spec)
-        restartSpin = spin
-        btn.icon = spin
-        spin.start()
+        return IndeterminateDrawable.createCircularDrawable(this, spec)
     }
 
     private fun itHaptic(v: View) {

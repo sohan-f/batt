@@ -549,8 +549,8 @@
 
                             <ImageView
                                 android:id="@+id/imageOrderPreviewIconFirst"
-                                android:layout_width="22dp"
-                                android:layout_height="22dp"
+                                android:layout_width="18dp"
+                                android:layout_height="18dp"
                                 android:layout_marginStart="6dp"
                                 android:contentDescription="@null"
                                 android:src="@drawable/ic_battery_circle" />
@@ -617,8 +617,8 @@
 
                             <ImageView
                                 android:id="@+id/imageOrderPreviewIconSecond"
-                                android:layout_width="22dp"
-                                android:layout_height="22dp"
+                                android:layout_width="18dp"
+                                android:layout_height="18dp"
                                 android:layout_marginEnd="6dp"
                                 android:contentDescription="@null"
                                 android:src="@drawable/ic_battery_circle" />
@@ -725,7 +725,7 @@
                                 android:id="@+id/textSizeValueDisplay"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="20 dp"
+                                android:text="16 dp"
                                 android:textAppearance="@style/TextAppearance.Material3.DisplaySmall"
                                 android:textColor="?attr/colorPrimary"
                                 android:textStyle="bold" />
@@ -764,7 +764,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:contentDescription="@string/footprint_slider_desc"
-                        android:value="20.0"
+                        android:value="16.0"
                         android:valueFrom="12.0"
                         android:valueTo="32.0" />
 

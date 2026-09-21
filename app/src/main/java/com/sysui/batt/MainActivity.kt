@@ -70,7 +70,7 @@ class MainActivity : AppCompatActivity() {
     private val settleSprings = mutableListOf<SpringAnimation>()
 
     companion object {
-        private const val DEFAULT_BATTERY_SIZE_DP = 20
+        private const val DEFAULT_BATTERY_SIZE_DP = 16
         private const val MIN_BATTERY_SIZE_DP = 12
         private const val MAX_BATTERY_SIZE_DP = 32
     }

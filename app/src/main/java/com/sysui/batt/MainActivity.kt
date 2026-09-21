@@ -20,6 +20,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.updatePadding
+import androidx.dynamicanimation.animation.FloatPropertyCompat
 import androidx.dynamicanimation.animation.SpringAnimation
 import com.sysui.batt.data.common.Preferences.BATTERY_STYLE_CIRCLE
 import com.sysui.batt.data.common.Preferences.BATTERY_STYLE_DOTTED_CIRCLE
@@ -627,20 +628,24 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun springSettlePop(v: View) {
-        val spring = MotionUtils.resolveThemeSpringForce(
-            this,
-            com.google.android.material.R.attr.motionSpringDefaultSpatial,
-            0,
-        )
         settleSprings.forEach { it.cancel() }
         settleSprings.clear()
         v.scaleX = 1.02f
         v.scaleY = 1.02f
-        settleSprings += SpringAnimation(v, SpringAnimation.SCALE_X, 1f).apply {
-            setSpring(spring)
-            start()
-        }
-        settleSprings += SpringAnimation(v, SpringAnimation.SCALE_Y, 1f).apply {
+        settleSprings += newSettleSpring(v, SpringAnimation.SCALE_X)
+        settleSprings += newSettleSpring(v, SpringAnimation.SCALE_Y)
+    }
+
+    private fun newSettleSpring(v: View, property: FloatPropertyCompat<View>): SpringAnimation {
+        // NB: setSpring() replaces the animation's spring wholesale, so the
+        // theme spring's home position must be pinned to the rest value here.
+        // Sharing one SpringForce across animations is also off the table.
+        val spring = MotionUtils.resolveThemeSpringForce(
+            this,
+            com.google.android.material.R.attr.motionSpringDefaultSpatial,
+            0,
+        ).apply { finalPosition = 1f }
+        return SpringAnimation(v, property).apply {
             setSpring(spring)
             start()
         }

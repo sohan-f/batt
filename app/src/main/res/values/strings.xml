@@ -33,6 +33,8 @@
     <string name="device_battery_temp">Temp</string>
     <string name="device_battery_voltage">Voltage</string>
     <string name="device_battery_health">Health</string>
+    <string name="device_temp_format">%1$.1f°C</string>
+    <string name="device_voltage_format">%1$.2fV</string>
     <string name="device_status_charging">Charging</string>
     <string name="device_status_discharging">Discharging</string>
     <string name="device_status_full">Full</string>

@@ -170,8 +170,8 @@ class MainActivity : AppCompatActivity() {
         binding.textDeviceLevel.text = "$pct%"
         binding.textDeviceStatus.text = deviceStatusText(status, charging)
         binding.textDeviceSource.text = deviceSourceText(plugged)
-        binding.textDeviceTemp.text = if (tempTenths != Int.MIN_VALUE) "%.1f°C".format(tempTenths / 10f) else "--"
-        binding.textDeviceVoltage.text = if (voltageMv != Int.MIN_VALUE) "%.2fV".format(voltageMv / 1000f) else "--"
+        binding.textDeviceTemp.text = if (tempTenths != Int.MIN_VALUE) getString(R.string.device_temp_format, tempTenths / 10f) else "--"
+        binding.textDeviceVoltage.text = if (voltageMv != Int.MIN_VALUE) getString(R.string.device_voltage_format, voltageMv / 1000f) else "--"
         binding.textDeviceHealth.text = deviceHealthText(health)
         binding.imageDeviceStatusIcon.setImageResource(
             if (charging) R.drawable.ic_bolt else R.drawable.ic_battery_circle,

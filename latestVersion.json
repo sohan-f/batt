@@ -1,0 +1,8 @@
+{
+  "versionName": "7.3.0",
+  "versionCode": 25,
+  "apkUrl": "https://github.com/Mahmud0808/Iconify/releases/download/v7.3.0/Iconify.v7.3.0.Standard.apk",
+  "changelog": [
+    "### Iconify v7.3.0 has arrived! It has the following new changes:\n## Feature Changes:\n- __New Additions:__\n    - Added new lockscreen clock styles.\n    - Added a few missing icons in icon packs.\n- __General Improvements:__\n    - Status bar logo customization improvements.\n    - Heads-Up & media blur effects, and OneUI 7 battery style.\n    - Multiple bug fixes, stability improvements, and translation updates.\n## App Changes:\n- Bump AGP and dependencies\n- Updated translations (thanks to all the contributors on [Crowdin](https://crowdin.com/project/iconify))\n- And many more improvements...\nAlso included in this version are bug fixes and other improvements."
+  ]
+}

@@ -78,7 +78,11 @@ app/src/main/
 ./gradlew assembleRelease
 ```
 
-Release signing falls back to debug keys unless `keystore.properties` is present (`app/build.gradle.kts:29-45`).
+Release signing uses `keystore.properties` if present (`app/build.gradle.kts:29-45`),
+otherwise it falls back to debug keys. CI signs with the `KEYSTORE_BASE64`,
+`KEY_ALIAS`, `KEY_PASSWORD`, `STORE_PASSWORD` repo secrets. Back up
+`keystore.jks` plus its passwords — losing them means published apps can
+never be updated in place.
 
 ## License
 

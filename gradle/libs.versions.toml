@@ -41,7 +41,7 @@ roomVersion = "2.7.2"
 slf4jApi = "2.0.17"
 viewpager2 = "1.1.0"
 workRuntime = "2.10.2"
-xposedbridge = "main-SNAPSHOT"
+libxposed = "102.0.0"
 zip4j = "2.11.5"
 
 [libraries]
@@ -90,7 +90,7 @@ su-core = { module = "com.github.topjohnwu.libsu:core", version.ref = "libsuVers
 su-nio = { module = "com.github.topjohnwu.libsu:nio", version.ref = "libsuVersion" }
 su-service = { module = "com.github.topjohnwu.libsu:service", version.ref = "libsuVersion" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4jApi" }
-xposedbridge = { module = "com.github.Mahmud0808:XposedBridge", version.ref = "xposedbridge" }
+libxposed-api = { module = "io.github.libxposed:api", version.ref = "libxposed" }
 zip4j = { module = "net.lingala.zip4j:zip4j", version.ref = "zip4j" }
 
 [plugins]

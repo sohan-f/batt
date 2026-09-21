@@ -25,9 +25,8 @@
 -keep class com.drdisagree.iconify.ui.activities.**
 -keep class com.drdisagree.iconify.ui.fragments.**
 
-# Xposed
--keep class de.robv.android.xposed.**
--keep class com.drdisagree.iconify.xposed.InitHook
+# LSPosed API 102 entry (loaded via META-INF/xposed/java_init.list)
+-keep class com.drdisagree.iconify.xposed.ModernInitHook
 -keepnames class com.drdisagree.iconify.xposed.**
 -keepnames class com.drdisagree.iconify.xposed.utils.XPrefs
 -keep class com.drdisagree.iconify.xposed.** {
@@ -78,7 +77,7 @@
 -keep class **.I*$Stub { *; }
 -keep class **.I*$Stub$Proxy { *; }
 
-# Circle Battery: LSPosed loads InitHook by name from assets/xposed_init,
+# Circle Battery: LSPosed loads ModernInitHook by name from META-INF/xposed/java_init.list,
 # invisible to R8. Keep the whole xposed package plus app entry points.
 -keep class com.drdisagree.iconify.xposed.** { *; }
 -keep class com.drdisagree.iconify.Iconify { *; }

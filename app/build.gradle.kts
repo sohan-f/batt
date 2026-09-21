@@ -166,11 +166,8 @@ dependencies {
     // Data Binding
     implementation(libs.library)
 
-    // Xposed API
-    // F-Droid disallow `api.xposed.info` since it's not a "Trusted Maven Repository".
-    // So we create a mirror GitHub repository and obtain the library from `jitpack.io` instead.
-    // Equivalent to `implementation 'de.robv.android.xposed:api:82'`.
-    compileOnly(libs.xposedbridge)
+    // Xposed API (LSPosed libxposed API 102 only, no legacy XposedBridge)
+    compileOnly(libs.libxposed.api)
 
     // The core module that provides APIs to a shell
     implementation(libs.su.core)

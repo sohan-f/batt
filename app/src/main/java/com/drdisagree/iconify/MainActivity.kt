@@ -134,7 +134,7 @@ class MainActivity : AppCompatActivity() {
                 .setTitle(R.string.systemui_module_status)
                 .setMessage(
                     if (isActive)
-                        "Circle Battery LSPosed hook is active and modifying SystemUI."
+                        "Circle Battery LSPosed hook (API 102) is active and modifying SystemUI."
                     else
                         getString(R.string.status_module_desc)
                 )

@@ -3,7 +3,7 @@ package com.drdisagree.iconify.xposed.modules
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.ColorStateList
-import android.content.res.XResources.DimensionReplacement
+import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
@@ -88,8 +88,6 @@ import com.drdisagree.iconify.data.common.Preferences.CUSTOM_BATTERY_STYLE
 import com.drdisagree.iconify.data.common.Preferences.CUSTOM_BATTERY_SWAP_PERCENTAGE
 import com.drdisagree.iconify.data.common.Preferences.CUSTOM_BATTERY_WIDTH
 import com.drdisagree.iconify.data.common.Preferences.ICONIFY_CHARGING_ICON_TAG
-import com.drdisagree.iconify.xposed.HookRes.Companion.modRes
-import com.drdisagree.iconify.xposed.HookRes.Companion.resParams
 import com.drdisagree.iconify.xposed.ModPack
 import com.drdisagree.iconify.xposed.modules.batterystyles.BatteryDrawable
 import com.drdisagree.iconify.xposed.modules.batterystyles.CircleBattery
@@ -130,8 +128,11 @@ import com.drdisagree.iconify.xposed.modules.batterystyles.RLandscapeBatteryStyl
 import com.drdisagree.iconify.xposed.modules.batterystyles.RLandscapeBatteryStyleB
 import com.drdisagree.iconify.xposed.modules.extras.utils.SettingsLibUtils
 import com.drdisagree.iconify.xposed.modules.extras.utils.ViewHelper.toPx
+import com.drdisagree.iconify.xposed.modules.extras.utils.toolkit.HookParam
+import com.drdisagree.iconify.xposed.modules.extras.utils.toolkit.MethodHook
 import com.drdisagree.iconify.xposed.modules.extras.utils.toolkit.XposedHook.Companion.findClass
 import com.drdisagree.iconify.xposed.modules.extras.utils.toolkit.callMethod
+import com.drdisagree.iconify.xposed.modules.extras.utils.toolkit.getBooleanField
 import com.drdisagree.iconify.xposed.modules.extras.utils.toolkit.getExtraField
 import com.drdisagree.iconify.xposed.modules.extras.utils.toolkit.getExtraFieldSilently
 import com.drdisagree.iconify.xposed.modules.extras.utils.toolkit.getField
@@ -142,13 +143,8 @@ import com.drdisagree.iconify.xposed.modules.extras.utils.toolkit.hookMethodMatc
 import com.drdisagree.iconify.xposed.modules.extras.utils.toolkit.log
 import com.drdisagree.iconify.xposed.modules.extras.utils.toolkit.setExtraField
 import com.drdisagree.iconify.xposed.modules.extras.utils.toolkit.setField
+import com.drdisagree.iconify.xposed.modules.extras.utils.toolkit.setStaticIntField
 import com.drdisagree.iconify.xposed.utils.XPrefs.Xprefs
-import de.robv.android.xposed.XC_MethodHook
-import de.robv.android.xposed.XC_MethodHook.MethodHookParam
-import de.robv.android.xposed.XposedHelpers.getBooleanField
-import de.robv.android.xposed.XposedHelpers.setStaticIntField
-import de.robv.android.xposed.callbacks.XC_InitPackageResources.InitPackageResourcesParam
-import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
 import kotlin.math.roundToInt
 
 @Suppress("unused")
@@ -158,7 +154,7 @@ class BatteryStyleManager(context: Context) : ModPack(context) {
     private var defaultLandscapeBatteryEnabled = false
     private var frameColor = Color.WHITE
     private var batteryController: Any? = null
-    private var batteryMeterViewParam: MethodHookParam? = null
+    private var batteryMeterViewParam: HookParam? = null
     private var mBatteryLayoutReverse = false
     private var mScaledPerimeterAlpha = false
     private var mScaledFillAlpha = false
@@ -322,7 +318,7 @@ class BatteryStyleManager(context: Context) : ModPack(context) {
         }
     }
 
-    override fun handleLoadPackage(loadPackageParam: LoadPackageParam) {
+    override fun handleLoadPackage(packageName: String, classLoader: ClassLoader) {
         val batteryControllerImplClass =
             findClass("$SYSTEMUI_PACKAGE.statusbar.policy.BatteryControllerImpl")
         val batteryMeterViewClass = findClass(
@@ -353,13 +349,13 @@ class BatteryStyleManager(context: Context) : ModPack(context) {
                 }
             }
 
-        val batteryDataRefreshHook: XC_MethodHook = object : XC_MethodHook() {
-            override fun afterHookedMethod(param: MethodHookParam) {
+        val batteryDataRefreshHook: MethodHook = object : MethodHook() {
+            override fun afterHookedMethod(param: HookParam) {
                 if (!customBatteryEnabled) return
 
                 val mLevel = param.thisObject.getField("mLevel") as Int
                 val mCharging = param.thisObject.isBatteryCharging()
-                val mPowerSave = getBooleanField(param.thisObject, "mPowerSave")
+                val mPowerSave = param.thisObject.getBooleanField("mPowerSave")
 
                 refreshBatteryData(mLevel, mCharging, mPowerSave)
                 // refreshing twice to avoid a bug where the battery icon updates incorrectly
@@ -618,7 +614,7 @@ class BatteryStyleManager(context: Context) : ModPack(context) {
         }
     }
 
-    private fun updateBatteryResources(param: MethodHookParam) {
+    private fun updateBatteryResources(param: HookParam) {
         try {
             val header = param.thisObject.getField("header") as View
             val textColorPrimary = SettingsLibUtils.getColorAttrDefaultColor(
@@ -701,7 +697,7 @@ class BatteryStyleManager(context: Context) : ModPack(context) {
         }
     }
 
-    private fun Any.isBatteryCharging(): Boolean {
+    private fun Any?.isBatteryCharging(): Boolean {
         val mCharging = getFieldSilently("mPluggedIn") as? Boolean == true
                 || getFieldSilently("mCharging") as? Boolean == true
                 || getFieldSilently("mWirelessCharging") as? Boolean == true
@@ -713,7 +709,7 @@ class BatteryStyleManager(context: Context) : ModPack(context) {
         return mCharging && !mIsIncompatibleCharging
     }
 
-    private fun initBatteryIfNull(param: MethodHookParam, batteryIconView: ImageView?): ImageView {
+    private fun initBatteryIfNull(param: HookParam, batteryIconView: ImageView?): ImageView {
         var mBatteryIconView: ImageView? = batteryIconView
 
         if (mBatteryIconView == null) {
@@ -833,35 +829,70 @@ class BatteryStyleManager(context: Context) : ModPack(context) {
         return mBatteryDrawable
     }
 
+    private var dimensHooked = false
+
     private fun setDefaultBatteryDimens() {
-        val resParam: InitPackageResourcesParam = resParams[SYSTEMUI_PACKAGE] ?: return
+        if (dimensHooked) return
+        dimensHooked = true
 
-        if (defaultLandscapeBatteryEnabled) {
-            resParam.res.setReplacement(
-                SYSTEMUI_PACKAGE, "dimen", "status_bar_battery_icon_width", DimensionReplacement(
-                    mBatteryScaleWidth.toFloat(), TypedValue.COMPLEX_UNIT_DIP
-                )
+        try {
+            val res = mContext.resources
+            val widthId = res.getIdentifier(
+                "status_bar_battery_icon_width", "dimen", SYSTEMUI_PACKAGE
+            )
+            val heightId = res.getIdentifier(
+                "status_bar_battery_icon_height", "dimen", SYSTEMUI_PACKAGE
+            )
+            val paddingId = res.getIdentifier(
+                "signal_cluster_battery_padding", "dimen", SYSTEMUI_PACKAGE
+            )
+            if (widthId == 0 && heightId == 0 && paddingId == 0) return
+
+            fun dimenPx(dp: Float): Float = TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP, dp, res.displayMetrics
             )
 
-            resParam.res.setReplacement(
-                SYSTEMUI_PACKAGE, "dimen", "status_bar_battery_icon_height", DimensionReplacement(
-                    mBatteryScaleHeight.toFloat(), TypedValue.COMPLEX_UNIT_DIP
-                )
-            )
+            fun dimenPxInt(dp: Float): Int = dimenPx(dp).toInt()
 
-            resParam.res.setReplacement(
-                SYSTEMUI_PACKAGE,
-                "dimen",
-                "signal_cluster_battery_padding",
-                DimensionReplacement(4f, TypedValue.COMPLEX_UNIT_DIP)
-            )
-        } else if (customBatteryEnabled) {
-            resParam.res.setReplacement(
-                SYSTEMUI_PACKAGE,
-                "dimen",
-                "signal_cluster_battery_padding",
-                DimensionReplacement(3f, TypedValue.COMPLEX_UNIT_DIP)
-            )
+            Resources::class.java
+                .hookMethod("getDimension")
+                .suppressError()
+                .runBefore { param ->
+                    val id = param.args.getOrNull(0) as? Int ?: return@runBefore
+                    when (id) {
+                        widthId -> if (defaultLandscapeBatteryEnabled) {
+                            param.result = dimenPx(mBatteryScaleWidth.toFloat())
+                        }
+                        heightId -> if (defaultLandscapeBatteryEnabled) {
+                            param.result = dimenPx(mBatteryScaleHeight.toFloat())
+                        }
+                        paddingId -> when {
+                            defaultLandscapeBatteryEnabled -> param.result = dimenPx(4f)
+                            customBatteryEnabled -> param.result = dimenPx(3f)
+                        }
+                    }
+                }
+
+            Resources::class.java
+                .hookMethod("getDimensionPixelOffset", "getDimensionPixelSize")
+                .suppressError()
+                .runBefore { param ->
+                    val id = param.args.getOrNull(0) as? Int ?: return@runBefore
+                    when (id) {
+                        widthId -> if (defaultLandscapeBatteryEnabled) {
+                            param.result = dimenPxInt(mBatteryScaleWidth.toFloat())
+                        }
+                        heightId -> if (defaultLandscapeBatteryEnabled) {
+                            param.result = dimenPxInt(mBatteryScaleHeight.toFloat())
+                        }
+                        paddingId -> when {
+                            defaultLandscapeBatteryEnabled -> param.result = dimenPxInt(4f)
+                            customBatteryEnabled -> param.result = dimenPxInt(3f)
+                        }
+                    }
+                }
+        } catch (t: Throwable) {
+            log(this@BatteryStyleManager, t)
         }
     }
 
@@ -904,8 +935,7 @@ class BatteryStyleManager(context: Context) : ModPack(context) {
                             context.resources.displayMetrics
                         ).toInt()
 
-                        setStaticIntField(
-                            batteryMeterViewEx,
+                        batteryMeterViewEx.setStaticIntField(
                             "sTempMax",
                             context.resources.getInteger(
                                 context.resources.getIdentifier(
@@ -915,8 +945,7 @@ class BatteryStyleManager(context: Context) : ModPack(context) {
                                 )
                             )
                         )
-                        setStaticIntField(
-                            batteryMeterViewEx,
+                        batteryMeterViewEx.setStaticIntField(
                             "sVoltMax",
                             context.resources.getInteger(
                                 context.resources.getIdentifier(
@@ -996,11 +1025,12 @@ class BatteryStyleManager(context: Context) : ModPack(context) {
         }
     }
 
-    private fun updateSettings(param: MethodHookParam) {
-        updateCustomizeBatteryDrawable(param.thisObject)
-        updateChargingIconView(param.thisObject)
-        updateBatteryRotation(param.thisObject)
-        updateFlipper(param.thisObject)
+    private fun updateSettings(param: HookParam) {
+        val obj = param.thisObject ?: return
+        updateCustomizeBatteryDrawable(obj)
+        updateChargingIconView(obj)
+        updateBatteryRotation(obj)
+        updateFlipper(obj)
     }
 
     private fun updateFlipper(thisObject: Any) {

@@ -4,7 +4,7 @@
 
     <string name="status_module_active">Active</string>
     <string name="status_module_inactive">Not active</string>
-    <string name="status_module_desc">Enable in LSPosed, then restart SystemUI.</string>
+    <string name="status_module_desc">Enable in LSPosed (API 102), then restart SystemUI.</string>
     <string name="battery_style_circle_title">Circle Battery</string>
     <string name="swap_percentage_title">Percent First</string>
     <string name="swap_percentage_desc">Show percentage before battery icon</string>

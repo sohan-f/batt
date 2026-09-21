@@ -11,9 +11,8 @@ import com.drdisagree.iconify.data.common.Const.ACTION_HOOK_CHECK_REQUEST
 import com.drdisagree.iconify.data.common.Const.ACTION_HOOK_CHECK_RESULT
 import com.drdisagree.iconify.data.common.Const.SYSTEMUI_PACKAGE
 import com.drdisagree.iconify.xposed.ModPack
-import de.robv.android.xposed.XC_MethodReplacement
-import de.robv.android.xposed.XposedHelpers
-import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
+import com.drdisagree.iconify.xposed.modules.extras.utils.toolkit.XposedHook.Companion.findClass
+import com.drdisagree.iconify.xposed.modules.extras.utils.toolkit.hookMethod
 
 class HookCheck(context: Context) : ModPack(context) {
 
@@ -34,20 +33,23 @@ class HookCheck(context: Context) : ModPack(context) {
     }
 
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
-    override fun handleLoadPackage(loadPackageParam: LoadPackageParam) {
-        if (loadPackageParam.packageName == BuildConfig.APPLICATION_ID) {
+    override fun handleLoadPackage(packageName: String, classLoader: ClassLoader) {
+        if (packageName == BuildConfig.APPLICATION_ID) {
             try {
-                XposedHelpers.findAndHookMethod(
+                findClass(
                     HookCheck::class.java.name,
-                    loadPackageParam.classLoader,
-                    "isModuleActive",
-                    XC_MethodReplacement.returnConstant(true)
-                )
+                    classLoader = classLoader,
+                    suppressError = true
+                )?.hookMethod("isModuleActive")
+                    ?.suppressError()
+                    ?.replace { param ->
+                        param.result = true
+                    }
             } catch (_: Throwable) {
             }
         }
 
-        if (!broadcastRegistered && loadPackageParam.packageName == SYSTEMUI_PACKAGE) {
+        if (!broadcastRegistered && packageName == SYSTEMUI_PACKAGE) {
             broadcastRegistered = true
 
             intentFilter.addAction(ACTION_HOOK_CHECK_REQUEST)
@@ -55,7 +57,7 @@ class HookCheck(context: Context) : ModPack(context) {
             val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
                 override fun onReceive(context: Context, intent: Intent) {
                     if (intent.action == ACTION_HOOK_CHECK_REQUEST &&
-                        loadPackageParam.packageName == SYSTEMUI_PACKAGE
+                        packageName == SYSTEMUI_PACKAGE
                     ) {
                         returnBroadcastResult()
                     }

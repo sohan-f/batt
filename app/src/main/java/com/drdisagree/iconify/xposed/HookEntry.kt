@@ -7,12 +7,12 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
 import android.os.RemoteException
-import android.os.UserManager
 import com.drdisagree.iconify.BuildConfig
 import com.drdisagree.iconify.IRootProviderProxy
 import com.drdisagree.iconify.R
 import com.drdisagree.iconify.data.common.Const.FRAMEWORK_PACKAGE
 import com.drdisagree.iconify.xposed.modules.extras.utils.toolkit.ResourceHookManager
+import com.drdisagree.iconify.xposed.modules.extras.utils.toolkit.XposedHook
 import com.drdisagree.iconify.xposed.modules.extras.utils.toolkit.XposedHook.Companion.findClass
 import com.drdisagree.iconify.xposed.modules.extras.utils.toolkit.hookMethod
 import com.drdisagree.iconify.xposed.modules.extras.utils.toolkit.log
@@ -21,7 +21,7 @@ import com.drdisagree.iconify.xposed.utils.SystemUtils
 import com.drdisagree.iconify.xposed.utils.XPrefs
 import com.drdisagree.iconify.xposed.utils.XPrefs.Xprefs
 import com.drdisagree.iconify.xposed.utils.XPrefs.XprefsIsInitialized
-import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
+import io.github.libxposed.api.XposedModule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -36,19 +36,35 @@ import java.util.concurrent.CompletableFuture
 class HookEntry : ServiceConnection {
 
     private lateinit var mContext: Context
+    private var hostPackage: String = ""
+    private var hostClassLoader: ClassLoader? = null
 
     init {
         instance = this
     }
 
-    fun handleLoadPackage(loadPackageParam: LoadPackageParam) {
+    fun handleLoadPackage(module: XposedModule, packageName: String, classLoader: ClassLoader) {
+        synchronized(handledPackages) {
+            if (!handledPackages.add(packageName)) return
+        }
+        XposedHook.init(module, packageName, classLoader)
+        hostPackage = packageName
+        hostClassLoader = classLoader
+
         isChildProcess = try {
-            loadPackageParam.processName.contains(":")
+            val processName = try {
+                Class.forName("android.app.ActivityThread")
+                    .getMethod("currentProcessName")
+                    .invoke(null) as? String
+            } catch (_: Throwable) {
+                null
+            }
+            processName?.contains(":") == true
         } catch (ignored: Throwable) {
             false
         }
 
-        when (loadPackageParam.packageName) {
+        when (packageName) {
             FRAMEWORK_PACKAGE -> {
                 val phoneWindowManagerClass =
                     findClass("com.android.server.policy.PhoneWindowManager")
@@ -68,7 +84,7 @@ class HookEntry : ServiceConnection {
                                 XPrefs.init(mContext)
                                 ResourceHookManager.init(mContext)
 
-                                CompletableFuture.runAsync { waitForXprefsLoad(loadPackageParam) }
+                                CompletableFuture.runAsync { waitForXprefsLoad(packageName) }
                             }
                         } catch (throwable: Throwable) {
                             log(this@HookEntry, throwable)
@@ -98,7 +114,7 @@ class HookEntry : ServiceConnection {
                                     XPrefs.init(mContext)
                                     ResourceHookManager.init(mContext)
 
-                                    CompletableFuture.runAsync { waitForXprefsLoad(loadPackageParam) }
+                                    CompletableFuture.runAsync { waitForXprefsLoad(packageName) }
                                 }
                             } catch (throwable: Throwable) {
                                 log(this@HookEntry, throwable)
@@ -109,27 +125,28 @@ class HookEntry : ServiceConnection {
         }
     }
 
-    private fun onXPrefsReady(loadPackageParam: LoadPackageParam) {
-        if (!isChildProcess && BootLoopProtector.isBootLooped(loadPackageParam.packageName)) {
-            log("Possible crash in ${loadPackageParam.packageName} ; Iconify will not load for now...")
+    private fun onXPrefsReady(packageName: String) {
+        if (!isChildProcess && BootLoopProtector.isBootLooped(packageName)) {
+            log("Possible crash in $packageName ; Iconify will not load for now...")
             return
         }
 
         SystemUtils(mContext)
 
-        loadModPacks(loadPackageParam)
+        loadModPacks(packageName)
     }
 
-    private fun loadModPacks(loadPackageParam: LoadPackageParam) {
+    private fun loadModPacks(packageName: String) {
+        val loader = hostClassLoader
         if (HookRes.modRes
                 .getStringArray(R.array.root_requirement)
                 .toList()
-                .contains(loadPackageParam.packageName)
+                .contains(packageName)
         ) {
             forceConnectRootService()
         }
 
-        for (mod in EntryList.getEntries(loadPackageParam.packageName)) {
+        for (mod in EntryList.getEntries(packageName)) {
             try {
                 val modInstance = mod.getConstructor(Context::class.java).newInstance(mContext)
 
@@ -142,7 +159,17 @@ class HookEntry : ServiceConnection {
                     }
                 }
 
-                modInstance.handleLoadPackage(loadPackageParam)
+                hostClassLoader?.let {
+                    try {
+                        XposedHook.init(
+                            XposedHook.module,
+                            packageName,
+                            it
+                        )
+                    } catch (_: Throwable) {
+                    }
+                }
+                modInstance.handleLoadPackage(packageName, loader ?: mContext.classLoader)
                 runningMods.add(modInstance)
             } catch (invocationTargetException: InvocationTargetException) {
                 log(this@HookEntry, "Start Error Dump - Occurred in ${mod.name}")
@@ -154,7 +181,7 @@ class HookEntry : ServiceConnection {
         }
     }
 
-    private fun waitForXprefsLoad(loadPackageParam: LoadPackageParam) {
+    private fun waitForXprefsLoad(packageName: String) {
         while (true) {
             try {
                 Xprefs.getBoolean("LoadTestBooleanValue", false)
@@ -165,14 +192,18 @@ class HookEntry : ServiceConnection {
         }
 
         log("Iconify Version: ${BuildConfig.VERSION_NAME}")
-        log("Hooked ${loadPackageParam.packageName}")
+        log("Hooked $packageName")
 
-        onXPrefsReady(loadPackageParam)
+        onXPrefsReady(packageName)
     }
 
     private fun forceConnectRootService() {
         CoroutineScope(Dispatchers.Main).launch {
-            val mUserManager = mContext.getSystemService(Context.USER_SERVICE) as UserManager?
+            val mUserManager = try {
+                mContext.getSystemService(Context.USER_SERVICE) as android.os.UserManager?
+            } catch (_: Throwable) {
+                null
+            }
 
             withContext(Dispatchers.IO) {
                 while (mUserManager == null || !mUserManager.isUserUnlocked) {
@@ -246,6 +277,7 @@ class HookEntry : ServiceConnection {
 
         val runningMods = ArrayList<ModPack>()
         var isChildProcess = false
+        private val handledPackages = mutableSetOf<String>()
 
         private var rootProxyIPC: IRootProviderProxy? = null
         private val proxyQueue: Queue<ProxyRunnable> = LinkedList()

@@ -3,7 +3,6 @@ package com.drdisagree.iconify.xposed
 import android.content.Context
 import android.content.pm.PackageManager
 import com.drdisagree.iconify.BuildConfig
-import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
 
 abstract class ModPack(private val context: Context) {
 
@@ -21,5 +20,5 @@ abstract class ModPack(private val context: Context) {
 
     abstract fun updatePrefs(vararg key: String)
 
-    abstract fun handleLoadPackage(loadPackageParam: LoadPackageParam)
+    abstract fun handleLoadPackage(packageName: String, classLoader: ClassLoader)
 }

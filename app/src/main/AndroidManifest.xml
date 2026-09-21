@@ -29,7 +29,7 @@
             </intent-filter>
         </activity>
 
-        <!-- Xposed Metadata -->
+        <!-- Xposed / LSPosed Metadata (API 102 only) -->
         <meta-data
             android:name="xposedmodule"
             android:value="true" />
@@ -38,7 +38,7 @@
             android:value="@string/app_moto" />
         <meta-data
             android:name="xposedminversion"
-            android:value="82" />
+            android:value="102" />
         <meta-data
             android:name="xposedscope"
             android:resource="@array/module_scope" />

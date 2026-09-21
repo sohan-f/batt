@@ -167,13 +167,13 @@ class MainActivity : AppCompatActivity() {
                 val surfaceVariant = MaterialColors.getColor(binding.root, com.google.android.material.R.attr.colorSurfaceVariant)
                 val onSurfaceVariant = MaterialColors.getColor(binding.root, com.google.android.material.R.attr.colorOnSurfaceVariant)
                 if (active) {
-                    binding.pillModuleStatus.setCardBackgroundColor(primaryContainer)
+                    animatePillBackground(binding.pillModuleStatus, primaryContainer)
                     binding.textModuleStatusBadge.setText(R.string.status_module_active)
                     binding.textModuleStatusBadge.setTextColor(onPrimaryContainer)
                     binding.imageModuleStatusDot.setImageResource(R.drawable.ic_shield_check)
                     binding.imageModuleStatusDot.setColorFilter(onPrimaryContainer)
                 } else {
-                    binding.pillModuleStatus.setCardBackgroundColor(surfaceVariant)
+                    animatePillBackground(binding.pillModuleStatus, surfaceVariant)
                     binding.textModuleStatusBadge.setText(R.string.status_module_inactive)
                     binding.textModuleStatusBadge.setTextColor(onSurfaceVariant)
                     binding.imageModuleStatusDot.setImageResource(R.drawable.ic_shield_alert)
@@ -318,6 +318,18 @@ class MainActivity : AppCompatActivity() {
 
     private val cardColorAnimators = mutableMapOf<View, ValueAnimator>()
 
+    private fun animatePillBackground(card: com.google.android.material.card.MaterialCardView, target: Int) {
+        cardColorAnimators[card]?.cancel()
+        val from = card.cardBackgroundColor?.defaultColor ?: target
+        if (from == target) return
+        cardColorAnimators[card] = ValueAnimator.ofArgb(from, target).apply {
+            duration = 250
+            interpolator = emphasized
+            addUpdateListener { a -> card.setCardBackgroundColor(a.animatedValue as Int) }
+            start()
+        }
+    }
+
     private fun updateRingGeometryVisuals(selectedStyle: Int, animate: Boolean = true) {
         val primaryContainer = MaterialColors.getColor(binding.root, com.google.android.material.R.attr.colorPrimaryContainer)
         val onPrimaryContainer = MaterialColors.getColor(binding.root, com.google.android.material.R.attr.colorOnPrimaryContainer)
@@ -404,7 +416,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupOrderSelector() {
         val isSwapped = RPrefs.getBoolean(CUSTOM_BATTERY_SWAP_PERCENTAGE, true)
-        updateOrderCardVisuals(isSwapped)
+        updateOrderCardVisuals(isSwapped, animate = false)
         binding.cardOrderPercentFirst.setOnClickListener {
             if (!RPrefs.getBoolean(CUSTOM_BATTERY_SWAP_PERCENTAGE, true)) {
                 RPrefs.putBoolean(CUSTOM_BATTERY_SWAP_PERCENTAGE, true)
@@ -421,7 +433,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateOrderCardVisuals(percentFirst: Boolean) {
+    private fun updateOrderCardVisuals(percentFirst: Boolean, animate: Boolean = true) {
         val primaryContainer = MaterialColors.getColor(binding.root, com.google.android.material.R.attr.colorPrimaryContainer)
         val onPrimaryContainer = MaterialColors.getColor(binding.root, com.google.android.material.R.attr.colorOnPrimaryContainer)
         val primaryColor = MaterialColors.getColor(binding.root, android.R.attr.colorPrimary)
@@ -430,33 +442,59 @@ class MainActivity : AppCompatActivity() {
         val outlineVariant = MaterialColors.getColor(binding.root, com.google.android.material.R.attr.colorOutlineVariant)
         val textSecondary = MaterialColors.getColor(binding.root, android.R.attr.textColorSecondary)
         val density = resources.displayMetrics.density
-        if (percentFirst) {
-            binding.cardOrderPercentFirst.setCardBackgroundColor(primaryContainer)
-            binding.cardOrderPercentFirst.strokeColor = primaryColor
-            binding.cardOrderPercentFirst.strokeWidth = (2 * density).toInt()
-            binding.checkPercentFirst.visibility = View.VISIBLE
-            binding.textPercentFirstTitle.setTextColor(onPrimaryContainer)
-            binding.textPercentFirstDesc.setTextColor(onPrimaryContainer)
-            binding.cardOrderIconFirst.setCardBackgroundColor(surfaceLow)
-            binding.cardOrderIconFirst.strokeColor = outlineVariant
-            binding.cardOrderIconFirst.strokeWidth = (1 * density).toInt()
-            binding.checkIconFirst.visibility = View.INVISIBLE
-            binding.textIconFirstTitle.setTextColor(onSurface)
-            binding.textIconFirstDesc.setTextColor(textSecondary)
-        } else {
-            binding.cardOrderPercentFirst.setCardBackgroundColor(surfaceLow)
-            binding.cardOrderPercentFirst.strokeColor = outlineVariant
-            binding.cardOrderPercentFirst.strokeWidth = (1 * density).toInt()
-            binding.checkPercentFirst.visibility = View.INVISIBLE
-            binding.textPercentFirstTitle.setTextColor(onSurface)
-            binding.textPercentFirstDesc.setTextColor(textSecondary)
-            binding.cardOrderIconFirst.setCardBackgroundColor(primaryContainer)
-            binding.cardOrderIconFirst.strokeColor = primaryColor
-            binding.cardOrderIconFirst.strokeWidth = (2 * density).toInt()
-            binding.checkIconFirst.visibility = View.VISIBLE
-            binding.textIconFirstTitle.setTextColor(onPrimaryContainer)
-            binding.textIconFirstDesc.setTextColor(onPrimaryContainer)
+        fun paint(
+            card: com.google.android.material.card.MaterialCardView,
+            title: android.widget.TextView,
+            desc: android.widget.TextView,
+            badge: android.widget.ImageView,
+            selected: Boolean,
+        ) {
+            val targetBg = if (selected) primaryContainer else surfaceLow
+            val targetStroke = if (selected) primaryColor else outlineVariant
+            if (animate) {
+                cardColorAnimators[card]?.cancel()
+                val fromBg = card.cardBackgroundColor?.defaultColor ?: targetBg
+                val fromStroke = card.strokeColor
+                cardColorAnimators[card] = ValueAnimator.ofArgb(fromBg, targetBg).apply {
+                    duration = 250
+                    interpolator = emphasized
+                    addUpdateListener { a -> card.setCardBackgroundColor(a.animatedValue as Int) }
+                    start()
+                }
+                ValueAnimator.ofArgb(fromStroke, targetStroke).apply {
+                    duration = 250
+                    interpolator = emphasized
+                    addUpdateListener { a -> card.strokeColor = a.animatedValue as Int }
+                    start()
+                }
+            } else {
+                card.setCardBackgroundColor(targetBg)
+                card.strokeColor = targetStroke
+            }
+            card.strokeWidth = if (selected) (2 * density).toInt() else (1 * density).toInt()
+            title.setTextColor(if (selected) onPrimaryContainer else onSurface)
+            desc.setTextColor(if (selected) onPrimaryContainer else textSecondary)
+            card.contentDescription = "${title.text}, ${if (selected) "selected" else "not selected"}"
+            if (selected) {
+                if (badge.visibility != View.VISIBLE) {
+                    badge.visibility = View.VISIBLE
+                    if (animate) {
+                        badge.scaleX = 0.4f
+                        badge.scaleY = 0.4f
+                        badge.alpha = 0f
+                        badge.animate().scaleX(1f).scaleY(1f).alpha(1f).setDuration(300).setInterpolator(emphasized).start()
+                    } else {
+                        badge.scaleX = 1f
+                        badge.scaleY = 1f
+                        badge.alpha = 1f
+                    }
+                }
+            } else {
+                badge.visibility = View.GONE
+            }
         }
+        paint(binding.cardOrderPercentFirst, binding.textPercentFirstTitle, binding.textPercentFirstDesc, binding.checkPercentFirst, percentFirst)
+        paint(binding.cardOrderIconFirst, binding.textIconFirstTitle, binding.textIconFirstDesc, binding.checkIconFirst, !percentFirst)
     }
 
     private fun setupSizeController() {

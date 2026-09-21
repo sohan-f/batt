@@ -27,6 +27,7 @@ class HookCheck(context: Context) : ModPack(context) {
             mContext.sendBroadcast(
                 Intent()
                     .setAction(ACTION_HOOK_CHECK_RESULT)
+                    .setPackage(BuildConfig.APPLICATION_ID)
                     .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
             )
         }.start()
@@ -76,5 +77,90 @@ class HookCheck(context: Context) : ModPack(context) {
     companion object {
         @JvmStatic
         fun isModuleActive(): Boolean = false
+
+        /**
+         * Fast synchronous check: true only if this process itself is hooked
+         * (requires the module's own package to be in LSPosed scope).
+         */
+        fun isSelfHooked(): Boolean = try {
+            isModuleActive()
+        } catch (_: Throwable) {
+            false
+        }
+
+        /**
+         * Reliable check for SystemUI hook: sends [ACTION_HOOK_CHECK_REQUEST]
+         * to SystemUI and waits for [ACTION_HOOK_CHECK_RESULT].
+         * Works with scope = [SYSTEMUI_PACKAGE] only, no self-scope needed.
+         */
+        fun isSystemUIHookActive(
+            context: Context,
+            timeoutMs: Long = 2000L,
+            callback: (Boolean) -> Unit
+        ) {
+            if (isSelfHooked()) {
+                callback(true)
+                return
+            }
+
+            val appContext = context.applicationContext
+            var done = false
+            val mainHandler = android.os.Handler(android.os.Looper.getMainLooper())
+            lateinit var receiver: BroadcastReceiver
+
+            val complete = { active: Boolean ->
+                if (!done) {
+                    done = true
+                    mainHandler.removeCallbacksAndMessages(null)
+                    try {
+                        appContext.unregisterReceiver(receiver)
+                    } catch (_: Throwable) {
+                    }
+                    try {
+                        callback(active)
+                    } catch (_: Throwable) {
+                    }
+                }
+            }
+
+            receiver = object : BroadcastReceiver() {
+                override fun onReceive(ctx: Context, intent: Intent) {
+                    if (intent.action == ACTION_HOOK_CHECK_RESULT) {
+                        complete(true)
+                    }
+                }
+            }
+
+            try {
+                val filter = IntentFilter(ACTION_HOOK_CHECK_RESULT)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    appContext.registerReceiver(
+                        receiver,
+                        filter,
+                        Context.RECEIVER_EXPORTED
+                    )
+                } else {
+                    @SuppressLint("UnspecifiedRegisterReceiverFlag")
+                    appContext.registerReceiver(receiver, filter)
+                }
+            } catch (_: Throwable) {
+                complete(false)
+                return
+            }
+
+            try {
+                val request = Intent(ACTION_HOOK_CHECK_REQUEST)
+                    .setPackage(SYSTEMUI_PACKAGE)
+                    .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
+                appContext.sendBroadcast(request)
+            } catch (_: Throwable) {
+                complete(false)
+                return
+            }
+
+            mainHandler.postDelayed({
+                complete(false)
+            }, timeoutMs)
+        }
     }
 }

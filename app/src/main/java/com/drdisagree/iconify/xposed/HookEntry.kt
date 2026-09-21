@@ -98,7 +98,7 @@ class HookEntry : ServiceConnection {
                                     XPrefs.init(mContext)
                                     ResourceHookManager.init(mContext)
 
-                                    waitForXprefsLoad(loadPackageParam)
+                                    CompletableFuture.runAsync { waitForXprefsLoad(loadPackageParam) }
                                 }
                             } catch (throwable: Throwable) {
                                 log(this@HookEntry, throwable)

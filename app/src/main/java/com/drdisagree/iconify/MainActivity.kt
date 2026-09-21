@@ -41,6 +41,13 @@ class MainActivity : AppCompatActivity() {
         setupAbout()
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (::binding.isInitialized) {
+            refreshModuleStatus()
+        }
+    }
+
     private fun setupEdgeToEdge() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -65,15 +72,30 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupStatusCard() {
-        val isHookActive = HookCheck.isModuleActive()
-        if (isHookActive) {
-            binding.textStatusTitle.setText(R.string.status_module_active)
-            binding.textStatusDesc.text = getString(R.string.status_module_active) + " - Circle Battery is active in SystemUI."
-            binding.imageStatusIcon.setImageResource(android.R.drawable.checkbox_on_background)
-        } else {
-            binding.textStatusTitle.setText(R.string.status_module_inactive)
-            binding.textStatusDesc.setText(R.string.status_module_desc)
-            binding.imageStatusIcon.setImageResource(android.R.drawable.ic_dialog_info)
+        // Show checking state first, then resolve async via SystemUI broadcast.
+        // Old code used only HookCheck.isModuleActive() which requires our own
+        // package in LSPosed scope, so it stayed false forever with a
+        // SystemUI-only scope even when hooks were working.
+        binding.textStatusTitle.setText(R.string.status_module_inactive)
+        binding.textStatusDesc.setText(R.string.status_module_desc)
+        binding.imageStatusIcon.setImageResource(android.R.drawable.ic_dialog_info)
+        refreshModuleStatus()
+    }
+
+    private fun refreshModuleStatus() {
+        HookCheck.isSystemUIHookActive(this) { active ->
+            runOnUiThread {
+                if (isFinishing || isDestroyed) return@runOnUiThread
+                if (active) {
+                    binding.textStatusTitle.setText(R.string.status_module_active)
+                    binding.textStatusDesc.text = getString(R.string.status_module_active) + " - Circle Battery is active in SystemUI."
+                    binding.imageStatusIcon.setImageResource(android.R.drawable.checkbox_on_background)
+                } else {
+                    binding.textStatusTitle.setText(R.string.status_module_inactive)
+                    binding.textStatusDesc.setText(R.string.status_module_desc)
+                    binding.imageStatusIcon.setImageResource(android.R.drawable.ic_dialog_info)
+                }
+            }
         }
     }
 

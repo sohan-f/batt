@@ -9,7 +9,6 @@ import android.content.IntentFilter
 import android.content.res.Configuration
 import android.os.BatteryManager
 import android.os.Bundle
-import android.text.method.LinkMovementMethod
 import android.view.HapticFeedbackConstants
 import android.view.View
 import android.view.animation.PathInterpolator
@@ -87,7 +86,6 @@ class MainActivity : AppCompatActivity() {
         setupOrderSelector()
         setupSizeController()
         setupActions()
-        binding.textAboutDesc.movementMethod = LinkMovementMethod.getInstance()
         updateSystemBarContrast()
     }
 

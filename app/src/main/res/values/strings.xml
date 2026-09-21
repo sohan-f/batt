@@ -1493,6 +1493,5 @@
 
     <!-- About / Legal -->
     <string name="about_title">About</string>
-    <string name="about_desc">Based on Iconify by Mahmud0808. GPL-3.0. https://github.com/sohan-f/batt</string>
 
 </resources>

@@ -1,11 +1,11 @@
 package com.sysui.batt
 
-import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Color
 import android.os.BatteryManager
 import android.os.Bundle
 import android.text.method.LinkMovementMethod
@@ -32,9 +32,12 @@ import com.sysui.batt.xposed.modules.batterystyles.BatteryDrawable
 import com.sysui.batt.xposed.modules.batterystyles.CircleBattery
 import com.sysui.batt.xposed.modules.batterystyles.CircleFilledBattery
 import com.sysui.batt.xposed.utils.HookCheck
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.progressindicator.CircularProgressIndicatorSpec
+import com.google.android.material.progressindicator.IndeterminateDrawable
 import com.google.android.material.snackbar.Snackbar
 
 class MainActivity : AppCompatActivity() {
@@ -88,8 +91,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        restartAnimator?.cancel()
         sizeAnimator?.cancel()
+        restartSpin?.stop()
         cardColorAnimators.values.forEach { it.cancel() }
         super.onDestroy()
     }
@@ -535,32 +538,68 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private var restartAnimator: ObjectAnimator? = null
+    private var restartSpin: IndeterminateDrawable<CircularProgressIndicatorSpec>? = null
 
+    // Expressive loading button: gentle press, then the restart glyph
+    // crossfades into an indeterminate spinner in the icon slot while the
+    // label reads "Restarting…". The spinner honors the system animator
+    // duration scale, so reduced-motion users get a calm static arc.
     private fun playRestartAnimation(v: View) {
         val btn = binding.btnRestartSystemUI
-        restartAnimator?.cancel()
-        // Loading state: lock double-tap, swap to "Restarting…" without new res.
+        restartSpin?.stop()
+        restartSpin = null
         btn.isEnabled = false
         val origText = btn.text.toString()
-        btn.text = "$origText…"
-        // Expressive press: compress, then spring back + subtle icon wobble.
-        // Icon-only spin isn't possible on MaterialButton (icon is a drawable,
-        // not a view), so we wobble the button ±10° instead of a full 360° spin
-        // that makes the label unreadable.
-        v.animate().scaleX(0.96f).scaleY(0.96f).setDuration(110).setInterpolator(emphasizedAccelerate)
+        v.animate().scaleX(0.97f).scaleY(0.97f).setDuration(120).setInterpolator(emphasizedAccelerate)
             .withEndAction {
                 v.animate().scaleX(1f).scaleY(1f).setDuration(450).setInterpolator(emphasized).start()
-                restartAnimator = ObjectAnimator.ofFloat(v, View.ROTATION, 0f, -10f, 10f, 0f).apply {
-                    duration = 450
-                    interpolator = emphasized
-                    start()
-                }
+                crossfadeRestartIconToSpinner(btn)
+                btn.text = "$origText…"
                 v.postDelayed({
+                    if (isFinishing || isDestroyed) return@postDelayed
+                    restartSpin?.stop()
+                    restartSpin = null
+                    btn.icon = getDrawable(R.drawable.ic_restart)
                     btn.text = origText
                     btn.isEnabled = true
                 }, 1400)
             }.start()
+    }
+
+    private fun crossfadeRestartIconToSpinner(btn: MaterialButton) {
+        val icon = btn.icon?.mutate()
+        if (icon == null) {
+            startRestartSpinner(btn)
+            return
+        }
+        ValueAnimator.ofInt(255, 0).apply {
+            duration = 180
+            interpolator = emphasized
+            addUpdateListener { a ->
+                icon.alpha = a.animatedValue as Int
+                btn.invalidate()
+            }
+            addListener(object : android.animation.AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: android.animation.Animator) {
+                    startRestartSpinner(btn)
+                }
+            })
+            start()
+        }
+    }
+
+    private fun startRestartSpinner(btn: MaterialButton) {
+        val density = resources.displayMetrics.density
+        val onPrimary = MaterialColors.getColor(btn, com.google.android.material.R.attr.colorOnPrimary)
+        val spec = CircularProgressIndicatorSpec(this, null)
+        spec.indicatorSize = (24 * density).toInt()
+        spec.trackThickness = (3 * density).toInt()
+        spec.indicatorColors = intArrayOf(onPrimary)
+        spec.trackColor = Color.TRANSPARENT
+        val spin = IndeterminateDrawable.createCircularDrawable(this, spec)
+        restartSpin = spin
+        btn.icon = spin
+        spin.start()
     }
 
     private fun itHaptic(v: View) {

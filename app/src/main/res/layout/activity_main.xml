@@ -874,7 +874,6 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:visibility="gone"
-                app:containerColor="@android:color/transparent"
                 app:indicatorColor="?attr/colorOnPrimary" />
 
         </FrameLayout>

@@ -1,21 +1,17 @@
 package com.sysui.batt
 
 import android.animation.ObjectAnimator
-import android.animation.PropertyValuesHolder
 import android.animation.ValueAnimator
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.res.ColorStateList
-import android.graphics.Color
 import android.graphics.drawable.AnimatedVectorDrawable
 import android.graphics.drawable.Drawable
 import android.os.BatteryManager
 import android.os.Bundle
 import android.os.SystemClock
 import android.text.method.LinkMovementMethod
-import android.transition.TransitionManager
 import android.view.HapticFeedbackConstants
 import android.view.View
 import android.view.animation.PathInterpolator
@@ -34,28 +30,16 @@ import com.sysui.batt.data.common.Preferences.CUSTOM_BATTERY_WIDTH
 import com.sysui.batt.data.config.RPrefs
 import com.sysui.batt.databinding.ActivityMainBinding
 import com.sysui.batt.utils.SystemUtils
-import com.sysui.batt.xposed.modules.batterystyles.BatteryDrawable
-import com.sysui.batt.xposed.modules.batterystyles.CircleBattery
-import com.sysui.batt.xposed.modules.batterystyles.CircleFilledBattery
 import com.sysui.batt.xposed.utils.HookCheck
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private var statusBarBatteryDrawable: BatteryDrawable? = null
-    private var heroBatteryDrawable: BatteryDrawable? = null
-    private var realBatteryLevel = 100
-    private var isDeviceCharging = false
-    private var isLightStatusBarMode = false
     private var currentRingStyle = BATTERY_STYLE_CIRCLE
-    private var glowPulseAnimator: ObjectAnimator? = null
     private val emphasized = PathInterpolator(0.05f, 0.7f, 0.1f, 1f)
     private val emphasizedAccelerate = PathInterpolator(0.3f, 0f, 0.8f, 0.15f)
 
@@ -73,7 +57,6 @@ class MainActivity : AppCompatActivity() {
         setupEdgeToEdge()
         initDefaultPreferences()
         setupModuleStatus()
-        setupBatteryPreview()
         setupRingGeometrySelector()
         setupOrderSelector()
         setupSizeController()
@@ -85,7 +68,6 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         if (::binding.isInitialized) {
             refreshModuleStatus()
-            updatePreviewTime()
             registerBatteryReceiver()
             refreshDeviceBattery(registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED)))
         }
@@ -100,7 +82,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        glowPulseAnimator?.cancel()
         restartAnimator?.cancel()
         cardColorAnimators.values.forEach { it.cancel() }
         super.onDestroy()
@@ -161,79 +142,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun updatePreviewTime() {
-        binding.textPreviewTime.text = try {
-            SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
-        } catch (_: Throwable) {
-            "09:41"
-        }
-    }
-
-    private fun createBatteryInstance(style: Int, fg: Int, bg: Int): BatteryDrawable {
-        val d: BatteryDrawable = when (style) {
-            BATTERY_STYLE_FILLED_CIRCLE -> CircleFilledBattery(this, fg)
-            else -> CircleBattery(this, fg).apply {
-                setMeterStyle(if (style == BATTERY_STYLE_DOTTED_CIRCLE) BATTERY_STYLE_DOTTED_CIRCLE else BATTERY_STYLE_CIRCLE)
-            }
-        }
-        d.setColors(fg, bg, fg)
-        d.setBatteryLevel(realBatteryLevel)
-        d.setChargingEnabled(isDeviceCharging)
-        return d
-    }
-
-    private fun getPreviewColors(): Pair<Int, Int> =
-        if (isLightStatusBarMode) Pair(Color.parseColor("#1C1B1F"), Color.parseColor("#9AA0A6"))
-        else Pair(Color.WHITE, Color.DKGRAY)
-
-    private fun setupBatteryPreview() {
-        updatePreviewTime()
-        recreateBatteryDrawables()
-        updatePreviewLayoutDirection(RPrefs.getBoolean(CUSTOM_BATTERY_SWAP_PERCENTAGE, true))
-        binding.btnToggleThemeMode.setOnClickListener {
-            isLightStatusBarMode = !isLightStatusBarMode
-            applyThemeMode(isLightStatusBarMode)
-            itHaptic(it)
-        }
-        refreshDeviceBattery(registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED)))
-    }
-
-    private fun recreateBatteryDrawables() {
-        val (fg, bg) = getPreviewColors()
-        statusBarBatteryDrawable = createBatteryInstance(currentRingStyle, fg, bg)
-        heroBatteryDrawable = createBatteryInstance(currentRingStyle, fg, bg)
-        binding.imageStatusBarBattery.setImageDrawable(statusBarBatteryDrawable)
-        binding.imageHeroBattery.setImageDrawable(heroBatteryDrawable)
-    }
-
-    private fun applyThemeMode(lightMode: Boolean) {
-        TransitionManager.beginDelayedTransition(binding.layoutPhoneStage)
-        val (fg, _) = getPreviewColors()
-        if (lightMode) {
-            binding.layoutPhoneStage.setBackgroundResource(R.drawable.bg_phone_stage_light)
-            binding.textPreviewTime.setTextColor(fg)
-            binding.textStatusBarPercent.setTextColor(fg)
-            binding.textHeroPercent.setTextColor(fg)
-            binding.imagePreviewWifi.setColorFilter(fg)
-            binding.imagePreviewCell.setColorFilter(fg)
-            binding.btnToggleThemeMode.setIconResource(R.drawable.ic_moon)
-            binding.btnToggleThemeMode.iconTint = ColorStateList.valueOf(fg)
-            binding.btnToggleThemeMode.strokeColor = ColorStateList.valueOf(Color.parseColor("#40000000"))
-        } else {
-            binding.layoutPhoneStage.setBackgroundResource(R.drawable.bg_phone_stage)
-            binding.textPreviewTime.setTextColor(Color.WHITE)
-            binding.textStatusBarPercent.setTextColor(Color.WHITE)
-            binding.textHeroPercent.setTextColor(Color.WHITE)
-            binding.imagePreviewWifi.setColorFilter(Color.WHITE)
-            binding.imagePreviewCell.setColorFilter(Color.WHITE)
-            binding.btnToggleThemeMode.setIconResource(R.drawable.ic_sun)
-            binding.btnToggleThemeMode.iconTint = ColorStateList.valueOf(Color.WHITE)
-            binding.btnToggleThemeMode.strokeColor = ColorStateList.valueOf(Color.parseColor("#40FFFFFF"))
-        }
-        recreateBatteryDrawables()
-        applyPreviewChargingGlow()
-    }
-
     private val batteryReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent?.action == Intent.ACTION_BATTERY_CHANGED) refreshDeviceBattery(intent)
@@ -259,14 +167,6 @@ class MainActivity : AppCompatActivity() {
         val tempTenths = intent.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, Int.MIN_VALUE)
         val voltageMv = intent.getIntExtra(BatteryManager.EXTRA_VOLTAGE, Int.MIN_VALUE)
         val health = intent.getIntExtra(BatteryManager.EXTRA_HEALTH, BatteryManager.BATTERY_HEALTH_UNKNOWN)
-        realBatteryLevel = pct
-        isDeviceCharging = charging
-        statusBarBatteryDrawable?.setBatteryLevel(pct)
-        statusBarBatteryDrawable?.setChargingEnabled(charging)
-        heroBatteryDrawable?.setBatteryLevel(pct)
-        heroBatteryDrawable?.setChargingEnabled(charging)
-        binding.textStatusBarPercent.text = "$pct%"
-        binding.textHeroPercent.text = "$pct%"
         binding.textDeviceLevel.text = "$pct%"
         binding.textDeviceStatus.text = deviceStatusText(status, charging)
         binding.textDeviceSource.text = deviceSourceText(plugged)
@@ -276,7 +176,6 @@ class MainActivity : AppCompatActivity() {
         binding.imageDeviceStatusIcon.setImageResource(
             if (charging) R.drawable.ic_bolt else R.drawable.ic_battery_circle,
         )
-        applyPreviewChargingGlow()
     }
 
     private fun deviceStatusText(status: Int, charging: Boolean): String = when {
@@ -301,32 +200,6 @@ class MainActivity : AppCompatActivity() {
         BatteryManager.BATTERY_HEALTH_OVER_VOLTAGE -> getString(R.string.device_health_over_voltage)
         BatteryManager.BATTERY_HEALTH_COLD -> getString(R.string.device_health_cold)
         else -> getString(R.string.device_health_unknown)
-    }
-
-    private fun applyPreviewChargingGlow() {
-        if (isDeviceCharging) startGlowPulseAnimation() else stopGlowPulseAnimation()
-    }
-
-    private fun startGlowPulseAnimation() {
-        glowPulseAnimator?.cancel()
-        glowPulseAnimator = ObjectAnimator.ofPropertyValuesHolder(
-            binding.viewHeroGlow,
-            PropertyValuesHolder.ofFloat(View.SCALE_X, 1f, 1.25f),
-            PropertyValuesHolder.ofFloat(View.SCALE_Y, 1f, 1.25f),
-            PropertyValuesHolder.ofFloat(View.ALPHA, 0.4f, 0.9f)
-        ).apply {
-            duration = 1400
-            repeatMode = ValueAnimator.REVERSE
-            repeatCount = ValueAnimator.INFINITE
-            interpolator = emphasized
-            start()
-        }
-    }
-
-    private fun stopGlowPulseAnimation() {
-        glowPulseAnimator?.cancel()
-        glowPulseAnimator = null
-        binding.viewHeroGlow.animate().scaleX(1f).scaleY(1f).alpha(1f).setDuration(250).setInterpolator(emphasized).start()
     }
 
     private fun setupRingGeometrySelector() {
@@ -357,11 +230,6 @@ class MainActivity : AppCompatActivity() {
     private fun applyRingStyle(style: Int) {
         RPrefs.putString(CUSTOM_BATTERY_STYLE, "$style")
         updateRingGeometryVisuals(style)
-        recreateBatteryDrawables()
-        binding.imageHeroBattery.animate().scaleX(1.15f).scaleY(1.15f).setDuration(120).setInterpolator(emphasizedAccelerate)
-            .withEndAction {
-                binding.imageHeroBattery.animate().scaleX(1f).scaleY(1f).setDuration(350).setInterpolator(emphasized).start()
-            }.start()
     }
 
     private val cardColorAnimators = mutableMapOf<View, ValueAnimator>()
@@ -437,8 +305,6 @@ class MainActivity : AppCompatActivity() {
         binding.cardOrderPercentFirst.setOnClickListener {
             if (!RPrefs.getBoolean(CUSTOM_BATTERY_SWAP_PERCENTAGE, true)) {
                 RPrefs.putBoolean(CUSTOM_BATTERY_SWAP_PERCENTAGE, true)
-                TransitionManager.beginDelayedTransition(binding.layoutPhoneStage)
-                updatePreviewLayoutDirection(true)
                 updateOrderCardVisuals(true)
                 itHaptic(it)
                 Snackbar.make(binding.root, R.string.layout_percent_first_msg, Snackbar.LENGTH_SHORT).show()
@@ -447,8 +313,6 @@ class MainActivity : AppCompatActivity() {
         binding.cardOrderIconFirst.setOnClickListener {
             if (RPrefs.getBoolean(CUSTOM_BATTERY_SWAP_PERCENTAGE, true)) {
                 RPrefs.putBoolean(CUSTOM_BATTERY_SWAP_PERCENTAGE, false)
-                TransitionManager.beginDelayedTransition(binding.layoutPhoneStage)
-                updatePreviewLayoutDirection(false)
                 updateOrderCardVisuals(false)
                 itHaptic(it)
                 Snackbar.make(binding.root, R.string.layout_icon_first_msg, Snackbar.LENGTH_SHORT).show()
@@ -573,16 +437,6 @@ class MainActivity : AppCompatActivity() {
         binding.textSizeValueDisplay.text = "$sizeDp dp"
         binding.imageSliderSize.visibility =
             if (sizeDp > MIN_BATTERY_SIZE_DP) View.VISIBLE else View.GONE
-        val px = (sizeDp * resources.displayMetrics.density).toInt()
-        binding.imageStatusBarBattery.layoutParams = binding.imageStatusBarBattery.layoutParams.apply {
-            width = px
-            height = px
-        }
-        binding.textStatusBarPercent.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, (sizeDp * 0.7f).coerceIn(9f, 22f))
-    }
-
-    private fun updatePreviewLayoutDirection(swapped: Boolean) {
-        binding.layoutStatusBarBattery.layoutDirection = if (swapped) View.LAYOUT_DIRECTION_RTL else View.LAYOUT_DIRECTION_LTR
     }
 
     private fun setupActions() {

@@ -48,7 +48,6 @@
         <item name="colorOnErrorContainer">@color/colorOnErrorContainerLight</item>
         <item name="materialButtonStyle">@style/Widget.CircleBattery.Button.Primary</item>
         <item name="materialButtonTonalStyle">@style/Widget.CircleBattery.Button.Tonal</item>
-        <item name="materialButtonOutlinedStyle">@style/Widget.CircleBattery.Button.StageOutlined</item>
         <item name="materialButtonToggleGroupStyle">@style/Widget.Material3Expressive.MaterialButtonToggleGroup</item>
         <item name="materialButtonGroupStyle">@style/Widget.Material3Expressive.MaterialButtonGroup</item>
         <item name="sliderStyle">@style/Widget.CircleBattery.Slider</item>

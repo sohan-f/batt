@@ -19,7 +19,7 @@ Fork / stripped-down build of Iconify focused on a single tweak: `BATTERY_STYLE_
 - Swap icon & percentage: flips `BatteryMeterView` to `LAYOUT_DIRECTION_RTL` so `%` renders before the icon (`BatteryStyleManager.kt:989-994`, `MainActivity.kt:113-117`). Default ON.
 - App UI (`MainActivity.kt`, `res/layout/activity_main.xml`):
   - Module status card (active check via `xposed/utils/HookCheck.kt`)
-  - Live icon preview mirroring real device battery + device battery card (level, charging, source, temp, voltage, health)
+  - Device battery card (live level, charging, source, temp, voltage, health)
   - Swap toggle + size slider persisted to `RPrefs`
   - Restart button (requires root)
 - Defaults on first launch: style = Circle (35), swap = true (`MainActivity.kt:52-60`)
@@ -52,7 +52,6 @@ Fork / stripped-down build of Iconify focused on a single tweak: `BATTERY_STYLE_
   - Hooks `systemui.statusbar.policy.BatteryControllerImpl` (`fireBatteryLevelChanged`, `firePowerSaveChanged`, `onReceive`) to push level/charging/power-save into custom drawables
   - Hooks `systemui.battery.BatteryMeterView` constructor / `updateColors` / `setPercentShowMode` / `updateShowPercent`, replaces icon `ImageView` drawable with `CircleBattery`, handles colors, scaling, RTL flip, charging icon view, and `ShadeHeaderController.onInit` for QS header
   - Reads prefs via `XPrefs` (`CUSTOM_BATTERY_STYLE`, `CUSTOM_BATTERY_SWAP_PERCENTAGE`), exposed by app via `RemotePrefProvider` (`AndroidManifest.xml:47-52`)
-- In-app preview instantiates the same `CircleBattery` drawable directly, no hook needed.
 
 ## Project structure
 
@@ -61,7 +60,7 @@ app/src/main/
   AndroidManifest.xml          # xposedmodule=true, scope=@array/module_scope, RemotePrefProvider
   assets/xposed_init           # InitHook entry
   java/com/sysui/batt/
-    MainActivity.kt            # status, preview, swap toggle, size slider, restart
+    MainActivity.kt            # status, device battery, swap toggle, size slider, restart
     BattApp.kt                 # Application subclass
     xposed/ModernInitHook.kt EntryList.kt HookEntry.kt HookRes.kt ModPack.kt
     xposed/modules/BatteryStyleManager.kt

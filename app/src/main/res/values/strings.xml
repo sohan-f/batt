@@ -33,7 +33,6 @@
     <string name="device_battery_temp">Temp</string>
     <string name="device_battery_voltage">Voltage</string>
     <string name="device_battery_health">Health</string>
-    <string name="device_battery_mirror_desc">Preview above mirrors this live device state.</string>
     <string name="device_status_charging">Charging</string>
     <string name="device_status_discharging">Discharging</string>
     <string name="device_status_full">Full</string>

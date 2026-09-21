@@ -540,11 +540,20 @@
                             android:orientation="horizontal">
 
                             <TextView
+                                android:id="@+id/textOrderPreviewPercentFirst"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="@string/order_percent_first_preview"
+                                android:text="--%"
                                 android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
                                 android:textStyle="bold" />
+
+                            <ImageView
+                                android:id="@+id/imageOrderPreviewIconFirst"
+                                android:layout_width="22dp"
+                                android:layout_height="22dp"
+                                android:layout_marginStart="6dp"
+                                android:contentDescription="@null"
+                                android:src="@drawable/ic_battery_circle" />
 
                             <View
                                 android:layout_width="0dp"
@@ -606,10 +615,19 @@
                             android:gravity="center_vertical"
                             android:orientation="horizontal">
 
+                            <ImageView
+                                android:id="@+id/imageOrderPreviewIconSecond"
+                                android:layout_width="22dp"
+                                android:layout_height="22dp"
+                                android:layout_marginEnd="6dp"
+                                android:contentDescription="@null"
+                                android:src="@drawable/ic_battery_circle" />
+
                             <TextView
+                                android:id="@+id/textOrderPreviewPercentSecond"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="@string/order_icon_first_preview"
+                                android:text="--%"
                                 android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
                                 android:textStyle="bold" />
 

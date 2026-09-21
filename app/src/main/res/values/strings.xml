@@ -9,9 +9,7 @@
     <string name="swap_percentage_title">Percent First</string>
     <string name="swap_percentage_desc">Show percentage before battery icon</string>
     <string name="order_percent_first">Percent First</string>
-    <string name="order_percent_first_preview">85%  ◎</string>
     <string name="order_icon_first">Icon First</string>
-    <string name="order_icon_first_preview">◎  85%</string>
     <string name="layout_order_title">Display Order</string>
     <string name="layout_order_subtitle">Position of percentage relative to circle</string>
     <string name="order_percent_first_desc">% before circle icon</string>

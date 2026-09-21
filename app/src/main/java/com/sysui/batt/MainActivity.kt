@@ -42,6 +42,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private var currentRingStyle = BATTERY_STYLE_CIRCLE
     private var deviceBatteryDrawable: BatteryDrawable? = null
+    private var orderIconFirstDrawable: BatteryDrawable? = null
+    private var orderIconSecondDrawable: BatteryDrawable? = null
     private var lastBatteryLevel = -1
     private var lastCharging = false
     private val emphasized = PathInterpolator(0.05f, 0.7f, 0.1f, 1f)
@@ -173,6 +175,8 @@ class MainActivity : AppCompatActivity() {
         val voltageMv = intent.getIntExtra(BatteryManager.EXTRA_VOLTAGE, Int.MIN_VALUE)
         val health = intent.getIntExtra(BatteryManager.EXTRA_HEALTH, BatteryManager.BATTERY_HEALTH_UNKNOWN)
         binding.textDeviceLevel.text = "$pct%"
+        binding.textOrderPreviewPercentFirst.text = "$pct%"
+        binding.textOrderPreviewPercentSecond.text = "$pct%"
         binding.textDeviceStatus.text = deviceStatusText(status, charging)
         binding.textDeviceSource.text = deviceSourceText(plugged)
         binding.textDeviceTemp.text = if (tempTenths != Int.MIN_VALUE) getString(R.string.device_temp_format, tempTenths / 10f) else "--"
@@ -183,7 +187,7 @@ class MainActivity : AppCompatActivity() {
         updateDeviceBatteryIcon(pct, charging)
     }
 
-    private fun createDeviceBatteryDrawable(): BatteryDrawable {
+    private fun createBatteryDrawable(): BatteryDrawable {
         val primary = MaterialColors.getColor(binding.root, android.R.attr.colorPrimary)
         val outline = MaterialColors.getColor(binding.root, com.google.android.material.R.attr.colorOutlineVariant)
         val d: BatteryDrawable = when (currentRingStyle) {
@@ -199,14 +203,27 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateDeviceBatteryIcon(level: Int, charging: Boolean) {
-        var d = deviceBatteryDrawable
-        if (d == null) {
-            d = createDeviceBatteryDrawable()
-            deviceBatteryDrawable = d
-            binding.imageDeviceStatusIcon.setImageDrawable(d)
+        if (deviceBatteryDrawable == null || orderIconFirstDrawable == null || orderIconSecondDrawable == null) {
+            refreshAllBatteryIcons()
         }
-        d.setBatteryLevel(level)
-        d.setChargingEnabled(charging)
+        deviceBatteryDrawable?.setBatteryLevel(level)
+        deviceBatteryDrawable?.setChargingEnabled(charging)
+        orderIconFirstDrawable?.setBatteryLevel(level)
+        orderIconFirstDrawable?.setChargingEnabled(charging)
+        orderIconSecondDrawable?.setBatteryLevel(level)
+        orderIconSecondDrawable?.setChargingEnabled(charging)
+    }
+
+    private fun refreshAllBatteryIcons() {
+        val device = createBatteryDrawable()
+        deviceBatteryDrawable = device
+        binding.imageDeviceStatusIcon.setImageDrawable(device)
+        val first = createBatteryDrawable()
+        orderIconFirstDrawable = first
+        binding.imageOrderPreviewIconFirst.setImageDrawable(first)
+        val second = createBatteryDrawable()
+        orderIconSecondDrawable = second
+        binding.imageOrderPreviewIconSecond.setImageDrawable(second)
     }
 
     private fun deviceStatusText(status: Int, charging: Boolean): String = when {
@@ -261,9 +278,7 @@ class MainActivity : AppCompatActivity() {
     private fun applyRingStyle(style: Int) {
         RPrefs.putString(CUSTOM_BATTERY_STYLE, "$style")
         updateRingGeometryVisuals(style)
-        val d = createDeviceBatteryDrawable()
-        deviceBatteryDrawable = d
-        binding.imageDeviceStatusIcon.setImageDrawable(d)
+        refreshAllBatteryIcons()
     }
 
     private val cardColorAnimators = mutableMapOf<View, ValueAnimator>()

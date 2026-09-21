@@ -144,8 +144,8 @@
                         <!-- Center Camera Punchhole -->
                         <View
                             android:id="@+id/viewCameraPunch"
-                            android:layout_width="10dp"
-                            android:layout_height="10dp"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
                             android:background="@drawable/bg_camera_punch"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
@@ -180,13 +180,22 @@
                                 android:src="@drawable/ic_cell_statusbar"
                                 app:tint="#FFFFFF" />
 
-                            <!-- Live Status Bar Battery + Percentage -->
+                            <!-- Live Status Bar Battery + Percentage.
+                                 Child order matches SystemUI BatteryMeterView
+                                 (icon, then percent) so the RTL/LTR swap trick
+                                 renders the same order as the real status bar. -->
                             <LinearLayout
                                 android:id="@+id/layoutStatusBarBattery"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:gravity="center_vertical"
                                 android:orientation="horizontal">
+
+                                <ImageView
+                                    android:id="@+id/imageStatusBarBattery"
+                                    android:layout_width="20dp"
+                                    android:layout_height="20dp"
+                                    android:contentDescription="@null" />
 
                                 <TextView
                                     android:id="@+id/textStatusBarPercent"
@@ -197,12 +206,6 @@
                                     android:textColor="#FFFFFF"
                                     android:textSize="14sp"
                                     android:textStyle="bold" />
-
-                                <ImageView
-                                    android:id="@+id/imageStatusBarBattery"
-                                    android:layout_width="20dp"
-                                    android:layout_height="20dp"
-                                    android:contentDescription="@null" />
 
                             </LinearLayout>
 

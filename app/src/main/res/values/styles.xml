@@ -6,15 +6,6 @@
         <!-- <item name="android:background">@drawable/container_main_no_ripple</item> -->
     </style>
 
-    <style name="PrefsThemeToolbar" parent="PreferenceThemeOverlay.v14.Material">
-    </style>
-
-    <style name="PrefsThemeCollapsingToolbar" parent="PreferenceThemeOverlay.v14.Material">
-    </style>
-
-    <style name="PrefsThemeNoToolbar" parent="PreferenceThemeOverlay.v14.Material">
-    </style>
-
     <style name="ColorPicker" parent="Theme.Material3.Light.Dialog">
         <item name="android:colorAccent">@color/colorAccent</item>
         <item name="android:windowTitleStyle">@style/LightPickerDialogTitleStyle</item>

@@ -88,7 +88,7 @@ class MainActivity : AppCompatActivity() {
                 if (isFinishing || isDestroyed) return@runOnUiThread
                 if (active) {
                     binding.textStatusTitle.setText(R.string.status_module_active)
-                    binding.textStatusDesc.text = getString(R.string.status_module_active) + " - Circle Battery is active in SystemUI."
+                    binding.textStatusDesc.text = getString(R.string.status_module_active)
                     binding.imageStatusIcon.setImageResource(android.R.drawable.checkbox_on_background)
                 } else {
                     binding.textStatusTitle.setText(R.string.status_module_inactive)
@@ -114,7 +114,6 @@ class MainActivity : AppCompatActivity() {
             val level = value.toInt()
             previewBatteryDrawable?.setBatteryLevel(level)
             binding.textPreviewPercent.text = "$level%"
-            binding.textLevelLabel.text = "Battery Level: $level%"
             // Expressive motion: subtle spring on the preview icon
             binding.imageBatteryPreview.animate()
                 .scaleX(1.08f)
@@ -146,7 +145,7 @@ class MainActivity : AppCompatActivity() {
             updatePreviewLayoutDirection(isChecked)
             Snackbar.make(
                 binding.root,
-                if (isChecked) "Percentage position swapped (placed before icon)" else "Default position restored",
+                if (isChecked) "Swapped" else "Default",
                 Snackbar.LENGTH_SHORT
             ).show()
         }

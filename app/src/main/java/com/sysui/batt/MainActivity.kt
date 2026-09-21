@@ -97,7 +97,6 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         sizeAnimator?.cancel()
         restartIconFade?.cancel()
-        restartSpin?.stop()
         cardColorAnimators.values.forEach { it.cancel() }
         super.onDestroy()
     }

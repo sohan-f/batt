@@ -1,223 +1,85 @@
-<div align="center">
-  <img src="https://raw.githubusercontent.com/Mahmud0808/Iconify/beta/.github/resources/banner.png" width="100%" alt="Banner">
-
-# v7.3.0 is out!
-</div>
-<p align="center">
-  <a href="https://github.com/Mahmud0808/Iconify/releases"><img src="https://img.shields.io/github/downloads/Mahmud0808/Iconify/total?color=%233DDC84&logo=android&logoColor=%23fff&style=for-the-badge" alt="Downloads"></a>
-  <a href="https://github.com/Mahmud0808/Iconify"><img alt="Repo Size" src="https://img.shields.io/github/repo-size/Mahmud0808/Iconify?style=for-the-badge"></a>
-  <a href="https://github.com/Mahmud0808/Iconify/actions"><img src="https://img.shields.io/github/actions/workflow/status/Mahmud0808/Iconify/build_debug.yml?branch=beta&label=Debug%20Build&style=for-the-badge" alt="Debug Build"></a>
-  <a href="https://t.me/DrDsProjects"><img src="https://img.shields.io/badge/Telegram-5K+-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white" alt="Telegram"></a>
-</p>
-<div align="center">
-
-# Iconify
-
-### Free and Open-Source Android Customizer Application
-</div>
-<p align="center">
-Iconify is an open-source Android mobile application aimed at providing users with the ability to customize various aspects of their device's user interface. 📱
-<br><br>
-Furthermore, the open-source nature of Iconify encourages community contributions and continuous improvement, ensuring a dynamic and evolving user experience. 🤝
-</p>
-<div align="center">
-  <br>
-  <a href="https://www.buymeacoffee.com/DrDisagree"><img src="https://github.com/Mahmud0808/Iconify/blob/beta/.github/resources/bmc-button.png" width="30%" alt="Buy me a coffee" /></a>
-  <br><br>
-  <img src="https://raw.githubusercontent.com/Mahmud0808/Iconify/beta/.github/resources/features.png" width="100%" alt="Features">
-</div>
-
-> [!CAUTION]
->
-> This app requires Magisk/KernelSU/APatch for root access. Any alternative methods won't work.
-
-# 🛠 Requirements
-
-- Android 12+ Pixel / AOSP based custom ROM
-
-- [Magisk](https://github.com/topjohnwu/Magisk) (Recommended) / [KernelSU](https://github.com/tiann/KernelSU) / [APatch](https://github.com/bmax121/APatch)
-
-- [LSPosed](https://github.com/LSPosed/LSPosed) / Other Xposed framework (Optional)
-
-- Decryption Supported Custom Recovery (Just in case)
-
-# 👨‍💻 Installation
-
-### Installation for Magisk Users:​
-
-1. Download and install the Iconify app.
-
-2. Open the app, grant root permission and follow the instructions.
-
-3. Wait for it to finish generating rom specific module.
-
-4. Reboot the device when prompted, profit!
-
-### Installation for KernelSU/APatch Users:​
-
-1. Flash [ZygiskNext](https://github.com/Dr-TSNG/ZygiskNext/releases/latest) module (only if you want to use LSPosed features).
-
-2. Reboot your device to get the module installed successfully.
-
-3. Now follow the installation steps of magisk users and voila!
-
-> [!TIP]
->
-> KernelSU doesn't show root prompt. You will have to manually enable root access for Iconify from the KernelSU app itself.
-> In some cases, you may need to disable the `Umount modules by default` option from KernelSU settings if Iconify changes are not reflecting.
-
-# 🤫 Roadmap
-
-You can track all the progress [HERE](https://github.com/Mahmud0808/Iconify/commits/beta)
-
-- Fix bugs.
-
-- Improve UI/UX.
-
-# 🤝 Contribution
-
-We highly appreciate and welcome all forms of contributions, ranging from code, documentation, graphics, design suggestions, to bug reports. We encourage you to make the most of GitHub's collaborative platform by submitting Pull Requests, providing tutorials or other relevant content. Whatever you have to offer, we value and can utilize it effectively in our project.
-
-# 🌐 Translation
-
-You can help translate Iconify [on Crowdin](https://crowdin.com/project/iconify). Here are a few tips:
-
-- When using quotation marks, insert the symbols specific to the target language, as listed in [this table](https://en.wikipedia.org/wiki/Quotation_mark#Summary_table).
-
-- Iconify uses title case for some English UI text. Title case isn’t used in other languages; opt for sentence case instead.
-
-- Some English terminology may have no commonly used equivalents in other languages. In such cases, use short descriptive phrases–for example, the equivalent of _shade generator_ for _monet engine_.
-
-# 🤓 FAQ
-
-<details>
-  <summary>How does Iconify work?</summary>
-
-- Iconify uses Android overlays and Xposed framework that allows modifications to be applied to the user interface (UI) of the device without directly modifying the underlying system files.
-</details>
-
-<details>
-  <summary>Do I need a root access for Iconify to work?</summary>
-
-- Yes, root access is required for Iconify to function properly. While Iconify does support KernelSU and APatch, it is highly recommended to use Magisk for the best compatibility.
-</details>
-
-<details>
-  <summary>Why is LSPosed listed as an optional requirement?</summary>
-
-- LSPosed is categorized as optional due to the fact that even without its installation, you can access the majority of the features offered by iconify. However, should you choose to install LSPosed, you will gain access to certain additional features such as header clocks, lockscreen clocks, header image, battery styles, among others.
-</details>
-
-<details>
-  <summary>Which devices does Iconify support?</summary>
-
-- Iconify exclusively supports stock Pixel or custom AOSP ROMs. It does not support other OEMs such as MIUI, OneUI, ColorOS, NothingOS, MotoUI, etc.
-</details>
-
-<details>
-  <summary>Is Android version "xx" supported?</summary>
-
-- Iconify officially supports Android 12 and later versions. Compatibility with earlier Android versions is not provided, and there are no plans to introduce support for those versions.
-</details>
-
-<details>
-  <summary>I got bootloop. How do I fix it?</summary>
-
-- Boot into [Safe Mode](https://www.androidauthority.com/how-to-enter-safe-mode-android-801476/). Or, you can remove the Iconify folder from /data/adb/modules/ using custom recovery.
-</details>
-
-<details>
-  <summary>What is the difference between Release build and Debug build?</summary>
-
-- [Release build](https://github.com/Mahmud0808/Iconify/releases/latest) is an optimized version intended for distribution to end-users, while [Debug build](https://github.com/Mahmud0808/Iconify/actions) includes additional features and information for debugging and development purposes.
-</details>
-
-<details>
-  <summary>What is the difference between FOSS build and Standard build?</summary>
-
-- FOSS does not include [ML Kit](https://developers.google.com/ml-kit/vision/subject-segmentation/android), which is essential for automatically extracting subjects from depth wallpapers using AI. Everything else remains the same.
-</details>
-
-<details>
-  <summary>Can I use Iconify in conjunction with other customization apps?</summary>
-
-- Yes, Iconify can be used alongside other customization apps. However, it's important to note that conflicts or overlapping modifications may occur, which could affect the overall user experience.
-</details>
-
-<details>
-  <summary>Is there any official support available for Iconify?</summary>
-
-- Yes, you can visit the official [Iconify telegram group](https://t.me/DrDsProjectsChat) to access resources, seek assistance, and engage with other Iconify users.
-</details>
-
-<details>
-  <summary>I found a bug. How do I report it?</summary>
-
-- To report a bug, please navigate to the [Issues](https://github.com/Mahmud0808/Iconify/issues/new/choose) section. Create a new issue and ensure you select the `Bug Report` template. Provide as much detailed information as possible, including steps to reproduce the bug and any relevant error messages or screenshots.
-</details>
-
-<details>
-  <summary>How do I request a new feature?</summary>
-
-- If you have a feature request, please go to the [Issues](https://github.com/Mahmud0808/Iconify/issues/new/choose) section. Create a new issue and choose the `Feature Request` template. Be sure to include comprehensive details about the desired feature, its potential benefits, and any other relevant information that can assist in understanding and evaluating the request.
-</details>
-
-<details>
-  <summary>Where can I make a donation?</summary>
-
-- The preferred and designated means for donating to the project's developer is via the "[Buy me a coffee](https://www.buymeacoffee.com/DrDisagree)" page.
-</details>
-
-# ❤ Credits
-
-### Thanks to:
-
-- [Android Open Source Project (AOSP)](https://source.android.com) for Android source code.
-- [Substratum](https://github.com/substratum/substratum) for overlay building tricks.
-- [icons8.com](https://icons8.com) for giving me permission to use their icons.
-- [iconsax.io](http://iconsax.io) for in-app icon set.
-- [@Jai](https://t.me/jai_08) for helping me with shell script.
-- [@Flodor](https://t.me/Rodolphe06), [@modestCat](https://t.me/ModestCat03), [@Jorge ARZ](https://t.me/ArzjoDev), [@ɦʏքɛʀ.sɦ](https://t.me/hyp3r_sh) for helping with resources.
-- [AOSPMods](https://github.com/siavash79/AOSPMods), [@siavash79](https://t.me/siavash7999) for helping me with Xposed mods.
-- [@Sanely_insane](https://t.me/sanely_insane), [@Jaguar](https://t.me/Jaguar0066) for support and motivation.
-- [HideNavBar](https://github.com/Magisk-Modules-Repo/HideNavBar) for the navbar tweaks.
-- And everyone who [contributed](https://github.com/Mahmud0808/Iconify/blob/beta/docs/contributors.md) and [translated](https://github.com/Mahmud0808/Iconify/blob/beta/docs/translators.md)... :)
-
-# 🚀 CI / CD Release Support
-
-This project includes automated and manual CI release workflows using **GitHub Actions**.
-
-### 1. Automated Release (Git Tag)
-Pushing any version tag starting with `v` triggers an automated build, checksum generation, and GitHub Release creation:
-```bash
-git tag v7.3.0
-git push origin v7.3.0
+# Circle Battery (LSPosed)
+
+LSPosed / Xposed module to replace the SystemUI battery icon with a circle style and swap the percentage position.
+
+- App name: `Circle Battery` (`app/src/main/res/values/strings.xml:2`)
+- Motto: `Replace battery icon with circle style and swap percentage`
+- Package: `com.drdisagree.iconify`, version `7.3.0` (`versionCode 25`) (`app/build.gradle.kts:19-25`)
+- `minSdk 31` (Android 12+), `targetSdk / compileSdk 35`
+
+Fork / stripped-down build of Iconify focused on a single tweak: `BATTERY_STYLE_CIRCLE = 35`.
+
+## Features
+
+- Circular battery gauge drawn by `xposed/modules/batterystyles/CircleBattery.kt:30`:
+  - 360° arc (`canvas.drawArc(mFrame, 270f, 360f, ...)`), level sweep `3.6f * batteryLevel`
+  - Charging bolt overlay with pulsing `ValueAnimator`
+  - Power-save and charging color states, low-battery `!` under `CRITICAL_LEVEL = 5`
+  - Dotted variant via `DashPathEffect` (`setMeterStyle()`), filled variant in `CircleFilledBattery.kt`
+- Swap icon & percentage: flips `BatteryMeterView` to `LAYOUT_DIRECTION_RTL` so `%` renders before the icon (`BatteryStyleManager.kt:989-994`, `MainActivity.kt:113-117`). Default ON.
+- App UI (`MainActivity.kt`, `res/layout/activity_main.xml`):
+  - Module status card (active check via `xposed/utils/HookCheck.kt`)
+  - Live icon preview with level slider (0-100) + simulate charging switch
+  - Swap toggle persisted to `RPrefs`
+  - Restart SystemUI button (requires root, else toast to `killall com.android.systemui`)
+- Defaults on first launch: style = Circle (35), swap = true (`MainActivity.kt:52-60`)
+
+## Requirements
+
+- Android 12+ Pixel / AOSP-based ROM (SystemUI `BatteryMeterView` hooks)
+- LSPosed / Xposed framework, Xposed API `82` (`AndroidManifest.xml:40-41`)
+- Module scope (`res/values/arrays.xml:4-8`): `android`, `com.android.systemui`, `com.android.settings`
+- Root only needed for the in-app SystemUI restart button, not for the hook itself
+
+## Installation / Usage
+
+1. Install the APK.
+2. Enable **Circle Battery** for **SystemUI** in LSPosed Manager.
+3. Reboot / restart SystemUI.
+4. Open the app:
+   - Verify `Active in SystemUI`, otherwise the hook is not loaded (`status_module_desc`).
+   - Toggle `Swap Icon & Percentage` as desired.
+   - Tap `Restart SystemUI` to apply immediately.
+
+## How it works
+
+- Entry: `app/src/main/assets/xposed_init` → `com.drdisagree.iconify.xposed.InitHook`
+- `InitHook.kt` delegates to `HookRes` (resources) + `HookEntry` (package hooks).
+- `EntryList.kt:10-25` loads:
+  - own package → `HookCheck` (reports `isModuleActive() = true` when hooked)
+  - `com.android.systemui` (non-child process) → `HookCheck` + `BatteryStyleManager`
+- `BatteryStyleManager.kt`:
+  - Hooks `systemui.statusbar.policy.BatteryControllerImpl` (`fireBatteryLevelChanged`, `firePowerSaveChanged`, `onReceive`) to push level/charging/power-save into custom drawables
+  - Hooks `systemui.battery.BatteryMeterView` constructor / `updateColors` / `setPercentShowMode` / `updateShowPercent`, replaces icon `ImageView` drawable with `CircleBattery`, handles colors, scaling, RTL flip, charging icon view, and `ShadeHeaderController.onInit` for QS header
+  - Reads prefs via `XPrefs` (`CUSTOM_BATTERY_STYLE`, `CUSTOM_BATTERY_SWAP_PERCENTAGE`), exposed by app via `RemotePrefProvider` (`AndroidManifest.xml:47-52`)
+- In-app preview instantiates the same `CircleBattery` drawable directly, no hook needed.
+
+## Project structure
+
+```
+app/src/main/
+  AndroidManifest.xml          # xposedmodule=true, scope=@array/module_scope, RemotePrefProvider
+  assets/xposed_init           # InitHook entry
+  java/com/drdisagree/iconify/
+    MainActivity.kt            # status, preview, swap toggle, restart SystemUI
+    xposed/InitHook.kt EntryList.kt HookEntry.kt HookRes.kt ModPack.kt
+    xposed/modules/BatteryStyleManager.kt
+    xposed/modules/batterystyles/CircleBattery.kt CircleFilledBattery.kt BatteryDrawable.kt
+    xposed/utils/HookCheck.kt XPrefs.kt
+    data/common/Preferences.kt # BATTERY_STYLE_CIRCLE=35, CUSTOM_BATTERY_SWAP_PERCENTAGE
+  res/values/strings.xml arrays.xml
+  res/layout/activity_main.xml
 ```
 
-### 2. Manual Release (GitHub Actions UI)
-You can trigger a release manually at any time without creating a Git tag:
-1. Navigate to the **Actions** tab on your GitHub repository.
-2. Under **Workflows**, select **Build and Release**.
-3. Click **Run workflow**.
-4. Configure optional parameters:
-   - **Release Tag**: Specify custom tag name (e.g., `v7.3.0`), or leave blank to auto-detect from `build.gradle.kts`.
-   - **Release Title**: Custom title (e.g., `Circle Battery v7.3.0`).
-   - **Build Type**: Choose `release`, `debug`, or `both`.
-   - **Pre-release / Draft**: Mark release as pre-release or draft if desired.
-5. Click **Run workflow**. The APK and its SHA-256 checksums will be built and attached to the GitHub Release and workflow artifacts.
+## Build
 
-### 3. Optional Keystore Signing Secrets
-By default, builds sign with standard keys. To sign releases with your custom production keystore, add the following GitHub repository secrets:
-- `KEYSTORE_BASE64`: Base64-encoded `.jks` file (`base64 -w 0 your-keystore.jks`)
-- `KEY_ALIAS`: Keystore key alias
-- `KEY_PASSWORD`: Keystore key password
-- `STORE_PASSWORD`: Keystore store password
+```bash
+./gradlew assembleDebug
+./gradlew assembleRelease
+```
 
----
+Release signing falls back to debug keys unless `keystore.properties` is present (`app/build.gradle.kts:29-45`).
 
-# 📝 Disclaimer
+## License
 
-> [!WARNING]
-> - Please note that Iconify may not be fully compatible with all custom ROMs. It is discouraged to use on heavily modified ROMs.
-> - I cannot be held responsible for any potential damage or issues that may occur to your device while using Iconify.
-> - It is highly recommended to have a custom recovery installed on your device to revert any changes in case of unexpected problems.
+GPL-3.0, see `LICENSE`. Derived from [Iconify](https://github.com/Mahmud0808/Iconify).

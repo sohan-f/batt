@@ -8,6 +8,7 @@
     <string name="battery_style_circle_title">Circle Battery</string>
     <string name="swap_percentage_title">Swap icon &amp; %</string>
     <string name="swap_percentage_desc">% before the icon</string>
+    <string name="size_title">Size</string>
     <string name="btn_restart_sysui">Restart SystemUI</string>
     <string name="restart_sysui_success">SystemUI restarted</string>
     <string name="restart_sysui_no_root">Root needed. Reboot instead.</string>

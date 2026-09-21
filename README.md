@@ -20,8 +20,8 @@ Fork / stripped-down build of Iconify focused on a single tweak: `BATTERY_STYLE_
 - App UI (`MainActivity.kt`, `res/layout/activity_main.xml`):
   - Module status card (active check via `xposed/utils/HookCheck.kt`)
   - Live icon preview with level slider (0-100) + simulate charging switch
-  - Swap toggle persisted to `RPrefs`
-  - Restart SystemUI button (requires root, else toast to `killall com.android.systemui`)
+  - Swap toggle + size slider persisted to `RPrefs`
+  - Restart button (requires root)
 - Defaults on first launch: style = Circle (35), swap = true (`MainActivity.kt:52-60`)
 
 ## Requirements
@@ -37,7 +37,7 @@ Fork / stripped-down build of Iconify focused on a single tweak: `BATTERY_STYLE_
 2. Enable **Circle Battery** for **SystemUI** in LSPosed Manager.
 3. Reboot / restart SystemUI.
 4. Open the app:
-   - Verify `Active in SystemUI`, otherwise the hook is not loaded (`status_module_desc`).
+   - Verify `Active`, otherwise the hook is not loaded (`status_module_desc`).
    - Toggle `Swap Icon & Percentage` as desired.
    - Tap `Restart SystemUI` to apply immediately.
 
@@ -61,7 +61,7 @@ app/src/main/
   AndroidManifest.xml          # xposedmodule=true, scope=@array/module_scope, RemotePrefProvider
   assets/xposed_init           # InitHook entry
   java/com/drdisagree/iconify/
-    MainActivity.kt            # status, preview, swap toggle, restart SystemUI
+    MainActivity.kt            # status, preview, swap toggle, size slider, restart
     xposed/InitHook.kt EntryList.kt HookEntry.kt HookRes.kt ModPack.kt
     xposed/modules/BatteryStyleManager.kt
     xposed/modules/batterystyles/CircleBattery.kt CircleFilledBattery.kt BatteryDrawable.kt

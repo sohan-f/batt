@@ -239,6 +239,37 @@
 
                 </LinearLayout>
 
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginHorizontal="20dp"
+                    android:background="?attr/colorOutlineVariant"
+                    android:alpha="0.6" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/size_title"
+                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+
+                    <com.google.android.material.slider.Slider
+                        android:id="@+id/sliderBatterySize"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:stepSize="1.0"
+                        android:value="20.0"
+                        android:valueFrom="12.0"
+                        android:valueTo="32.0"
+                        app:labelBehavior="withinBounds" />
+
+                </LinearLayout>
+
             </com.google.android.material.card.MaterialCardView>
 
             <!-- Primary action: expressive tonal button with icon -->

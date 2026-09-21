@@ -11,8 +11,10 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import com.drdisagree.iconify.data.common.Preferences.BATTERY_STYLE_CIRCLE
+import com.drdisagree.iconify.data.common.Preferences.CUSTOM_BATTERY_HEIGHT
 import com.drdisagree.iconify.data.common.Preferences.CUSTOM_BATTERY_STYLE
 import com.drdisagree.iconify.data.common.Preferences.CUSTOM_BATTERY_SWAP_PERCENTAGE
+import com.drdisagree.iconify.data.common.Preferences.CUSTOM_BATTERY_WIDTH
 import com.drdisagree.iconify.data.config.RPrefs
 import com.drdisagree.iconify.databinding.ActivityMainBinding
 import com.drdisagree.iconify.utils.SystemUtils
@@ -25,6 +27,10 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private var previewBatteryDrawable: CircleBattery? = null
+
+    companion object {
+        private const val DEFAULT_BATTERY_SIZE_DP = 20
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         DynamicColors.applyToActivityIfAvailable(this)
@@ -68,6 +74,12 @@ class MainActivity : AppCompatActivity() {
         }
         if (!RPrefs.contains(CUSTOM_BATTERY_SWAP_PERCENTAGE)) {
             RPrefs.putBoolean(CUSTOM_BATTERY_SWAP_PERCENTAGE, true)
+        }
+        if (!RPrefs.contains(CUSTOM_BATTERY_WIDTH)) {
+            RPrefs.putInt(CUSTOM_BATTERY_WIDTH, DEFAULT_BATTERY_SIZE_DP)
+        }
+        if (!RPrefs.contains(CUSTOM_BATTERY_HEIGHT)) {
+            RPrefs.putInt(CUSTOM_BATTERY_HEIGHT, DEFAULT_BATTERY_SIZE_DP)
         }
     }
 
@@ -148,6 +160,26 @@ class MainActivity : AppCompatActivity() {
                 if (isChecked) "Swapped" else "Default",
                 Snackbar.LENGTH_SHORT
             ).show()
+        }
+
+        val sizeDp = RPrefs.getSliderInt(CUSTOM_BATTERY_WIDTH, DEFAULT_BATTERY_SIZE_DP)
+        binding.sliderBatterySize.value = sizeDp.toFloat()
+        updatePreviewIconSize(sizeDp)
+
+        binding.sliderBatterySize.addOnChangeListener { _, value, fromUser ->
+            if (!fromUser) return@addOnChangeListener
+            val size = value.toInt()
+            RPrefs.putInt(CUSTOM_BATTERY_WIDTH, size)
+            RPrefs.putInt(CUSTOM_BATTERY_HEIGHT, size)
+            updatePreviewIconSize(size)
+        }
+    }
+
+    private fun updatePreviewIconSize(sizeDp: Int) {
+        val px = (sizeDp * resources.displayMetrics.density).toInt()
+        binding.imageBatteryPreview.layoutParams = binding.imageBatteryPreview.layoutParams.apply {
+            width = px
+            height = px
         }
     }
 

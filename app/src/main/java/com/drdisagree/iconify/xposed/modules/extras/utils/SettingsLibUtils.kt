@@ -70,43 +70,62 @@ class SettingsLibUtils(context: Context) : ModPack(context) {
             resID: Int,
             defValue: Int = 0
         ): Int {
-            if (UtilsClass == null) return defValue
-
-            return try {
-                UtilsClass.callStaticMethod(
-                    methodName,
-                    resID,
-                    context
-                ) as Int
-            } catch (ignored: Throwable) {
+            if (UtilsClass != null) {
                 try {
-                    UtilsClass.callStaticMethod(
+                    return UtilsClass.callStaticMethod(
                         methodName,
-                        context,
-                        resID
+                        resID,
+                        context
                     ) as Int
                 } catch (ignored: Throwable) {
                     try {
-                        UtilsClass.callStaticMethod(
+                        return UtilsClass.callStaticMethod(
                             methodName,
                             context,
-                            resID,
-                            defValue
+                            resID
                         ) as Int
                     } catch (ignored: Throwable) {
                         try {
-                            UtilsClass.callStaticMethod(
+                            return UtilsClass.callStaticMethod(
                                 methodName,
+                                context,
                                 resID,
-                                defValue,
-                                context
+                                defValue
                             ) as Int
-                        } catch (throwable: Throwable) {
-                            log(SettingsLibUtils, throwable)
-                            defValue
+                        } catch (ignored: Throwable) {
+                            try {
+                                return UtilsClass.callStaticMethod(
+                                    methodName,
+                                    resID,
+                                    defValue,
+                                    context
+                                ) as Int
+                            } catch (throwable: Throwable) {
+                                log(SettingsLibUtils, throwable)
+                            }
                         }
                     }
                 }
+            }
+
+            // SettingsLibUtils is never registered as a ModPack in EntryList,
+            // so UtilsClass is always null and every lookup above is skipped.
+            // Resolve the theme attribute directly instead of returning
+            // defValue (0 = fully transparent): a 0 tint makes shade-header
+            // icons and the battery drawable disappear on QS pull-down.
+            return resolveThemeColor(context, resID, defValue)
+        }
+
+        private fun resolveThemeColor(context: Context, resID: Int, defValue: Int): Int {
+            return try {
+                val attrs = context.theme.obtainStyledAttributes(intArrayOf(resID))
+                try {
+                    attrs.getColor(0, defValue)
+                } finally {
+                    attrs.recycle()
+                }
+            } catch (_: Throwable) {
+                defValue
             }
         }
 

@@ -571,15 +571,18 @@ class MainActivity : AppCompatActivity() {
         updateSizeDisplay(sizeDp)
         syncPresetChecked(sizeDp)
         binding.sliderBatterySize.setLabelFormatter { v -> getString(R.string.footprint_value_format, v.toInt()) }
-        binding.sliderBatterySize.addOnChangeListener { _, value, _ ->
-            // Display tracks live; prefs persist on settle (stop / glide end).
+        binding.sliderBatterySize.addOnChangeListener { _, value, fromUser ->
+            // Display tracks live; presets only follow the user's finger so
+            // programmatic glides don't flicker through intermediate stops.
+            // Prefs persist on settle (stop / glide end).
             val s = value.toInt()
             updateSizeDisplay(s)
-            syncPresetChecked(s)
+            if (fromUser) syncPresetChecked(s)
         }
         binding.sliderBatterySize.addOnSliderTouchListener(object : com.google.android.material.slider.Slider.OnSliderTouchListener {
             override fun onStartTrackingTouch(s: com.google.android.material.slider.Slider) {
                 sizeAnimator?.cancel()
+                sliderGlideTarget = null
             }
 
             override fun onStopTrackingTouch(s: com.google.android.material.slider.Slider) {
@@ -591,20 +594,22 @@ class MainActivity : AppCompatActivity() {
             }
         })
         binding.btnSizeMinus.setOnClickListener {
-            val c = binding.sliderBatterySize.value.roundToInt()
+            val c = sliderGlideTarget ?: binding.sliderBatterySize.value.roundToInt()
             if (c > MIN_BATTERY_SIZE_DP) {
                 animateSliderTo(c - 1)
                 itHaptic(it)
             }
         }
         binding.btnSizePlus.setOnClickListener {
-            val c = binding.sliderBatterySize.value.roundToInt()
+            val c = sliderGlideTarget ?: binding.sliderBatterySize.value.roundToInt()
             if (c < MAX_BATTERY_SIZE_DP) {
                 animateSliderTo(c + 1)
                 itHaptic(it)
             }
         }
     }
+
+    private var sliderGlideTarget: Int? = null
 
     private var sizeAnimator: ValueAnimator? = null
 
@@ -699,7 +704,9 @@ class MainActivity : AppCompatActivity() {
         val target = targetDp.coerceIn(MIN_BATTERY_SIZE_DP, MAX_BATTERY_SIZE_DP).toFloat()
         sizeAnimator?.cancel()
         val slider = binding.sliderBatterySize
+        sliderGlideTarget = targetDp
         if (slider.value == target) {
+            sliderGlideTarget = null
             applyBatterySize(targetDp)
             syncPresetChecked(targetDp)
             return
@@ -714,6 +721,7 @@ class MainActivity : AppCompatActivity() {
             addListener(object : android.animation.AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: android.animation.Animator) {
                     if (destroyed) return
+                    sliderGlideTarget = null
                     applyBatterySize(targetDp)
                     syncPresetChecked(targetDp)
                 }
@@ -753,6 +761,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateSizeDisplay(sizeDp: Int) {
         binding.textSizeValueDisplay.text = getString(R.string.footprint_value_format, sizeDp)
+        binding.btnSizeMinus.alpha = if (sizeDp <= MIN_BATTERY_SIZE_DP) 0.4f else 1f
+        binding.btnSizePlus.alpha = if (sizeDp >= MAX_BATTERY_SIZE_DP) 0.4f else 1f
     }
 
     private fun setupActions() {

@@ -20,6 +20,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.updatePadding
+import androidx.dynamicanimation.animation.FloatValueHolder
 import androidx.dynamicanimation.animation.FloatPropertyCompat
 import androidx.dynamicanimation.animation.SpringAnimation
 import com.sysui.batt.data.common.Preferences.BATTERY_STYLE_CIRCLE
@@ -119,6 +120,7 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         sizeAnimator?.cancel()
         levelWeightAnimator?.cancel()
+        pulseSpring?.cancel()
         restartIconFade?.cancel()
         settleSprings.forEach { it.cancel() }
         settleSprings.clear()
@@ -484,6 +486,7 @@ class MainActivity : AppCompatActivity() {
             card.contentDescription = "${title.text}, ${if (selected) "selected" else "not selected"}"
             if (selected) {
                 if (badge.visibility != View.VISIBLE) {
+                    badge.animate().cancel()
                     badge.visibility = View.VISIBLE
                     if (animate) {
                         badge.scaleX = 0.4f
@@ -496,8 +499,14 @@ class MainActivity : AppCompatActivity() {
                         badge.alpha = 1f
                     }
                 }
-            } else {
-                badge.visibility = View.GONE
+            } else if (badge.visibility != View.INVISIBLE) {
+                // Reserve the badge slot so the header row never remeasures.
+                if (animate) {
+                    badge.animate().scaleX(0.4f).scaleY(0.4f).alpha(0f).setDuration(200).setInterpolator(emphasizedAccelerate)
+                        .withEndAction { badge.visibility = View.INVISIBLE }.start()
+                } else {
+                    badge.visibility = View.INVISIBLE
+                }
             }
         }
         paint(binding.cardOrderPercentFirst, binding.textPercentFirstTitle, binding.textPercentFirstDesc, binding.checkPercentFirst, percentFirst)
@@ -581,31 +590,58 @@ class MainActivity : AppCompatActivity() {
         setDoto(binding.textOrderPreviewPercentSecond, 700f)
     }
 
-    // Level change swell: wght 700 breathes toward 850 while the glyph
-    // scales to 1.06, both riding one emphasized curve, then settles exact.
+    // Level swell in two phases: a quick 180ms swell out (weight 700 to
+    // 900, glyph to 1.08), then the theme spatial spring carries it home
+    // with a natural overshoot settle. Exact rest values on completion.
     private fun pulseLevelWeight() {
         levelWeightAnimator?.cancel()
+        pulseSpring?.cancel()
         val tv = binding.textDeviceLevel
         if (tv.width > 0) {
             tv.pivotX = tv.width / 2f
             tv.pivotY = tv.height / 2f
         }
         levelWeightAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = 350
-            interpolator = emphasized
+            duration = 180
+            interpolator = emphasizedAccelerate
             addUpdateListener { a ->
-                val swell = kotlin.math.sin((a.animatedValue as Float) * kotlin.math.PI).toFloat()
-                tv.fontVariationSettings = "'wght' ${700 + 150 * swell}, 'ROND' 100"
-                tv.scaleX = 1 + 0.06f * swell
-                tv.scaleY = 1 + 0.06f * swell
+                val f = a.animatedValue as Float
+                tv.fontVariationSettings = "'wght' ${700 + 200 * f}, 'ROND' 100"
+                tv.scaleX = 1 + 0.08f * f
+                tv.scaleY = 1 + 0.08f * f
             }
             addListener(object : android.animation.AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: android.animation.Animator) {
-                    tv.fontVariationSettings = "'wght' 700, 'ROND' 100"
-                    tv.scaleX = 1f
-                    tv.scaleY = 1f
+                    settleLevelSwell(tv)
                 }
             })
+            start()
+        }
+    }
+
+    private var pulseSpring: SpringAnimation? = null
+
+    private fun settleLevelSwell(tv: android.widget.TextView) {
+        val holder = FloatValueHolder(0.08f)
+        val spring = MotionUtils.resolveThemeSpringForce(
+            this,
+            com.google.android.material.R.attr.motionSpringDefaultSpatial,
+            0,
+        ).apply { finalPosition = 0f }
+        pulseSpring?.cancel()
+        pulseSpring = SpringAnimation(holder).apply {
+            setSpring(spring)
+            addUpdateListener { _, value, _ ->
+                val s = value.coerceIn(-0.02f, 0.08f)
+                tv.scaleX = 1 + s
+                tv.scaleY = 1 + s
+                tv.fontVariationSettings = "'wght' ${700 + 200 * (s / 0.08f)}, 'ROND' 100"
+            }
+            addEndListener { _, _, _, _ ->
+                tv.fontVariationSettings = "'wght' 700, 'ROND' 100"
+                tv.scaleX = 1f
+                tv.scaleY = 1f
+            }
             start()
         }
     }

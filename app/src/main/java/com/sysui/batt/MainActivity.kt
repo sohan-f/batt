@@ -237,6 +237,9 @@ class MainActivity : AppCompatActivity() {
         binding.textDeviceTemp.text = if (tempTenths != Int.MIN_VALUE) getString(R.string.device_temp_format, tempTenths / 10f) else "--"
         binding.textDeviceVoltage.text = if (voltageMv != Int.MIN_VALUE) getString(R.string.device_voltage_format, voltageMv / 1000f) else "--"
         binding.textDeviceHealth.text = deviceHealthText(health)
+        binding.textDeviceRate.text = formatBatteryRate()
+        binding.textDeviceTech.text =
+            intent.getStringExtra(BatteryManager.EXTRA_TECHNOLOGY)?.takeIf { it.isNotBlank() } ?: "--"
         lastBatteryLevel = pct
         lastCharging = charging
         updateDeviceBatteryIcon(pct, charging)
@@ -294,6 +297,19 @@ class MainActivity : AppCompatActivity() {
         plugged and BatteryManager.BATTERY_PLUGGED_USB != 0 -> getString(R.string.device_source_usb)
         plugged and BatteryManager.BATTERY_PLUGGED_WIRELESS != 0 -> getString(R.string.device_source_wireless)
         else -> getString(R.string.device_source_unplugged)
+    }
+
+    private fun formatBatteryRate(): String {
+        val nowUa = try {
+            getSystemService(BatteryManager::class.java)?.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW)
+        } catch (_: Throwable) {
+            null
+        } ?: return "--"
+        if (nowUa == Long.MIN_VALUE) return "--"
+        val sign = if (nowUa < 0) "-" else "+"
+        val absMa = kotlin.math.abs(nowUa) / 1000f
+        return if (absMa >= 1000) getString(R.string.device_rate_format_a, sign, absMa / 1000)
+        else getString(R.string.device_rate_format_ma, sign, absMa.toInt())
     }
 
     private fun deviceHealthText(health: Int): String = when (health) {

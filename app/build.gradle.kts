@@ -172,10 +172,6 @@ dependencies {
 
     // The core module that provides APIs to a shell
     implementation(libs.su.core)
-    // Optional: APIs for creating root services. Depends on ":core"
-    implementation(libs.su.service)
-    // Optional: Provides remote file system support
-    implementation(libs.su.nio)
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)

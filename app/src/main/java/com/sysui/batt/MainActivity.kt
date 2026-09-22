@@ -15,6 +15,7 @@ import android.view.animation.PathInterpolator
 import android.widget.Toast
 import kotlin.math.abs
 import kotlin.math.roundToInt
+import kotlin.math.roundToInt
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -116,13 +117,23 @@ class MainActivity : AppCompatActivity() {
         super.onPause()
     }
 
+    private var destroyed = false
+
     override fun onDestroy() {
+        destroyed = true
         sizeAnimator?.cancel()
         levelChangeAnim?.cancel()
         restartIconFade?.cancel()
+        restartPhase2?.let { binding.layoutBottomDock.removeCallbacks(it) }
+        restartPhase3?.let { binding.layoutBottomDock.removeCallbacks(it) }
+        restartPhase2 = null
+        restartPhase3 = null
         settleSprings.forEach { it.cancel() }
         settleSprings.clear()
         cardColorAnimators.values.forEach { it.cancel() }
+        cardColorAnimators.clear()
+        strokeAnimators.values.forEach { it.cancel() }
+        strokeAnimators.clear()
         super.onDestroy()
     }
 
@@ -131,15 +142,15 @@ class MainActivity : AppCompatActivity() {
             Configuration.UI_MODE_NIGHT_YES
         val controller = WindowInsetsControllerCompat(window, binding.root)
         controller.isAppearanceLightStatusBars = !night
-        controller.isAppearanceLightNavigationBars = !night
     }
 
     private fun setupEdgeToEdge() {
+        val density = resources.displayMetrics.density
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
             val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             binding.appBarLayout.updatePadding(left = bars.left, top = bars.top, right = bars.right)
-            binding.nestedScrollView.updatePadding(left = bars.left, right = bars.right, bottom = bars.bottom + 84)
-            binding.layoutBottomDock.updatePadding(left = bars.left + 16, right = bars.right + 16, bottom = bars.bottom + 12)
+            binding.nestedScrollView.updatePadding(left = bars.left, right = bars.right, bottom = bars.bottom + (84 * density).toInt())
+            binding.layoutBottomDock.updatePadding(left = bars.left + (16 * density).toInt(), right = bars.right + (16 * density).toInt(), bottom = bars.bottom + (12 * density).toInt())
             insets
         }
     }
@@ -157,7 +168,7 @@ class MainActivity : AppCompatActivity() {
             val active = binding.textModuleStatusBadge.text == getString(R.string.status_module_active)
             MaterialAlertDialogBuilder(this)
                 .setTitle(R.string.systemui_module_status)
-                .setMessage(if (active) "Circle Battery LSPosed hook (API 102) is active and modifying SystemUI." else getString(R.string.status_module_desc))
+                .setMessage(if (active) getString(R.string.status_module_active_desc) else getString(R.string.status_module_desc))
                 .setPositiveButton(android.R.string.ok, null)
                 .show()
         }
@@ -206,19 +217,21 @@ class MainActivity : AppCompatActivity() {
         if (intent == null) return
         val level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
         val scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, 100).takeIf { it > 0 } ?: 100
-        val pct = if (level >= 0) (level * 100 / scale).coerceIn(0, 100) else return
+        val pct = if (level >= 0) (level * 100f / scale).roundToInt().coerceIn(0, 100) else return
         val status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, BatteryManager.BATTERY_STATUS_UNKNOWN)
         val plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0)
         val charging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
-            status == BatteryManager.BATTERY_STATUS_FULL && plugged != 0
+            (status == BatteryManager.BATTERY_STATUS_FULL && plugged != 0)
         val tempTenths = intent.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, Int.MIN_VALUE)
         val voltageMv = intent.getIntExtra(BatteryManager.EXTRA_VOLTAGE, Int.MIN_VALUE)
         val health = intent.getIntExtra(BatteryManager.EXTRA_HEALTH, BatteryManager.BATTERY_HEALTH_UNKNOWN)
         if (pct != lastBatteryLevel || charging != lastCharging) animateLevelChange(pct)
-        else binding.textDeviceLevel.text = "$pct%"
-        binding.textOrderPreviewPercentFirst.text = "$pct%"
-        binding.textOrderPreviewPercentSecond.text = "$pct%"
+        else binding.textDeviceLevel.text = getString(R.string.device_percent_format, pct)
+        binding.textOrderPreviewPercentFirst.text = getString(R.string.device_percent_format, pct)
+        binding.textOrderPreviewPercentSecond.text = getString(R.string.device_percent_format, pct)
         binding.textDeviceStatus.text = deviceStatusText(status, charging)
+        binding.imageDeviceStatusIcon.contentDescription =
+            getString(R.string.device_battery_icon_desc, pct, binding.textDeviceStatus.text)
         binding.textDeviceSource.text = deviceSourceText(plugged)
         binding.textDeviceTemp.text = if (tempTenths != Int.MIN_VALUE) getString(R.string.device_temp_format, tempTenths / 10f) else "--"
         binding.textDeviceVoltage.text = if (voltageMv != Int.MIN_VALUE) getString(R.string.device_voltage_format, voltageMv / 1000f) else "--"
@@ -324,6 +337,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val cardColorAnimators = mutableMapOf<View, ValueAnimator>()
+    private val strokeAnimators = mutableMapOf<View, ValueAnimator>()
 
     private fun animatePillBackground(card: com.google.android.material.card.MaterialCardView, target: Int) {
         cardColorAnimators[card]?.cancel()
@@ -363,7 +377,8 @@ class MainActivity : AppCompatActivity() {
                     addUpdateListener { a -> card.setCardBackgroundColor(a.animatedValue as Int) }
                     start()
                 }
-                ValueAnimator.ofArgb(fromStroke, targetStroke).apply {
+                strokeAnimators[card]?.cancel()
+                strokeAnimators[card] = ValueAnimator.ofArgb(fromStroke, targetStroke).apply {
                     duration = 250
                     interpolator = emphasized
                     addUpdateListener { a -> card.strokeColor = a.animatedValue as Int }
@@ -375,7 +390,11 @@ class MainActivity : AppCompatActivity() {
             }
             card.strokeWidth = if (selected) (2 * density).toInt() else (1 * density).toInt()
             title.setTextColor(if (selected) onPrimaryContainer else onSurface)
-            card.contentDescription = "${title.text}, ${if (selected) "selected" else "not selected"}"
+            card.contentDescription = getString(
+                R.string.card_selection_state_format,
+                title.text,
+                getString(if (selected) R.string.card_selected_state else R.string.card_unselected_state),
+            )
             if (selected) {
                 if (badge.visibility != View.VISIBLE) {
                     badge.animate().cancel()
@@ -476,7 +495,8 @@ class MainActivity : AppCompatActivity() {
                     addUpdateListener { a -> card.setCardBackgroundColor(a.animatedValue as Int) }
                     start()
                 }
-                ValueAnimator.ofArgb(fromStroke, targetStroke).apply {
+                strokeAnimators[card]?.cancel()
+                strokeAnimators[card] = ValueAnimator.ofArgb(fromStroke, targetStroke).apply {
                     duration = 250
                     interpolator = emphasized
                     addUpdateListener { a -> card.strokeColor = a.animatedValue as Int }
@@ -489,7 +509,11 @@ class MainActivity : AppCompatActivity() {
             card.strokeWidth = if (selected) (2 * density).toInt() else (1 * density).toInt()
             title.setTextColor(if (selected) onPrimaryContainer else onSurface)
             desc.setTextColor(if (selected) onPrimaryContainer else textSecondary)
-            card.contentDescription = "${title.text}, ${if (selected) "selected" else "not selected"}"
+            card.contentDescription = getString(
+                R.string.card_selection_state_format,
+                title.text,
+                getString(if (selected) R.string.card_selected_state else R.string.card_unselected_state),
+            )
             if (selected) {
                 if (badge.visibility != View.VISIBLE) {
                     badge.animate().cancel()
@@ -519,9 +543,12 @@ class MainActivity : AppCompatActivity() {
         paint(binding.cardOrderIconFirst, binding.textIconFirstTitle, binding.textIconFirstDesc, binding.checkIconFirst, !percentFirst)
     }
 
+    private var suppressPresetListener = false
+
     private fun setupSizeController() {
         val sizeDp = RPrefs.getSliderInt(CUSTOM_BATTERY_WIDTH, DEFAULT_BATTERY_SIZE_DP).coerceIn(MIN_BATTERY_SIZE_DP, MAX_BATTERY_SIZE_DP)
         binding.groupSizePresets.addOnButtonCheckedListener { group, checkedId, isChecked ->
+            if (suppressPresetListener) return@addOnButtonCheckedListener
             val btn = group.findViewById<View>(checkedId)
             if (!isChecked) {
                 // Tapping the active preset keeps it selected; programmatic
@@ -529,7 +556,6 @@ class MainActivity : AppCompatActivity() {
                 if (btn?.isPressed == true) group.check(checkedId)
                 return@addOnButtonCheckedListener
             }
-            if (btn?.isPressed != true) return@addOnButtonCheckedListener
             val preset = when (checkedId) {
                 R.id.btnPreset16 -> 16
                 R.id.btnPreset20 -> 20
@@ -538,16 +564,16 @@ class MainActivity : AppCompatActivity() {
                 else -> return@addOnButtonCheckedListener
             }
             setPresetSize(preset)
-            itHaptic(btn)
+            itHaptic(btn ?: group)
         }
         binding.sliderBatterySize.value = sizeDp.toFloat()
         updateSizeDisplay(sizeDp)
         syncPresetChecked(sizeDp)
-        binding.sliderBatterySize.setLabelFormatter { v -> "${v.toInt()} dp" }
-        binding.sliderBatterySize.addOnChangeListener { _, value, fromUser ->
+        binding.sliderBatterySize.setLabelFormatter { v -> getString(R.string.footprint_value_format, v.toInt()) }
+        binding.sliderBatterySize.addOnChangeListener { _, value, _ ->
+            // Display tracks live; prefs persist on settle (stop / glide end).
             val s = value.toInt()
             updateSizeDisplay(s)
-            if (fromUser) applyBatterySize(s)
             syncPresetChecked(s)
         }
         binding.sliderBatterySize.addOnSliderTouchListener(object : com.google.android.material.slider.Slider.OnSliderTouchListener {
@@ -625,9 +651,10 @@ class MainActivity : AppCompatActivity() {
             }
             addListener(object : android.animation.AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: android.animation.Animator) {
-                    tv.text = "$pct%"
-                    binding.textOrderPreviewPercentFirst.text = "$pct%"
-                    binding.textOrderPreviewPercentSecond.text = "$pct%"
+                    if (destroyed) return
+                    tv.text = getString(R.string.device_percent_format, pct)
+                    binding.textOrderPreviewPercentFirst.text = getString(R.string.device_percent_format, pct)
+                    binding.textOrderPreviewPercentSecond.text = getString(R.string.device_percent_format, pct)
                     fadeLevelIn(tv)
                 }
             })
@@ -655,6 +682,7 @@ class MainActivity : AppCompatActivity() {
             }
             addListener(object : android.animation.AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: android.animation.Animator) {
+                    if (destroyed) return
                     levelWeight = 700f
                     tv.fontVariationSettings = "'wght' 700, 'ROND' 100"
                     tv.alpha = 1f
@@ -684,6 +712,7 @@ class MainActivity : AppCompatActivity() {
             addUpdateListener { a -> slider.value = a.animatedValue as Float }
             addListener(object : android.animation.AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: android.animation.Animator) {
+                    if (destroyed) return
                     applyBatterySize(targetDp)
                     syncPresetChecked(targetDp)
                 }
@@ -701,9 +730,13 @@ class MainActivity : AppCompatActivity() {
             else -> View.NO_ID
         }
         if (checkedId == View.NO_ID) {
+            suppressPresetListener = true
             binding.groupSizePresets.clearChecked()
+            suppressPresetListener = false
         } else if (binding.groupSizePresets.checkedButtonId != checkedId) {
+            suppressPresetListener = true
             binding.groupSizePresets.check(checkedId)
+            suppressPresetListener = false
         }
     }
 
@@ -718,7 +751,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateSizeDisplay(sizeDp: Int) {
-        binding.textSizeValueDisplay.text = "$sizeDp dp"
+        binding.textSizeValueDisplay.text = getString(R.string.footprint_value_format, sizeDp)
     }
 
     private fun setupActions() {
@@ -736,6 +769,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private var restartIconFade: ValueAnimator? = null
+    private var restartPhase2: Runnable? = null
+    private var restartPhase3: Runnable? = null
 
     // Expressive loading button: gentle press, then the glyph and label
     // fade out while the expressive LoadingIndicator plays centered over
@@ -758,18 +793,22 @@ class MainActivity : AppCompatActivity() {
                     btn.icon = null
                     spin.show()
                 }
-                v.postDelayed({
-                    if (isFinishing || isDestroyed) return@postDelayed
+                restartPhase2?.let { binding.layoutBottomDock.removeCallbacks(it) }
+                restartPhase2 = Runnable {
+                    if (isFinishing || isDestroyed) return@Runnable
                     spin.hide()
                     btn.icon = getDrawable(R.drawable.ic_restart)
                     fadeRestartIcon(btn, visible = true)
                     springSettlePop(v)
-                    v.postDelayed({
-                        if (isFinishing || isDestroyed) return@postDelayed
+                    restartPhase3?.let { binding.layoutBottomDock.removeCallbacks(it) }
+                    restartPhase3 = Runnable {
+                        if (isFinishing || isDestroyed) return@Runnable
                         btn.text = origText
                         btn.isEnabled = true
-                    }, 300)
-                }, 1400)
+                    }
+                    binding.layoutBottomDock.postDelayed(restartPhase3!!, 300)
+                }
+                binding.layoutBottomDock.postDelayed(restartPhase2!!, 1400)
             }.start()
     }
 
@@ -813,6 +852,7 @@ class MainActivity : AppCompatActivity() {
             }
             addListener(object : android.animation.AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: android.animation.Animator) {
+                    if (destroyed) return
                     onDone?.invoke()
                 }
             })

@@ -239,45 +239,51 @@ class BatteryStyleManager(context: Context) : ModPack(context) {
         mBatteryStyle = batteryStyle
 
         for (view in batteryViews.toList()) {
-            val mBatteryIconView = view.getFieldSilently("mBatteryIconView") as? ImageView
-            mBatteryIconView?.let {
-                updateBatteryRotation(it)
-                updateFlipper(it.parent)
-            }
+            // updatePrefs can arrive on a Binder thread; all view work must
+            // hop to the view's own thread.
+            view.post {
+                val mBatteryIconView = view.getFieldSilently("mBatteryIconView") as? ImageView
+                mBatteryIconView?.let {
+                    updateBatteryRotation(it)
+                    it.parent?.let { parent -> updateFlipper(parent) }
+                }
 
-            val mBatteryPercentView = view.getFieldSilently("mBatteryPercentView") as? TextView
-            mBatteryPercentView?.visibility = if (mHidePercentage) View.GONE else View.VISIBLE
+                val mBatteryPercentView = view.getFieldSilently("mBatteryPercentView") as? TextView
+                mBatteryPercentView?.visibility = if (mHidePercentage) View.GONE else View.VISIBLE
 
-            if (styleChanged) {
-                val mCharging = view.isBatteryCharging()
-                val mLevel = view.getFieldSilently("mLevel") as? Int ?: continue
-                val mPowerSave =
-                    batteryController?.getFieldSilently("mPowerSave") as? Boolean == true
+                if (styleChanged) {
+                    val mCharging = view.isBatteryCharging()
+                    val mLevel = view.getFieldSilently("mLevel") as? Int
+                    if (mLevel != null) {
+                        val mPowerSave =
+                            batteryController?.getFieldSilently("mPowerSave") as? Boolean == true
 
-                if (customBatteryEnabled) {
-                    val mBatteryDrawable = getNewBatteryDrawable(mContext)
+                        if (customBatteryEnabled) {
+                            val mBatteryDrawable = getNewBatteryDrawable(mContext)
 
-                    if (mBatteryDrawable != null) {
-                        if (mBatteryIconView != null) {
-                            mBatteryIconView.setImageDrawable(mBatteryDrawable)
-                            mBatteryIconView.setVisibility(if (mHideBattery) View.GONE else View.VISIBLE)
+                            if (mBatteryDrawable != null) {
+                                if (mBatteryIconView != null) {
+                                    mBatteryIconView.setImageDrawable(mBatteryDrawable)
+                                    mBatteryIconView.setVisibility(if (mHideBattery) View.GONE else View.VISIBLE)
+                                }
+
+                                view.setExtraField("mBatteryDrawable", mBatteryDrawable)
+
+                                mBatteryDrawable.setBatteryLevel(mLevel)
+                                mBatteryDrawable.setChargingEnabled(mCharging)
+                                mBatteryDrawable.setPowerSavingEnabled(mPowerSave)
+
+                                // A fresh drawable defaults to WHITE (the constructor's
+                                // frameColor is unused), so replay this view's last
+                                // SystemUI colors — otherwise the icon keeps the wrong
+                                // color until the next theme-driven updateColors.
+                                (view.getExtraFieldSilently("mLastBatteryColors") as? IntArray)
+                                    ?.takeIf { it.size == 3 }
+                                    ?.let { mBatteryDrawable.setColors(it[0], it[1], it[2]) }
+
+                                updateCustomizeBatteryDrawable(mBatteryDrawable)
+                            }
                         }
-
-                        view.setExtraField("mBatteryDrawable", mBatteryDrawable)
-
-                        mBatteryDrawable.setBatteryLevel(mLevel)
-                        mBatteryDrawable.setChargingEnabled(mCharging)
-                        mBatteryDrawable.setPowerSavingEnabled(mPowerSave)
-
-                        // A fresh drawable defaults to WHITE (the constructor's
-                        // frameColor is unused), so replay this view's last
-                        // SystemUI colors — otherwise the icon keeps the wrong
-                        // color until the next theme-driven updateColors.
-                        (view.getExtraFieldSilently("mLastBatteryColors") as? IntArray)
-                            ?.takeIf { it.size == 3 }
-                            ?.let { mBatteryDrawable.setColors(it[0], it[1], it[2]) }
-
-                        updateCustomizeBatteryDrawable(mBatteryDrawable)
                     }
                 }
             }
@@ -1066,7 +1072,7 @@ class BatteryStyleManager(context: Context) : ModPack(context) {
             thisObject.gravity = Gravity.CENTER_VERTICAL or Gravity.START
             thisObject
         } else {
-            thisObject as View
+            thisObject as? View ?: return
         }
 
         batteryView.layoutDirection = if (mSwapPercentage) {
@@ -1077,7 +1083,7 @@ class BatteryStyleManager(context: Context) : ModPack(context) {
     }
 
     private fun updateBatteryRotation(thisObject: Any) {
-        val mBatteryIconView = thisObject.getField("mBatteryIconView") as View
+        val mBatteryIconView = thisObject.getFieldSilently("mBatteryIconView") as? View ?: return
         updateBatteryRotation(mBatteryIconView)
     }
 

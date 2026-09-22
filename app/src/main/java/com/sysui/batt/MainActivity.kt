@@ -20,7 +20,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.updatePadding
-import androidx.dynamicanimation.animation.FloatValueHolder
 import androidx.dynamicanimation.animation.FloatPropertyCompat
 import androidx.dynamicanimation.animation.SpringAnimation
 import com.sysui.batt.data.common.Preferences.BATTERY_STYLE_CIRCLE
@@ -104,7 +103,7 @@ class MainActivity : AppCompatActivity() {
             registerBatteryReceiver()
             refreshDeviceBattery(registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED)))
             binding.textDeviceLevel.post {
-                if (!isFinishing && !isDestroyed) pulseLevelWeight()
+                if (!isFinishing && !isDestroyed && lastBatteryLevel >= 0) animateLevelChange(lastBatteryLevel)
             }
         }
     }
@@ -119,8 +118,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         sizeAnimator?.cancel()
-        levelWeightAnimator?.cancel()
-        pulseSpring?.cancel()
+        levelChangeAnim?.cancel()
         restartIconFade?.cancel()
         settleSprings.forEach { it.cancel() }
         settleSprings.clear()
@@ -216,8 +214,8 @@ class MainActivity : AppCompatActivity() {
         val tempTenths = intent.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, Int.MIN_VALUE)
         val voltageMv = intent.getIntExtra(BatteryManager.EXTRA_VOLTAGE, Int.MIN_VALUE)
         val health = intent.getIntExtra(BatteryManager.EXTRA_HEALTH, BatteryManager.BATTERY_HEALTH_UNKNOWN)
-        binding.textDeviceLevel.text = "$pct%"
-        if (pct != lastBatteryLevel || charging != lastCharging) pulseLevelWeight()
+        if (pct != lastBatteryLevel || charging != lastCharging) animateLevelChange(pct)
+        else binding.textDeviceLevel.text = "$pct%"
         binding.textOrderPreviewPercentFirst.text = "$pct%"
         binding.textOrderPreviewPercentSecond.text = "$pct%"
         binding.textDeviceStatus.text = deviceStatusText(status, charging)
@@ -573,7 +571,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private var levelWeightAnimator: ValueAnimator? = null
     private var sizeAnimator: ValueAnimator? = null
 
     private fun setDoto(textView: android.widget.TextView, wght: Float, rond: Float = 100f) {
@@ -590,58 +587,73 @@ class MainActivity : AppCompatActivity() {
         setDoto(binding.textOrderPreviewPercentSecond, 700f)
     }
 
-    // Level swell in two phases: a quick 180ms swell out (weight 700 to
-    // 900, glyph to 1.08), then the theme spatial spring carries it home
-    // with a natural overshoot settle. Exact rest values on completion.
-    private fun pulseLevelWeight() {
-        levelWeightAnimator?.cancel()
-        pulseSpring?.cancel()
+    // Level change as fade-through: the old value recedes fast (fades,
+    // lightens, settles back), the new value arrives slow and weighted,
+    // order previews trailing on a short stagger. No scale popping.
+    private var levelChangeAnim: ValueAnimator? = null
+    private var levelWeight = 700f
+
+    private fun animateLevelChange(pct: Int) {
+        levelChangeAnim?.cancel()
         val tv = binding.textDeviceLevel
         if (tv.width > 0) {
             tv.pivotX = tv.width / 2f
             tv.pivotY = tv.height / 2f
         }
-        levelWeightAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = 180
+        val startAlpha = tv.alpha
+        val startScale = tv.scaleX
+        val startWeight = levelWeight
+        levelChangeAnim = ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = 110
             interpolator = emphasizedAccelerate
             addUpdateListener { a ->
                 val f = a.animatedValue as Float
-                tv.fontVariationSettings = "'wght' ${700 + 200 * f}, 'ROND' 100"
-                tv.scaleX = 1 + 0.08f * f
-                tv.scaleY = 1 + 0.08f * f
+                tv.alpha = startAlpha * (1 - f)
+                val s = startScale - (startScale - 0.95f) * f
+                tv.scaleX = s
+                tv.scaleY = s
+                levelWeight = startWeight - (startWeight - 620f) * f
+                tv.fontVariationSettings = "'wght' $levelWeight, 'ROND' 100"
             }
             addListener(object : android.animation.AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: android.animation.Animator) {
-                    settleLevelSwell(tv)
+                    tv.text = "$pct%"
+                    binding.textOrderPreviewPercentFirst.text = "$pct%"
+                    binding.textOrderPreviewPercentSecond.text = "$pct%"
+                    fadeLevelIn(tv)
                 }
             })
             start()
         }
     }
 
-    private var pulseSpring: SpringAnimation? = null
-
-    private fun settleLevelSwell(tv: android.widget.TextView) {
-        val holder = FloatValueHolder(0.08f)
-        val spring = MotionUtils.resolveThemeSpringForce(
-            this,
-            com.google.android.material.R.attr.motionSpringDefaultSpatial,
-            0,
-        ).apply { finalPosition = 0f }
-        pulseSpring?.cancel()
-        pulseSpring = SpringAnimation(holder).apply {
-            setSpring(spring)
-            addUpdateListener { _, value, _ ->
-                val s = value.coerceIn(-0.02f, 0.08f)
-                tv.scaleX = 1 + s
-                tv.scaleY = 1 + s
-                tv.fontVariationSettings = "'wght' ${700 + 200 * (s / 0.08f)}, 'ROND' 100"
+    private fun fadeLevelIn(tv: android.widget.TextView) {
+        listOf(binding.textOrderPreviewPercentFirst, binding.textOrderPreviewPercentSecond).forEachIndexed { i, v ->
+            v.animate().cancel()
+            v.alpha = 0f
+            v.animate().alpha(1f).setStartDelay(60L * (i + 1)).setDuration(220).setInterpolator(emphasized).start()
+        }
+        levelChangeAnim = ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = 280
+            interpolator = emphasized
+            addUpdateListener { a ->
+                val f = a.animatedValue as Float
+                tv.alpha = f
+                val s = 0.95f + 0.05f * f
+                tv.scaleX = s
+                tv.scaleY = s
+                levelWeight = 620f + 80f * f
+                tv.fontVariationSettings = "'wght' $levelWeight, 'ROND' 100"
             }
-            addEndListener { _, _, _, _ ->
-                tv.fontVariationSettings = "'wght' 700, 'ROND' 100"
-                tv.scaleX = 1f
-                tv.scaleY = 1f
-            }
+            addListener(object : android.animation.AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: android.animation.Animator) {
+                    levelWeight = 700f
+                    tv.fontVariationSettings = "'wght' 700, 'ROND' 100"
+                    tv.alpha = 1f
+                    tv.scaleX = 1f
+                    tv.scaleY = 1f
+                }
+            })
             start()
         }
     }

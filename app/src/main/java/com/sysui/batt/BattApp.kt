@@ -27,11 +27,6 @@ class BattApp : Application() {
             get() {
                 return LocaleHelper.setLocale(appContext)
             }
-
-        private fun getInstance(): BattApp {
-            return instance
-                ?: throw IllegalStateException("BattApp application is not created yet")
-        }
     }
 
     override fun onCreate() {

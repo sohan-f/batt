@@ -1,6 +1,5 @@
 package com.sysui.batt.data.common
 
-import com.sysui.batt.data.config.RPrefs.getBoolean
 
 object Preferences {
 

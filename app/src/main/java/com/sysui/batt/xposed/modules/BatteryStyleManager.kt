@@ -17,7 +17,6 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.core.content.res.ResourcesCompat
 import com.sysui.batt.R
 import com.sysui.batt.data.common.Const.SYSTEMUI_PACKAGE
 import com.sysui.batt.data.common.Preferences.BATTERY_STYLE_CIRCLE
@@ -133,7 +132,6 @@ import com.sysui.batt.xposed.modules.extras.utils.toolkit.MethodHook
 import com.sysui.batt.xposed.modules.extras.utils.toolkit.XposedHook.Companion.findClass
 import com.sysui.batt.xposed.modules.extras.utils.toolkit.callMethod
 import com.sysui.batt.xposed.modules.extras.utils.toolkit.getBooleanField
-import com.sysui.batt.xposed.modules.extras.utils.toolkit.getExtraField
 import com.sysui.batt.xposed.modules.extras.utils.toolkit.getExtraFieldSilently
 import com.sysui.batt.xposed.modules.extras.utils.toolkit.getField
 import com.sysui.batt.xposed.modules.extras.utils.toolkit.getFieldSilently

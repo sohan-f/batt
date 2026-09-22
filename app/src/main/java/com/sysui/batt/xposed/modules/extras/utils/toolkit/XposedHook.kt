@@ -7,7 +7,6 @@ import com.sysui.batt.xposed.modules.extras.utils.ViewHelper.toPx
 import io.github.libxposed.api.XposedInterface
 import io.github.libxposed.api.XposedModule
 import java.lang.ref.WeakReference
-import java.lang.reflect.Constructor
 import java.lang.reflect.Executable
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier

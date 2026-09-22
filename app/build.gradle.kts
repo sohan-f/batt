@@ -164,9 +164,6 @@ dependencies {
     // Core Library Desugaring
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
-    // Data Binding
-    implementation(libs.library)
-
     // Xposed API (LSPosed libxposed API 102 only, no legacy XposedBridge)
     compileOnly(libs.libxposed.api)
 

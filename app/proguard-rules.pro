@@ -68,10 +68,6 @@
 -repackageclasses
 -allowaccessmodification
 
-# Root Service
--keep class com.sysui.batt.services.RootProviderProxy { *; }
--keep class com.sysui.batt.IRootProviderProxy { *; }
-
 # AIDL Classes
 -keep interface **.I* { *; }
 -keep class **.I*$Stub { *; }

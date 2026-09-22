@@ -40,8 +40,8 @@
     <string name="device_battery_health">Health</string>
     <string name="device_battery_rate">Rate</string>
     <string name="device_battery_tech">Tech</string>
-    <string name="device_rate_format_ma">%1$s%d mA</string>
-    <string name="device_rate_format_a">%1$s%.1f A</string>
+    <string name="device_rate_format_ma">%1$s%2$d mA</string>
+    <string name="device_rate_format_a">%1$s%2$.1f A</string>
     <string name="device_temp_format">%1$.1f°C</string>
     <string name="device_voltage_format">%1$.2fV</string>
     <string name="device_status_charging">Charging</string>

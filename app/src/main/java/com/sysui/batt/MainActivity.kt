@@ -564,16 +564,45 @@ class MainActivity : AppCompatActivity() {
     private var levelWeightAnimator: ValueAnimator? = null
     private var sizeAnimator: ValueAnimator? = null
 
-    // Flex wght pulse on the level readout: 700 swells toward 850 and
-    // settles back, synced to the emphasized curve.
+    private fun setDoto(textView: android.widget.TextView, wght: Float, rond: Float = 100f) {
+        textView.fontVariationSettings = "'wght' $wght, 'ROND' $rond"
+    }
+
+    // Round dot-matrix numerals for the hero data readouts; chrome labels
+    // stay on the crisp default so hierarchy reads at a glance.
+    private fun applyDotoNumerals() {
+        setDoto(binding.textAppTitle, 700f)
+        setDoto(binding.textDeviceLevel, 700f)
+        setDoto(binding.textSizeValueDisplay, 700f)
+        setDoto(binding.textOrderPreviewPercentFirst, 700f)
+        setDoto(binding.textOrderPreviewPercentSecond, 700f)
+    }
+
+    // Level change swell: wght 700 breathes toward 850 while the glyph
+    // scales to 1.06, both riding one emphasized curve, then settles exact.
     private fun pulseLevelWeight() {
         levelWeightAnimator?.cancel()
-        levelWeightAnimator = ValueAnimator.ofFloat(700f, 850f, 700f).apply {
+        val tv = binding.textDeviceLevel
+        if (tv.width > 0) {
+            tv.pivotX = tv.width / 2f
+            tv.pivotY = tv.height / 2f
+        }
+        levelWeightAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
             duration = 350
             interpolator = emphasized
             addUpdateListener { a ->
-                binding.textDeviceLevel.fontVariationSettings = "'wght' ${a.animatedValue as Float}"
+                val swell = kotlin.math.sin((a.animatedValue as Float) * kotlin.math.PI).toFloat()
+                tv.fontVariationSettings = "'wght' ${700 + 150 * swell}, 'ROND' 100"
+                tv.scaleX = 1 + 0.06f * swell
+                tv.scaleY = 1 + 0.06f * swell
             }
+            addListener(object : android.animation.AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: android.animation.Animator) {
+                    tv.fontVariationSettings = "'wght' 700, 'ROND' 100"
+                    tv.scaleX = 1f
+                    tv.scaleY = 1f
+                }
+            })
             start()
         }
     }

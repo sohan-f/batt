@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.os.BatteryManager
 import android.os.Bundle
@@ -370,7 +371,7 @@ class MainActivity : AppCompatActivity() {
             if (animate) {
                 cardColorAnimators[card]?.cancel()
                 val fromBg = card.cardBackgroundColor?.defaultColor ?: targetBg
-                val fromStroke = card.strokeColor
+                val fromStroke = card.strokeColorStateList?.defaultColor ?: targetStroke
                 cardColorAnimators[card] = ValueAnimator.ofArgb(fromBg, targetBg).apply {
                     duration = 250
                     interpolator = emphasized
@@ -381,12 +382,12 @@ class MainActivity : AppCompatActivity() {
                 strokeAnimators[card] = ValueAnimator.ofArgb(fromStroke, targetStroke).apply {
                     duration = 250
                     interpolator = emphasized
-                    addUpdateListener { a -> card.strokeColor = a.animatedValue as Int }
+                    addUpdateListener { a -> card.setStrokeColor(ColorStateList.valueOf(a.animatedValue as Int)) }
                     start()
                 }
             } else {
                 card.setCardBackgroundColor(targetBg)
-                card.strokeColor = targetStroke
+                card.setStrokeColor(ColorStateList.valueOf(targetStroke))
             }
             card.strokeWidth = if (selected) (2 * density).toInt() else (1 * density).toInt()
             title.setTextColor(if (selected) onPrimaryContainer else onSurface)
@@ -488,7 +489,7 @@ class MainActivity : AppCompatActivity() {
             if (animate) {
                 cardColorAnimators[card]?.cancel()
                 val fromBg = card.cardBackgroundColor?.defaultColor ?: targetBg
-                val fromStroke = card.strokeColor
+                val fromStroke = card.strokeColorStateList?.defaultColor ?: targetStroke
                 cardColorAnimators[card] = ValueAnimator.ofArgb(fromBg, targetBg).apply {
                     duration = 250
                     interpolator = emphasized
@@ -499,12 +500,12 @@ class MainActivity : AppCompatActivity() {
                 strokeAnimators[card] = ValueAnimator.ofArgb(fromStroke, targetStroke).apply {
                     duration = 250
                     interpolator = emphasized
-                    addUpdateListener { a -> card.strokeColor = a.animatedValue as Int }
+                    addUpdateListener { a -> card.setStrokeColor(ColorStateList.valueOf(a.animatedValue as Int)) }
                     start()
                 }
             } else {
                 card.setCardBackgroundColor(targetBg)
-                card.strokeColor = targetStroke
+                card.setStrokeColor(ColorStateList.valueOf(targetStroke))
             }
             card.strokeWidth = if (selected) (2 * density).toInt() else (1 * density).toInt()
             title.setTextColor(if (selected) onPrimaryContainer else onSurface)

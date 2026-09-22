@@ -516,9 +516,9 @@ open class LandscapeBatteryOneUI7(private val context: Context, frameColor: Int)
     /**
      * Set the fill level
      */
-    override fun setBatteryLevel(l: Int) {
-        invertFillIcon = if (l >= 67) true else if (l <= 33) false else invertFillIcon
-        batteryLevel = l
+    override fun setBatteryLevel(mLevel: Int) {
+        invertFillIcon = if (mLevel >= 67) true else if (mLevel <= 33) false else invertFillIcon
+        batteryLevel = mLevel
         levelColor = batteryColorForLevel(batteryLevel)
         invalidateSelf()
     }

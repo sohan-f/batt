@@ -306,7 +306,7 @@ class MethodHookHelper(
             }
         }
 
-        if (!foundAny && printError && clazz != null) {
+        if (!foundAny && printError) {
             log(XposedHook, "Method(s) not found: ${methodNames.joinToString()} in ${clazz.simpleName}")
         } else if (!foundAny && throwError) {
             throw Throwable("Method(s) not found: ${methodNames.joinToString()} in ${clazz?.simpleName}")

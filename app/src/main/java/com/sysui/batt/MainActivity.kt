@@ -53,6 +53,7 @@ class MainActivity : AppCompatActivity() {
     private var orderIconSecondDrawable: BatteryDrawable? = null
     private var lastBatteryLevel = -1
     private var lastCharging = false
+    private var lastStatus = BatteryManager.BATTERY_STATUS_UNKNOWN
     // Motion comes from the M3E theme tokens (emphasized easing, spatial
     // springs), with the spec curves as fallback if a token is missing.
     private val emphasized: TimeInterpolator by lazy {
@@ -233,19 +234,19 @@ class MainActivity : AppCompatActivity() {
         else binding.textDeviceLevel.text = getString(R.string.device_percent_format, pct)
         binding.textOrderPreviewPercentFirst.text = getString(R.string.device_percent_format, pct)
         binding.textOrderPreviewPercentSecond.text = getString(R.string.device_percent_format, pct)
-        binding.textDeviceStatus.text = deviceStatusText(status, charging)
-        binding.imageDeviceStatusIcon.contentDescription =
-            getString(R.string.device_battery_icon_desc, pct, binding.textDeviceStatus.text)
+        val cycles = intent.getIntExtra(BatteryManager.EXTRA_CYCLE_COUNT, -1)
+        binding.textDeviceCycles.text = if (cycles >= 0) "$cycles" else "--"
         binding.textDeviceSource.text = deviceSourceText(plugged)
         binding.textDeviceTemp.text = if (tempTenths != Int.MIN_VALUE) getString(R.string.device_temp_format, tempTenths / 10f) else "--"
         binding.textDeviceVoltage.text = if (voltageMv != Int.MIN_VALUE) getString(R.string.device_voltage_format, voltageMv / 1000f) else "--"
         binding.textDeviceHealth.text = deviceHealthText(health)
-        rateEma = null
-        updateRateMeter()
         binding.textDeviceTech.text =
             intent.getStringExtra(BatteryManager.EXTRA_TECHNOLOGY)?.takeIf { it.isNotBlank() } ?: "--"
         lastBatteryLevel = pct
         lastCharging = charging
+        lastStatus = status
+        rateEma = null
+        updateStatusLine()
         updateDeviceBatteryIcon(pct, charging)
     }
 
@@ -307,7 +308,7 @@ class MainActivity : AppCompatActivity() {
 
     // ACTION_BATTERY_CHANGED doesn't fire for current fluctuations, so the
     // rate re-reads on a ticker while visible, smoothed so it reads steady.
-    private val rateTicker = Runnable {
+    private val rateTicker: Runnable = Runnable {
         if (!isFinishing && !isDestroyed && ::binding.isInitialized) {
             updateRateMeter()
             binding.root.postDelayed(rateTicker, 2000)
@@ -318,13 +319,22 @@ class MainActivity : AppCompatActivity() {
         val raw = readCurrentMa()
         if (raw == null) {
             rateEma = null
-            binding.textDeviceRate.text = "--"
-            return
+        } else {
+            val previous = rateEma
+            rateEma = if (previous == null) raw else previous * 0.5f + raw * 0.5f
         }
-        val previous = rateEma
-        val smoothed: Float = if (previous == null) raw else previous * 0.5f + raw * 0.5f
-        rateEma = smoothed
-        binding.textDeviceRate.text = formatRateMa(smoothed)
+        updateStatusLine()
+    }
+
+    // Status carries the live rate in parentheses when known, e.g.
+    // "Charging (+845 mA)"; the ticker refreshes it as current drifts.
+    private fun updateStatusLine() {
+        val base = deviceStatusText(lastStatus, lastCharging)
+        val ema = rateEma
+        binding.textDeviceStatus.text =
+            if (ema == null) base else getString(R.string.device_status_with_rate_format, base, formatRateMa(ema))
+        binding.imageDeviceStatusIcon.contentDescription =
+            getString(R.string.device_battery_icon_desc, lastBatteryLevel, binding.textDeviceStatus.text)
     }
 
     private fun readCurrentMa(): Float? {

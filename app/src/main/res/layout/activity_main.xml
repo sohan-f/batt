@@ -324,12 +324,12 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="@string/device_battery_rate"
+                                    android:text="@string/device_battery_cycles"
                                     android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
                                     android:textColor="?attr/colorOnSurfaceVariant" />
 
                                 <TextView
-                                    android:id="@+id/textDeviceRate"
+                                    android:id="@+id/textDeviceCycles"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_marginTop="2dp"

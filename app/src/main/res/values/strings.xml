@@ -39,6 +39,8 @@
     <string name="device_battery_voltage">Voltage</string>
     <string name="device_battery_health">Health</string>
     <string name="device_battery_rate">Rate</string>
+    <string name="device_battery_cycles">Cycles</string>
+    <string name="device_status_with_rate_format">%1$s (%2$s)</string>
     <string name="device_battery_tech">Tech</string>
     <string name="device_rate_format_ma">%1$s%2$d mA</string>
     <string name="device_rate_format_a">%1$s%2$.1f A</string>

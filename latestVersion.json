@@ -1,8 +1,8 @@
 {
-  "versionName": "16",
-  "versionCode": 16,
-  "apkUrl": "https://github.com/sohan-f/batt/releases/download/v16/CircleBattery-16-release.apk",
+  "versionName": "16.1",
+  "versionCode": 17,
+  "apkUrl": "https://github.com/sohan-f/batt/releases/download/v16.1/CircleBattery-16.1-release.apk",
   "changelog": [
-    "Circle Battery v16 — first release: circle gauge with Continuous, Dotted and Filled styles, percent-first layout option, adjustable footprint, and live device battery readout."
+    "Circle Battery v16.1: live charge rate in the status line, battery cycle count, 1s meter ticker, Doto variable brand font with fade-through level changes, expressive restart loader, and a full codebase cleanup."
   ]
 }

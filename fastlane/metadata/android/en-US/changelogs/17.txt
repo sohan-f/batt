@@ -1,8 +1,9 @@
-Iconify v6.7.0 has arrived! It has the following new changes:
+Circle Battery v16.1
 
-Feature Changes:
-• Fully compatible with Android 14 December and January release
-• Updated translations
-• and many more!
-
-Full changelog at https://github.com/Mahmud0808/Iconify/releases/tag/v6.7.0
+• Live charge/discharge rate in the status line, refreshed every second
+• Battery cycle count and chemistry readout
+• Doto variable brand font with fade-through level changes
+• Expressive loading state on Restart SystemUI
+• Continuous footprint slider with distance-timed glides and presets
+• Standardized selection motion, M3E color roles, dark-theme fixes
+• Removed the fake simulation, dead resources, and legacy cruft

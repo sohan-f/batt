@@ -102,6 +102,9 @@ class MainActivity : AppCompatActivity() {
             refreshModuleStatus()
             registerBatteryReceiver()
             refreshDeviceBattery(registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED)))
+            binding.textDeviceLevel.post {
+                if (!isFinishing && !isDestroyed) pulseLevelWeight()
+            }
         }
     }
 
@@ -212,7 +215,7 @@ class MainActivity : AppCompatActivity() {
         val voltageMv = intent.getIntExtra(BatteryManager.EXTRA_VOLTAGE, Int.MIN_VALUE)
         val health = intent.getIntExtra(BatteryManager.EXTRA_HEALTH, BatteryManager.BATTERY_HEALTH_UNKNOWN)
         binding.textDeviceLevel.text = "$pct%"
-        if (pct != lastBatteryLevel) pulseLevelWeight()
+        if (pct != lastBatteryLevel || charging != lastCharging) pulseLevelWeight()
         binding.textOrderPreviewPercentFirst.text = "$pct%"
         binding.textOrderPreviewPercentSecond.text = "$pct%"
         binding.textDeviceStatus.text = deviceStatusText(status, charging)

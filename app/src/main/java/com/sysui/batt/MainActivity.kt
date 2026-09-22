@@ -311,7 +311,7 @@ class MainActivity : AppCompatActivity() {
     private val rateTicker: Runnable = Runnable {
         if (!isFinishing && !isDestroyed && ::binding.isInitialized) {
             updateRateMeter()
-            binding.root.postDelayed(rateTicker, 2000)
+            binding.root.postDelayed(rateTicker, 1000)
         }
     }
 
@@ -857,9 +857,11 @@ class MainActivity : AppCompatActivity() {
         val origText = btn.text.toString()
         v.animate().scaleX(0.97f).scaleY(0.97f).setDuration(120).setInterpolator(emphasizedAccelerate)
             .withEndAction {
+                if (isFinishing || isDestroyed) return@withEndAction
                 v.animate().scaleX(1f).scaleY(1f).setDuration(450).setInterpolator(emphasized).start()
                 btn.text = ""
                 fadeRestartIcon(btn, visible = false) {
+                    if (isFinishing || isDestroyed) return@fadeRestartIcon
                     btn.icon = null
                     spin.show()
                 }
@@ -867,7 +869,7 @@ class MainActivity : AppCompatActivity() {
                 restartPhase2 = Runnable {
                     if (isFinishing || isDestroyed) return@Runnable
                     spin.hide()
-                    btn.icon = getDrawable(R.drawable.ic_restart)
+                    btn.icon = getDrawable(R.drawable.ic_restart)?.also { it.alpha = 0 }
                     fadeRestartIcon(btn, visible = true)
                     springSettlePop(v)
                     restartPhase3?.let { binding.layoutBottomDock.removeCallbacks(it) }
@@ -910,7 +912,7 @@ class MainActivity : AppCompatActivity() {
         restartIconFade?.cancel()
         val icon = btn.icon?.mutate()
         if (icon == null) {
-            onDone?.invoke()
+            if (!destroyed) onDone?.invoke()
             return
         }
         restartIconFade = ValueAnimator.ofInt(if (visible) 0 else 255, if (visible) 255 else 0).apply {

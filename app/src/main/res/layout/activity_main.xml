@@ -34,7 +34,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/app_name"
                     android:textAppearance="@style/TextAppearance.Material3.HeadlineMedium"
-                    android:fontVariationSettings="'wght' 700" />
+                    android:fontVariationSettings="&#39;wght&#39; 700" />
 
                 <TextView
                     android:id="@+id/textAppSubtitle"
@@ -80,7 +80,7 @@
                         android:text="@string/status_module_active"
                         android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
                         android:textColor="?attr/colorOnPrimaryContainer"
-                        android:fontVariationSettings="'wght' 700" />
+                        android:fontVariationSettings="&#39;wght&#39; 700" />
 
                 </LinearLayout>
 
@@ -147,7 +147,7 @@
                                 android:text="--%"
                                 android:textAppearance="@style/TextAppearance.Material3.DisplaySmall"
                                 android:textColor="?attr/colorPrimary"
-                                android:fontVariationSettings="'wght' 700" />
+                                android:fontVariationSettings="&#39;wght&#39; 700" />
 
                             <TextView
                                 android:id="@+id/textDeviceStatus"
@@ -214,7 +214,7 @@
                                     android:singleLine="true"
                                     android:text="--"
                                     android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
-                                    android:fontVariationSettings="'wght' 700" />
+                                    android:fontVariationSettings="&#39;wght&#39; 700" />
 
                             </LinearLayout>
 
@@ -240,7 +240,7 @@
                                     android:singleLine="true"
                                     android:text="--"
                                     android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
-                                    android:fontVariationSettings="'wght' 700" />
+                                    android:fontVariationSettings="&#39;wght&#39; 700" />
 
                             </LinearLayout>
 
@@ -275,7 +275,7 @@
                                     android:singleLine="true"
                                     android:text="--"
                                     android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
-                                    android:fontVariationSettings="'wght' 700" />
+                                    android:fontVariationSettings="&#39;wght&#39; 700" />
 
                             </LinearLayout>
 
@@ -301,7 +301,7 @@
                                     android:singleLine="true"
                                     android:text="--"
                                     android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
-                                    android:fontVariationSettings="'wght' 700" />
+                                    android:fontVariationSettings="&#39;wght&#39; 700" />
 
                             </LinearLayout>
 
@@ -364,7 +364,7 @@
                                 android:layout_marginTop="8dp"
                                 android:text="@string/ring_style_continuous"
                                 android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
-                                android:fontVariationSettings="'wght' 600" />
+                                android:fontVariationSettings="&#39;wght&#39; 600" />
 
                         </LinearLayout>
 
@@ -421,7 +421,7 @@
                                 android:layout_marginTop="8dp"
                                 android:text="@string/ring_style_dotted"
                                 android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
-                                android:fontVariationSettings="'wght' 600" />
+                                android:fontVariationSettings="&#39;wght&#39; 600" />
 
                         </LinearLayout>
 
@@ -479,7 +479,7 @@
                                 android:layout_marginTop="8dp"
                                 android:text="@string/ring_style_filled"
                                 android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
-                                android:fontVariationSettings="'wght' 600" />
+                                android:fontVariationSettings="&#39;wght&#39; 600" />
 
                         </LinearLayout>
 
@@ -545,7 +545,7 @@
                                 android:layout_height="wrap_content"
                                 android:text="--%"
                                 android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-                                android:fontVariationSettings="'wght' 700" />
+                                android:fontVariationSettings="&#39;wght&#39; 700" />
 
                             <ImageView
                                 android:id="@+id/imageOrderPreviewIconFirst"
@@ -579,7 +579,7 @@
                             android:layout_marginTop="10dp"
                             android:text="@string/order_percent_first"
                             android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
-                            android:fontVariationSettings="'wght' 700" />
+                            android:fontVariationSettings="&#39;wght&#39; 700" />
 
                         <TextView
                             android:id="@+id/textPercentFirstDesc"
@@ -629,7 +629,7 @@
                                 android:layout_height="wrap_content"
                                 android:text="--%"
                                 android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-                                android:fontVariationSettings="'wght' 700" />
+                                android:fontVariationSettings="&#39;wght&#39; 700" />
 
                             <View
                                 android:layout_width="0dp"
@@ -656,7 +656,7 @@
                             android:layout_marginTop="10dp"
                             android:text="@string/order_icon_first"
                             android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
-                            android:fontVariationSettings="'wght' 700" />
+                            android:fontVariationSettings="&#39;wght&#39; 700" />
 
                         <TextView
                             android:id="@+id/textIconFirstDesc"
@@ -728,7 +728,7 @@
                                 android:text="16 dp"
                                 android:textAppearance="@style/TextAppearance.Material3.DisplaySmall"
                                 android:textColor="?attr/colorPrimary"
-                                android:fontVariationSettings="'wght' 700" />
+                                android:fontVariationSettings="&#39;wght&#39; 700" />
 
                             <TextView
                                 android:layout_width="wrap_content"

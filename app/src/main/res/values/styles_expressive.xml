@@ -33,6 +33,6 @@
     </style>
     <style name="Text.CircleBattery.SectionTitle" parent="TextAppearance.Material3.TitleMedium">
         <item name="android:fontFamily">@font/google_sans_flex</item>
-        <item name="android:fontVariationSettings">'wght' 600</item>
+        <item name="android:fontVariationSettings">&#39;wght&#39; 600</item>
     </style>
 </resources>

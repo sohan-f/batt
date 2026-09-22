@@ -107,6 +107,8 @@ class MainActivity : AppCompatActivity() {
             binding.textDeviceLevel.post {
                 if (!isFinishing && !isDestroyed && lastBatteryLevel >= 0) animateLevelChange(lastBatteryLevel)
             }
+            binding.root.removeCallbacks(rateTicker)
+            binding.root.post(rateTicker)
         }
     }
 
@@ -115,6 +117,7 @@ class MainActivity : AppCompatActivity() {
             unregisterReceiver(batteryReceiver)
         } catch (_: Throwable) {
         }
+        if (::binding.isInitialized) binding.root.removeCallbacks(rateTicker)
         super.onPause()
     }
 
@@ -237,7 +240,8 @@ class MainActivity : AppCompatActivity() {
         binding.textDeviceTemp.text = if (tempTenths != Int.MIN_VALUE) getString(R.string.device_temp_format, tempTenths / 10f) else "--"
         binding.textDeviceVoltage.text = if (voltageMv != Int.MIN_VALUE) getString(R.string.device_voltage_format, voltageMv / 1000f) else "--"
         binding.textDeviceHealth.text = deviceHealthText(health)
-        binding.textDeviceRate.text = formatBatteryRate()
+        rateEma = null
+        updateRateMeter()
         binding.textDeviceTech.text =
             intent.getStringExtra(BatteryManager.EXTRA_TECHNOLOGY)?.takeIf { it.isNotBlank() } ?: "--"
         lastBatteryLevel = pct
@@ -299,15 +303,42 @@ class MainActivity : AppCompatActivity() {
         else -> getString(R.string.device_source_unplugged)
     }
 
-    private fun formatBatteryRate(): String {
+    private var rateEma: Float? = null
+
+    // ACTION_BATTERY_CHANGED doesn't fire for current fluctuations, so the
+    // rate re-reads on a ticker while visible, smoothed so it reads steady.
+    private val rateTicker = Runnable {
+        if (!isFinishing && !isDestroyed && ::binding.isInitialized) {
+            updateRateMeter()
+            binding.root.postDelayed(rateTicker, 2000)
+        }
+    }
+
+    private fun updateRateMeter() {
+        val raw = readCurrentMa()
+        if (raw == null) {
+            rateEma = null
+            binding.textDeviceRate.text = "--"
+            return
+        }
+        rateEma = if (rateEma == null) raw else rateEma!! * 0.5f + raw * 0.5f
+        binding.textDeviceRate.text = formatRateMa(rateEma!!)
+    }
+
+    private fun readCurrentMa(): Float? {
         val nowUa = try {
             getSystemService(BatteryManager::class.java)?.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW)
         } catch (_: Throwable) {
             null
-        } ?: return "--"
-        if (nowUa == Long.MIN_VALUE) return "--"
-        val sign = if (nowUa < 0) "-" else "+"
-        val absMa = kotlin.math.abs(nowUa) / 1000f
+        } ?: return null
+        if (nowUa == Long.MIN_VALUE) return null
+        val sign = if (nowUa < 0) -1 else 1
+        return sign * abs(nowUa) / 1000f
+    }
+
+    private fun formatRateMa(ma: Float): String {
+        val sign = if (ma < 0) "-" else "+"
+        val absMa = abs(ma)
         return if (absMa >= 1000) getString(R.string.device_rate_format_a, sign, absMa / 1000)
         else getString(R.string.device_rate_format_ma, sign, absMa.toInt())
     }

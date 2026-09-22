@@ -378,6 +378,7 @@ class MainActivity : AppCompatActivity() {
             card.contentDescription = "${title.text}, ${if (selected) "selected" else "not selected"}"
             if (selected) {
                 if (badge.visibility != View.VISIBLE) {
+                    badge.animate().cancel()
                     badge.visibility = View.VISIBLE
                     if (animate) {
                         badge.scaleX = 0.4f
@@ -390,8 +391,15 @@ class MainActivity : AppCompatActivity() {
                         badge.alpha = 1f
                     }
                 }
-            } else {
-                badge.visibility = View.GONE
+            } else if (badge.visibility == View.VISIBLE) {
+                // Overlay badge, so GONE is layout-safe; still fade it with
+                // the card instead of snapping it away mid-transition.
+                if (animate) {
+                    badge.animate().scaleX(0.4f).scaleY(0.4f).alpha(0f).setDuration(200).setInterpolator(emphasizedAccelerate)
+                        .withEndAction { badge.visibility = View.GONE }.start()
+                } else {
+                    badge.visibility = View.GONE
+                }
             }
         }
         paint(binding.cardStyleRing, binding.textStyleRingTitle, binding.checkStyleRing, selectedStyle == BATTERY_STYLE_CIRCLE)

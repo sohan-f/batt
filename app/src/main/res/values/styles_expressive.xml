@@ -32,6 +32,7 @@
         <item name="labelBehavior">floating</item>
     </style>
     <style name="Text.CircleBattery.SectionTitle" parent="TextAppearance.Material3.TitleMedium">
-        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">@font/google_sans_flex</item>
+        <item name="android:fontVariationSettings">'wght' 600</item>
     </style>
 </resources>

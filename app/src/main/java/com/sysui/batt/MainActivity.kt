@@ -114,6 +114,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         sizeAnimator?.cancel()
+        levelWeightAnimator?.cancel()
         restartIconFade?.cancel()
         settleSprings.forEach { it.cancel() }
         settleSprings.clear()
@@ -210,6 +211,7 @@ class MainActivity : AppCompatActivity() {
         val voltageMv = intent.getIntExtra(BatteryManager.EXTRA_VOLTAGE, Int.MIN_VALUE)
         val health = intent.getIntExtra(BatteryManager.EXTRA_HEALTH, BatteryManager.BATTERY_HEALTH_UNKNOWN)
         binding.textDeviceLevel.text = "$pct%"
+        if (pct != lastBatteryLevel) pulseLevelWeight()
         binding.textOrderPreviewPercentFirst.text = "$pct%"
         binding.textOrderPreviewPercentSecond.text = "$pct%"
         binding.textDeviceStatus.text = deviceStatusText(status, charging)
@@ -558,7 +560,22 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private var levelWeightAnimator: ValueAnimator? = null
     private var sizeAnimator: ValueAnimator? = null
+
+    // Flex wght pulse on the level readout: 700 swells toward 850 and
+    // settles back, synced to the emphasized curve.
+    private fun pulseLevelWeight() {
+        levelWeightAnimator?.cancel()
+        levelWeightAnimator = ValueAnimator.ofFloat(700f, 850f, 700f).apply {
+            duration = 350
+            interpolator = emphasized
+            addUpdateListener { a ->
+                binding.textDeviceLevel.fontVariationSettings = "'wght' ${a.animatedValue as Float}"
+            }
+            start()
+        }
+    }
 
     private fun animateSliderTo(targetDp: Int) {
         val target = targetDp.coerceIn(MIN_BATTERY_SIZE_DP, MAX_BATTERY_SIZE_DP).toFloat()

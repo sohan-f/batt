@@ -321,8 +321,10 @@ class MainActivity : AppCompatActivity() {
             binding.textDeviceRate.text = "--"
             return
         }
-        rateEma = if (rateEma == null) raw else rateEma!! * 0.5f + raw * 0.5f
-        binding.textDeviceRate.text = formatRateMa(rateEma!!)
+        val previous = rateEma
+        val smoothed: Float = if (previous == null) raw else previous * 0.5f + raw * 0.5f
+        rateEma = smoothed
+        binding.textDeviceRate.text = formatRateMa(smoothed)
     }
 
     private fun readCurrentMa(): Float? {

@@ -87,6 +87,7 @@ class MainActivity : AppCompatActivity() {
         setupOrderSelector()
         setupSizeController()
         setupActions()
+        applyDotoNumerals()
         updateSystemBarContrast()
     }
 
